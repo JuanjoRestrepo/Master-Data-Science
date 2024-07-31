@@ -1,0 +1,60 @@
+---
+title: "Informe de Análisis del Mercado Inmobiliario en Cali"
+author: "Juan José Restrepo Rosero"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output: 
+  html_document:
+      toc: true
+      toc_depth: 3
+      toc_float: true
+      collapsed: true
+      smooth_scroll: true
+      theme: journal
+      highlight: kate
+      df_print: paged
+      code_folding: show
+---
+
+# Introducción
+En este informe se presenta un análisis descriptivo del mercado inmobiliario en la ciudad de Cali, basado en los datos recopilados por la empresa B&C.
+
+# Objetivos
+1. Analizar el precio de las viviendas en diferentes zonas de Cali.
+2. Identificar el tipo de viviendas más ofertadas en Cali.
+3. Determinar las características más relevantes de la oferta de vivienda en Cali.
+
+# Métodos
+Se utilizaron técnicas de análisis descriptivo para identificar tendencias y patrones en los datos.
+
+# Resultados
+## Precio de las viviendas en diferentes zonas de Cali
+
+# Cargar librerías
+```{r message=FALSE, warning=FALSE}
+library(dplyr)
+library(ggplot2)
+library(paqueteMETODOS)
+```
+
+# Cargar datos
+```{r, echo=TRUE}
+data(vivienda_faltantes)
+vivienda <- vivienda_faltantes
+head(vivienda <- vivienda_faltantes)
+```
+
+
+# Análisis del precio por zona
+```{r}
+resumen_precios <- vivienda %>%
+  group_by(zona) %>%
+  summarise(precio_promedio = mean(preciom, na.rm = TRUE), .groups = 'drop')
+
+ggplot(resumen_precios, aes(x = zona, y = precio_promedio)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(title = "Precio Promedio de Viviendas por Zona",
+       x = "Zona",
+       y = "Precio Promedio")
+
+```
