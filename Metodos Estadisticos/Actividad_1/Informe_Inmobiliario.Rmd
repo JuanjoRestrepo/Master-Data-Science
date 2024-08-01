@@ -27,34 +27,182 @@ En este informe se presenta un análisis descriptivo del mercado inmobiliario en
 Se utilizaron técnicas de análisis descriptivo para identificar tendencias y patrones en los datos.
 
 # Resultados
-## Precio de las viviendas en diferentes zonas de Cali
+### Precio de las viviendas en diferentes zonas de Cali
 
 # Cargar librerías
 ```{r message=FALSE, warning=FALSE}
 library(dplyr)
 library(ggplot2)
 library(paqueteMETODOS)
+library(tidyverse)
 ```
 
 # Cargar datos
 ```{r, echo=TRUE}
 data(vivienda_faltantes)
 vivienda <- vivienda_faltantes
-head(vivienda <- vivienda_faltantes)
+
 ```
 
-
-# Análisis del precio por zona
+# Exploración inicial
 ```{r}
-resumen_precios <- vivienda %>%
-  group_by(zona) %>%
-  summarise(precio_promedio = mean(preciom, na.rm = TRUE), .groups = 'drop')
-
-ggplot(resumen_precios, aes(x = zona, y = precio_promedio)) +
-  geom_bar(stat = "identity") +
-  theme_minimal() +
-  labs(title = "Precio Promedio de Viviendas por Zona",
-       x = "Zona",
-       y = "Precio Promedio")
-
+head(vivienda)
+summary(vivienda)
+str(vivienda)  # Para ver los tipos de datos de cada columna
+dim(vivienda)  # Para ver las dimensiones del dataframe
 ```
+
+Como podemos apreciar, hay valores faltantes en las columnas "piso" y "estrato". Esto podría deberse a diferentes razones, como información no recopilada o errores en la base de datos.
+
+# Identificar valores faltantes
+```{r}
+colSums(is.na(vivienda))
+```
+
+# Convertir la variable "zona" a factor si aún no lo es
+```{r}
+vivienda$zona <- as.factor(vivienda$zona)
+```
+
+
+# Frecuencia de tipos de vivienda
+```{r}
+table(vivienda$tipo)
+```
+
+# Tabla de contingencia: tipo de vivienda vs. zona
+```{r}
+tabla_contingencia <- table(vivienda$tipo, vivienda$zona)
+prop.table(tabla_contingencia, margin = 1)  # Proporciones por fila
+```
+
+# Gráfico de barras: tipo de vivienda
+```{r}
+ggplot(vivienda, aes(x = tipo)) +
+  geom_bar() +
+  labs(title = "Distribución de Tipos de Vivienda", x = "Tipo de Vivienda", y = "Frecuencia")
+```
+
+# Crear un diccionario de sinónimos
+```{r}
+sinónimos <- c("Apartamento" = "Apartamento", "APARTAMENTO" = "Apartamento", 
+               "apto" = "Apartamento", "casa" = "Casa", "Casa" = "Casa", "CASA" = "Casa")
+
+# Reemplazar sinónimos en la columna "tipo"
+vivienda$tipo <- plyr::revalue(vivienda$tipo, replace = sinónimos)
+ggplot(vivienda, aes(x = tipo)) +
+  geom_bar() +
+  labs(title = "Distribución de Tipos de Vivienda (Normalizada)", x = "Tipo de Vivienda", y = "Frecuencia")
+```
+
+
+# Tabla de contingencia: tipo de vivienda vs. zona
+```{r}
+tabla_contingencia <- table(vivienda$tipo, vivienda$zona)
+prop.table(tabla_contingencia, margin = 1)  # Proporciones por fila
+```
+
+# Gráfico de barras apiladas
+```{r}
+ggplot(vivienda, aes(x = zona, fill = tipo)) +
+  geom_bar(position = "fill") +
+  labs(title = "Distribución de Tipos de Vivienda por Zona", x = "Zona", y = "Proporción")
+```
+
+
+# Gráfico de caja: precio por tipo de vivienda
+```{r}
+ggplot(vivienda, aes(x = tipo, y = preciom)) +
+  geom_boxplot() +
+  labs(title = "Precio Promedio por Tipo de Vivienda", x = "Tipo de Vivienda", y = "Precio")
+```
+
+
+
+# Imputar valores faltantes en la columna "piso" con la mediana
+```{r}
+vivienda$piso[is.na(vivienda$piso)] <- median(vivienda$piso, na.rm = TRUE)
+```
+
+# Tratamiento de valores faltantes (ejemplo: imputación de la mediana)
+```{r}
+vivienda$piso[is.na(vivienda$piso)] <- median(vivienda$piso, na.rm = TRUE)
+```
+
+# Análisis del estrato socioeconómico
+```{r}
+ggplot(vivienda, aes(x = estrato, y = preciom)) +
+  geom_boxplot() +
+  labs(title = "Precio Promedio por Estrato")
+```
+
+# Análisis de correlación
+```{r}
+library(corrplot)
+cor_matrix <- cor(vivienda[, c("preciom", "areaconst", "parquea", "banios", "habitac")], use = "pairwise.complete.obs")
+corrplot(cor_matrix, method = "circle")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Análisis por zona
+## Precio promedio por zona
+```{r}
+precio_por_zona <- vivienda %>%
+  group_by(zona) %>%
+  summarise(precio_promedio = mean(preciom, na.rm = TRUE))
+```
+
+```{r}
+ggplot(precio_por_zona, aes(x = zona, y = precio_promedio)) +
+  geom_col() +
+  labs(title = "Precio Promedio por Zona", x = "Zona", y = "Precio Promedio")
+```
+
+## Comparación de características por zona
+```{r}
+caracteristicas_por_zona <- vivienda %>%
+  group_by(zona) %>%
+  summarise(
+    area_promedio = mean(areaconst, na.rm = TRUE),
+    habitaciones_promedio = mean(habitac, na.rm = TRUE)
+  )
+```
+
+## Visualización comparativa
+```{r}
+ggplot(caracteristicas_por_zona, aes(x = zona)) +
+  geom_col(aes(y = area_promedio, fill = "Área"), position = "dodge") +
+  geom_col(aes(y = habitaciones_promedio, fill = "Habitaciones"), position = "dodge") +
+  labs(title = "Comparación de Características por Zona", x = "Zona", y = "Promedio")
+```
+
+# Análisis de la relación entre precio y área
+```{r, warning=FALSE}
+ggplot(vivienda, aes(x = areaconst, y = preciom)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(title = "Relación entre Precio y Área Construida")
+```
+
+# Análisis de outliers en el precio
+```{r}
+boxplot(vivienda$preciom, main = "Distribución de Precios")
+```
+
+
+
+
+
