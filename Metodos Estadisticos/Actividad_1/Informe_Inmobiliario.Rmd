@@ -36,6 +36,8 @@ library(dplyr)
 library(ggplot2)
 library(paqueteMETODOS)
 library(tidyverse)
+library(visdat)
+library(naniar)
 ```
 
 ```{r, echo=TRUE}
@@ -63,7 +65,7 @@ Al observar las primeras 6 filas del conjunto de datos, podemos ver que hay una 
 - Será necesario identificar patrones y tendencias en los datos, como la relación entre el precio y el área construida, la distribución de los precios por zona, y la frecuencia de cada tipo de propiedad.
 
 
-## Identificación de valores faltantes
+## Identificación de datos faltantes
 ```{r}
 colSums(is.na(vivienda))
 ```
@@ -81,13 +83,22 @@ ggplot(faltantes, aes(x = Variable, y = Faltantes)) +
        y = "Número de Valores Faltantes")
 ```
 
+```{r}
+vis_miss(vivienda, sort_miss = TRUE,
+         cluster = TRUE)
+```
+
+```{r}
+vivienda %>% gg_miss_upset()
+```
+
 A partir del gráfico, podemos observar lo siguiente:
 
 - **Variable "piso"**: tiene una cantidad considerable de valores faltantes, lo cual podría indicar que no se recopiló esta información para muchas propiedades.
 - **Variable "parqueadero"**: también presenta una cantidad significativa de valores faltantes, lo que sugiere que la clasificación socioeconómica no está disponible para todas las propiedades.
 
 Dado esto, veremos cuál es la 
-relación entre estos valores faltantes y otras variables. Lo anterior nos permitirá ver si los valores faltantes en "piso" están más concentrados en un determinado tipo de propiedad (apartamentos, casas) y si hay alguna relación entre la falta de información sobre el parqueadero y el tamaño de la propiedad.
+relación entre estos valores faltantes y otras variables. Lo anterior nos permitirá ver si los valores faltantes en "piso" están más concentrados en un determinado tipo de propiedad (apartamentos, casas) y si hay alguna relación entre ***la falta de datos sobre el parqueadero y el tamaño de la propiedad/área construida.***
 
 
 ## Análisis entre tipo de propiedad y valores faltantes en "piso"
@@ -140,7 +151,7 @@ La gráfica de barras apiladas nos muestra que:
 Con esto, podemos concluir que la falta de información sobre el piso no parece estar sesgada hacia un tipo de propiedad en particula y sugiere que podemos tratar los valores faltantes de manera similar para ambos tipos de propiedades.
 
 
-## Análisis entre el 'parqueadero' y el 'tamaño de la propiedad (areaconst)'.
+## Análisis entre el 'parqueadero' y el 'tipo'.
 
 ```{r}
 tabla_Tipo_Parquea <- table(vivienda$tipo, is.na(vivienda$parquea))
