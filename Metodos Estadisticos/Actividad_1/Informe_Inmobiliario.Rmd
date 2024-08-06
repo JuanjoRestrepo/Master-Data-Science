@@ -231,6 +231,6 @@ vivienda_por_zona <- vivienda %>%
 
 # Gráfico de boxplot
 ggplot(vivienda_por_zona, aes(x = zona, y = precio_medio)) +
-  geom_histogram() +
+  geom_boxplot() +
   labs(title = "Distribución de precios por zona")
 ```
