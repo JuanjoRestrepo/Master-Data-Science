@@ -220,3 +220,17 @@ En base en estos análisis, se puede concluir que:
 - El área construida es un predictor más fuerte del precio que el número de habitaciones. Ambos factores influyen positivamente en el precio de la propiedad.
 - Se evidencia que la cantidad de baños también influye significativamente en el precio de las propiedades, junto con el área construida y el número de habitaciones.
 
+## Análisis por zona
+
+```{r}
+# Agrupar por zona y calcular estadísticas descriptivas
+vivienda_por_zona <- vivienda %>%
+  group_by(zona) %>%
+  summarize(precio_medio = mean(preciom),
+            desv_std = sd(preciom))
+
+# Gráfico de boxplot
+ggplot(vivienda_por_zona, aes(x = zona, y = precio_medio)) +
+  geom_histogram() +
+  labs(title = "Distribución de precios por zona")
+```
