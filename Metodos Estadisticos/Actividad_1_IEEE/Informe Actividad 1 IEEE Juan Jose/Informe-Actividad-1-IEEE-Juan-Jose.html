@@ -529,6 +529,17 @@ como la relación entre el precio y el área construida, la distribución
 de los precios por zona, y la frecuencia de cada tipo de
 propiedad.</p></li>
 </ul>
+</div>
+</div>
+<div id="análisis-descriptivo" class="section level1">
+<h1>Análisis Descriptivo</h1>
+<div id="identificación-de-datos-faltantes" class="section level2">
+<h2>Identificación de datos faltantes</h2>
+<pre class="r"><code>colSums(is.na(vivienda))</code></pre>
+<pre><code>##        id      zona      piso   estrato   preciom areaconst   parquea    banios 
+##         3         3      2641         3         2         3      1606         3 
+##   habitac      tipo    barrio  longitud   latitud 
+##         3         3         3         3         3</code></pre>
 <!-- An example of a floating figure using the graphicx package.
 Note that \label must occur AFTER (or within) \caption.
 For figures, \caption should occur after the \includegraphics.

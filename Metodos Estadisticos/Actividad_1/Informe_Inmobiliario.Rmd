@@ -31,14 +31,13 @@ Se utilizaron técnicas de análisis descriptivo para identificar tendencias y p
 # Resultados
 
 ```{r message=FALSE, warning=FALSE}
-library(dplyr)
-library(ggplot2)
 library(paqueteMETODOS)
 library(tidyverse)
 library(visdat)
 library(naniar)
 library(sf)
 library(corrplot)
+library(stats)
 ```
 
 ## Exploración Inicial de Datos
@@ -49,9 +48,24 @@ vivienda <- vivienda_faltantes
 
 ```{r}
 head(vivienda)
-summary(vivienda)
-str(vivienda)  
 dim(vivienda)
+str(vivienda)  
+summary(vivienda)
+```
+
+```{r}
+colId <- vivienda$id
+colZona <- vivienda$zona
+colPiso <- vivienda$piso
+colPrecio <- vivienda$preciom
+colAreaCons <- vivienda$areaconst
+colParque <- vivienda$parquea
+colBanios <- vivienda$banios
+colHabitac <- vivienda$habitac
+colTipo <- vivienda$tipo
+colBarrio <- vivienda$barrio
+colLongitud <- vivienda$longitud
+colLatitud <- vivienda$latitud
 ```
 
 Al observar las primeras 6 filas del conjunto de datos, podemos ver que hay una variedad de tipos de propiedades, desde apartamentos hasta casas grandes, ubicadas en diferentes zonas de la ciudad. Los precios y las áreas construidas varían considerablemente.
@@ -65,8 +79,6 @@ Al observar las primeras 6 filas del conjunto de datos, podemos ver que hay una 
 - Es necesario tratar los valores faltantes en las diferentes columnas.
 
 - Será necesario identificar patrones y tendencias en los datos, como la relación entre el precio y el área construida, la distribución de los precios por zona, y la frecuencia de cada tipo de propiedad.
-
-
 
 # Análisis Descriptivo
 
@@ -94,11 +106,38 @@ Para visualizar los patrones de datos faltantes y su relación con otras variabl
 ```{r}
 vis_miss(vivienda, sort_miss = TRUE,
          cluster = TRUE)
+
+boxplot(vivienda$piso)
+boxplot(vivienda$parquea)
 ```
 
 ```{r}
-vivienda %>% gg_miss_upset()
+which.min(vivienda$piso)
+which.max(vivienda$piso)
 ```
+
+
+```{r}
+hist(vivienda$piso,
+     breaks = 10,
+     col = "steelblue",
+     pch = 19,
+     lwd = 5,
+     xlab = 'Pisos',
+     main = "Histograma pisos")
+```
+
+
+#### Observaciones Generales:
+
+- **Rango:** Tanto para "piso" como para "parquea", el rango de valores es similar, lo que sugiere que tanto el número de pisos como el número de parqueaderos se encuentran dentro de un intervalo relativamente estrecho.
+- **Mediana:** La mediana en ambos casos se encuentra cerca del centro del rango, lo que indica una distribución aproximadamente simétrica. La mediana de "parquea" parece ser ligeramente superior a la de "piso". Esto podría indicar que, en promedio, las viviendas tienen un número ligeramente mayor de parqueaderos que de pisos.
+- **Cuartiles:** El rango intercuartílico (IQR) es similar en ambos casos, lo que sugiere una dispersión similar en los datos.
+- **Valores atípicos:** Ambos resúmenes muestran valores máximos atípicos, lo que indica la existencia de viviendas con un número inusualmente alto de pisos o parqueaderos.
+
+
+
+
 
 A partir del gráfico, podemos observar lo siguiente:
 
@@ -130,6 +169,8 @@ dim(vivienda)
 vivienda %>% gg_miss_upset()
 ```
 
+## Verificamos si la distribución de estas variables era aproximadamente normal
+
 ```{r}
 faltantesActualizado <- colSums(is.na(vivienda))
 faltantesActualizado <- data.frame(Variable = names(faltantesActualizado), Faltantes = faltantesActualizado)
@@ -141,6 +182,9 @@ ggplot(faltantesActualizado, aes(x = Variable, y = Faltantes)) +
        x = "Variable",
        y = "Número de Valores Faltantes")
 ```
+
+Aplicando imputación y creación de variables categóricas, se redujo significativamente la cantidad de datos faltantes. 
+La imputación de la media para variables numéricas y la categoría 'Desconocido' para variables categóricas produjeron un conjunto de datos más completo.
 
 
 ## Frecuencia de tipos de vivienda

@@ -1,5 +1,5 @@
 ---
-title: Informe de Análisis del Mercado Inmobiliario en Cali
+title: Bare Demo of IEEEtran.cls for IEEE Conferences
 affiliation:
   ## Author mode :  use one only of the following --- +
   
@@ -18,10 +18,14 @@ affiliation:
   ## Authors cited in institution field are ignored when this author field exists
   ## Comment / Uncomment below
   author:   
-   - name: Juan José Restrepo Rosero
+   - name: Eldon Tyrell
      mark: [2, 3]
-     email: juanjorestrepo@javerianacali.edu.co
-
+     email: eldon@starfleet-academy.star
+   - name: Michael Shell
+     mark: 1
+   - name: Roy Batty
+     mark: 4
+     email: roy@replicant.offworld
   
   ## Put authors in a given order, with multiline possibility (used with `wide: true` if `authors` above unset)
   ## Authors cited in institution are ignored if exists
@@ -44,14 +48,33 @@ affiliation:
 
   ## Define institution, and also authors used when `author-columnar: true` or `institution-columnar: true`
   institution:
-    - name: Pontificia Universidad Javeriana Cali
-      department: Departamento de Electrónica y Ciencias de la Computación
-      location: Santiago de Cali, Colombia
-      email: juanjorestrepo@javerianacali.edu.co # if unset, authors' email will be used
+    - name: Georgia Institute of Technology
+      department: School of Electrical and Computer Engineering
+      location: Atlanta, Georgia 30332--0250
+      email: ece@datech.edu # if unset, authors' email will be used
       mark: 1
       author:
-        - name: Juan José Restrepo Rosero
-
+        - name: Michael Shell
+    - name: Twentieth Century Fox
+      location: Springfield, USA
+      mark: 2
+      author:
+        - name: Homer Simpson
+          email: homer@thesimpsons.com
+    - name: Starfleet Academy
+      location: San Francisco, California 96678-2391
+      other: "Telephone: (800) 555--1212, Fax: (888) 555--1212"
+      mark: 3
+      author:
+        - name: Montgomery Scott
+    - name: Tyrell Inc.
+      location: 123 Replicant Street, Los Angeles, USA 90210--4321
+      mark: 4
+      author:
+        - name: Eldon Tyrell
+          email: eldon@starfleet-academy.star
+        - name: Roy Batty
+          email: roy@replicant.offworld
 
 keywords: ["keyword 1", "keyword 2"]
 abstract: |
@@ -72,19 +95,22 @@ output: rticles::ieee_article
 #citation_sorting: none   ## used as sorting option of the biblatex package (if selected)
 ---
 
-# I. Introducción
+# Introduction
 
-Este informe presenta un análisis detallado del mercado inmobiliario en Cali, Colombia, basado en datos de la empresa B&C. El estudio abarca los años 2022 y 2023, un período marcado por fluctuaciones económicas y dinámicas sociales que han impactado la oferta y demanda de bienes raíces. Con la reactivación económica post-pandemia, las políticas gubernamentales incentivaron la compra de viviendas, aunque desafíos como la inflación y el aumento de costos de construcción también jugaron un papel significativo. Usando un conjunto de datos que incluye información sobre propiedades como área construida, número de habitaciones, baños, parqueaderos, precio, y ubicación geográfica, este informe visualiza las principales tendencias del mercado y explora relaciones clave entre variables, brindando una visión clara para la toma de decisiones en el sector inmobiliario.
+<!-- no \IEEEPARstart -->
+This demo file is intended to serve as a ``starter file''
+for IEEE conference papers produced under \LaTeX\ using
+IEEEtran.cls version 1.8b and later.
+<!-- You must have at least 2 lines in the paragraph with the drop letter
+(should never be an issue) -->
+I wish you the best of success.
 
-# II. Análisis Descriptivo
-## Tratamiento de Datos
-```{r setup, include=FALSE}
-source("main.R")
-```
+## Subsection Heading Here
+Subsection text here.
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, paged.print=FALSE}
+### Subsubsection Heading Here
+Subsubsection text here.
 
-```
 <!-- An example of a floating figure using the graphicx package.
 Note that \label must occur AFTER (or within) \caption.
 For figures, \caption should occur after the \includegraphics.
