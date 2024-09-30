@@ -1,0 +1,52 @@
+---
+title: "Actividad 2 - Problema 4"
+author: "Juan José Restrepo Rosero"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Problema 5 - Relaciones entre la potencia, el tamaño de los efectos y el tamaño de la muestra**
+
+El “efecto del tamaño” (o “tamaño del efecto”, en inglés “effect size”) en el contexto de la prueba de hipótesis se refiere a la magnitud de la diferencia o la fuerza de la relación que se está investigando entre las variables. En otras palabras, mide la cantidad de cambio o la importancia práctica de los resultados, más allá de simplemente determinar si una diferencia es estadísticamente significativa. El tamaño del efecto es crucial porque, incluso si una prueba estadística muestra que un resultado es significativo (es decir, rechazas la hipótesis nula), el tamaño del efecto te dice si esa diferencia es realmente importante en un sentido práctico o clínico. Por ejemplo, un estudio podría encontrar que un nuevo medicamento reduce la presión arterial de manera estadísticamente significativa, pero el tamaño del efecto te indicaría si la reducción es lo suficientemente grande como para tener relevancia clínica. En resumen, el tamaño del efecto proporciona una medida complementaria a la significancia estadística, ayudando a interpretar el verdadero impacto o importancia de los resultados encontrados.
+
+En este problema, nos centraremos en una aplicación que requiere la aplicación de la prueba t de Student para comparar las medias entre dos grupos. En este contexto evaluaremos cómo el efecto de los tamaños o las diferencias en los tamaños muestrales de los grupos influyen en la potencia de la prueba. De manera formal, la potencia se define como la probabilidad de rechazar la hipótesis nula cuando la hipótesis alternativa es verdadera. De forma más coloquial, la potencia es la capacidad de una prueba estadística para identificar un efecto si este realmente existe. En general, desequilibrios muy marcados en los tamaños de muestra tienden a reducir la potencia estadística, incluso cuando se asocian con tamaños de efecto considerables, lo que aumenta la probabilidad de cometer un error de tipo II. Para fundamentar esta afirmación, debes analizar diferentes resultados computacionales que se presentan a continuación.
+
+### **Caso 1: Variando los tamaños de los efectos (d)**
+En los códigos del archivo llamado caso1.R, para cada tamaño fijo de los efectos d
+, se modela la relación entre el tamaño muestral y la potencia (manteniendo constante el nivel de significancia $α=0.05$). En las figuras se visualizan los resultados para tamaño de efecto muy pequeño ($d=0.1$), pequeño ($d=0.2$), mediano ($d=0.5$) y grande ($d=0.8$). Repite el análisis usando 5 valores distintos del nivel de significancia. ¿Cambian los resultados? ¿Qué ocurre cuando el tamaño de muestra de los grupos que se comparan es de ***20, 60, 100 y 140***? Analiza y compara los resultados.
+
+### **Caso 2: Variando los tamaños muestrales**
+En los códigos del archivo llamado caso2.R, se modela la relación entre el tamaño del efecto ***d*** y la potencia (manteniendo constante el nivel de significancia $α=0.05$). Para ello, se considera los siguientes tamaños de muestra, donde $n_1$ es el número de sujetos en el grupo 1 y $n_2$ es el número de sujetos en el grupo 2:
+
+
+- $n_1=28$, $n_2=1406$: $n_1$ representa el **2%** del tamaño total de la muestra de **1434**.
+
+- $n_1=144$, $n_2=1290$: $n_1$ representa el **10%** del tamaño total de la muestra de **1434**.
+
+- $n_1=287$, $n_2=1147$: $n_1$ representa el **20%** del tamaño total de la muestra de **1434**.
+
+- $n_1=430$, $n_2=1004$: $n_1$ representa el **30%** del tamaño total de la muestra de **1434**.
+
+- $n_1=574$, $n_2=860$ : $n_1$ representa el **40%** del tamaño total de la muestra de **1434**.
+
+- $n_1=717$, $n_2=717$ : grupos de igual tamaño (esto es óptimo porque conduce a la potencia más alta para un tamaño de efecto dado).
+
+
+En la figura resultante, se trazaron las curvas de potencia para la prueba t de Student, en función del tamaño del efecto, asumiendo una tasa de error Tipo I del **5%**. La comparación de diferentes curvas de potencia (basadas en el tamaño de la muestra de cada grupo) en el mismo gráfico es una representación visual útil de este análisis. En la figura también se trazó una línea discontinua horizontal en un nivel de potencia aceptable del **80%** y una línea vertical en el tamaño del efecto que tendría que estar presente en nuestros datos para alcanzar el 80 % de potencia. Se observa que el tamaño del efecto debe ser superior a **0.54** para alcanzar un nivel de potencia aceptable dados tamaños de grupo altamente desequilibrados de $n_1=28$ y $n_2=1406$, en comparación con todos los demás escenarios que conducen al 100% de potencia. Repite el análisis usando 5 valores distintos del nivel de significancia. ¿Cambian los resultados? ¿Qué ocurre cuando $n_1=28$ y $n_2=1406$? Analiza y compara los resultados.
+
+
+## **Resultado**
+
+
+
+```{r }
+
+```
+
+
+## **Conclusiones**
+Como se puede observar, el segundo estimador corrige el intervalo.

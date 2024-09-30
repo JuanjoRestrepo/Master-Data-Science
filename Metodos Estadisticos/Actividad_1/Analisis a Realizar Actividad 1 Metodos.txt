@@ -1,0 +1,21 @@
+Propuesta para profundizar el análisis:
+1. Análisis por zonas:
+Visualización: Crea gráficos de boxplot o violín para comparar la distribución de precios en diferentes zonas.
+Estadísticas descriptivas: Calcula el precio promedio y la desviación estándar para cada zona.
+Prueba de hipótesis: Utiliza una prueba ANOVA o una prueba de Kruskal-Wallis para determinar si existen diferencias significativas en los precios entre las diferentes zonas.
+¿Cómo influye el número de pisos en el precio de las casas?
+
+
+
+
+2. Análisis por tipo de propiedad:
+Visualización: Crea gráficos de barras para comparar la frecuencia de cada tipo de propiedad (apartamento, casa).
+Análisis de precios: Compara los precios promedio de los apartamentos y las casas, y los pisos (pisos en casas se refieren al numero de pisos de la vivienda, pisos en apartamento significa el piso en el que esta ubicado dicho apartamento)
+
+3. Análisis de interacción entre variables:
+Visualización: Crea gráficos de interacción para explorar cómo la relación entre dos variables (por ejemplo, precio y área construida) varía según una tercera variable (por ejemplo, zona).
+Modelos de regresión: Incluye términos de interacción en un modelo de regresión lineal para evaluar si el efecto de una variable sobre el precio depende del valor de otra variable.
+
+4. Análisis espacial:
+Mapas de calor: Crea mapas de calor para visualizar la distribución espacial de los precios.
+Clustering: Utiliza técnicas de clustering para identificar grupos de propiedades con características similares (por ejemplo, precios similares, ubicaciones similares).

@@ -1,0 +1,298 @@
+---
+title: "Actividad 2 - Problema 4"
+author: "Juan José Restrepo Rosero"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Problema 3 - Teorema del Límite Central**
+
+El Teorema del Límite Central es uno de los más importantes en la inferencia estadística y habla sobre la convergencia de los estimadores como la proporción muestral a la distribución normal. Algunos autores afirman que esta aproximación es bastante buena a partir del umbral ***n>30***.
+
+A continuación se describen los siguientes pasos para su verificación:
+
+a. Realice una simulación en la cual genere una población de n=1000 (Lote), donde el porcentaje de individuos (supongamos plantas) enfermas sea del 50%.
+
+b.Genere una función que permita:
+- Obtener una muestra aleatoria de la población y
+- Calcule el estimador de la proporción muestral pˆ para un tamaño de muestra dado n.
+
+c. Repita el escenario anterior (b) n=500 veces y analice los resultados en cuanto al comportamiento de los 500 resultados del estimador pˆ. ¿Qué tan simétricos o sesgados son los resultados obtenidos? y ¿qué se puede observar en cuanto a la variabilidad?. Realice en su informe un comentario sobre los resultados obtenidos.
+
+d. Repita los puntos b y c para tamaños de muestra n=5, 10, 15, 20, 30, 50, 60, 100, 200, 500. Compare los resultados obtenidos para los diferentes tamaños de muestra en cuanto a la normalidad. Utilice pruebas de bondad y ajuste (shapiro wilks :shspiro.test()) y métodos gráficos (gráfico de normalidad: qqnorm()). Comente en su informe los resultados obtenidos
+
+e. Repita toda la simulación (puntos a – d), pero ahora para lotes con 10% de plantas enfermas y de nuevo para lotes con un 90% de plantas enfermas. Concluya sobre los resultados del ejercicio.
+
+## **Resultados**
+
+Se generó una población de n=1000 (Lote), donde el porcentaje de individuos (plantas) enfermas es del 50%.
+
+```{r }
+# a. Se crea la ppoblación de 1000 plantas donde el porcentaje de enfermas es del 50% 
+# ( 1: enferma, 0: sana)
+
+GenerarPoblacion = function(Total = 1000, Enfer = 0.5, Sanas = 0.5) {
+  
+  # Redondeamos a cero cifras decimales
+  E = round(Total * Enfer, 0) 
+  S = round(Total * Sanas, 0)
+  Poblacion = c(rep("Enfermo", E), rep("Sana",S))
+  
+  print(paste("Lote Generado de tamaño: ", Total, " Enfermos: ",E,"Sanos: ",S))
+  return(Poblacion)
+}
+
+Lote = GenerarPoblacion(Total = 1000, Enfer = 0.5, Sanas = 0.5)
+
+```
+
+
+```{r}
+# b. Obtener una muestra aleatoria de la población y calcular el estimador
+
+set.seed(123)
+GenerarMuestra = function(Pob, Tam, Con) {
+  if (Tam <= length(Pob)) {
+    muestra = sample(x = Pob, size = Tam)
+    
+    Pob_muestra = sum(muestra == Con)/Tam
+    return(Pob_muestra)
+  }
+  else 
+  {
+    print("Error: el tamaño de la muestra supera el tamaño de la población")
+    return(-1)
+  }
+}
+
+# Prueba
+n = 1200
+muestra = GenerarMuestra (Pob= Lote, Tam = n, Con = "Enfermo")
+print(paste("Para una muestra de tamaño: ", n, 
+            "se obtuvo un ^P =", muestra))
+
+n = 300
+muestra = GenerarMuestra (Pob = Lote, Tam = n, Con = "Enfermo")
+print(paste("Para una muestra de tamaño:", n, 
+            "un estimador de la proporción =", muestra))
+
+```
+
+```{r}
+# c. Repita el escenario anterior (b) n = 500 veces y analice los resultados en cuanto al comportamiento de los 500 resultados del estimador pˆ
+
+GenerarMuestra_Iter = function(Pob, Tam, Con, Iter) {
+  if (Tam <= length(Pob)) {
+    muestra_iter = array(NA, Iter)
+    for (i in 1:Iter) {
+      muestra_iter[i] = GenerarMuestra(Pob, Tam, Con)
+    }
+    return(muestra_iter)
+  }
+  else {
+    print("Error: el tamaño de la muestra supera el tamaño de la población.")
+    return(-1)
+  }
+}
+
+
+iter = 500
+P_muestras = GenerarMuestra_Iter(Pob = Lote, Tam = n, Con = "Enfermo", Iter = iter)
+
+hist(P_muestras, main = "Histograma con n = 500 iteraciones",
+     xlab = "Probabilidad de las muestras", 
+     ylab = "Frecuencia", 
+     las = 1,
+     font.axis = 4)
+
+line = mean(P_muestras)
+
+abline (v=line, lwd = 4, lty = 2, col="red")
+
+```
+```{r}
+
+library(moments)
+
+min <- min(P_muestras, na.rm = TRUE)
+q1 <- quantile(P_muestras, probs = 0.25, na.rm = TRUE)
+media <- mean.default(P_muestras, na.rm = TRUE)
+mediana <- median.default(P_muestras, na.rm = TRUE)
+var <- var(P_muestras, na.rm = TRUE)
+desvest <- sd(P_muestras, na.rm = TRUE)
+q3 <- quantile(P_muestras, probs = 0.75, na.rm = TRUE)
+max <- max(P_muestras, na.rm = TRUE)
+s <- skewness(P_muestras)
+c <- kurtosis(P_muestras)
+
+descriptStat <- round(as.numeric(c(min, q1, media, mediana,
+                                     var, desvest, q3, max, s, c)),4)
+nombresCols <- c("Mínimo", "Q1", "Media",  "Mediana", "Varianza", 
+             "Desviación", "Q3", "Máximo", "Simetría", "Curtosis")
+descr2 <- as.data.frame(rbind(nombresCols, descriptStat))
+descr2
+
+```
+
+Como se puede apreciar, el estimador tiene un valor muy cercano al parámetro ***P = 0.49*** al obtener ***500 muestras*** de ***tamaño 300***. De igual forma, se presentan valores para:
+- ***Mediana igual a 0.5***
+- ***Media igual a 0.49***
+- ***Coeficiente de simetría igual a 0.0509*** 
+
+En el gráfico del histograma se puede observar que el coeficiente de simetría es diferente de cero, por otro lado, mientras que la varianza es casi nula.
+
+
+Se repite el mismo procedimiento para los puntos b y c con tamaños de muestra de ***n = 5, 10, 15, 20, 30, 50, 60, 100, 200 y 500***
+
+```{r}
+
+library(ggplot2)
+library(qqplotr)
+
+t_Muestras = c(5,10,15,20,30,50,60,100,200,500)
+iter = 500
+
+for (i in 1:length(t_Muestras)) {
+  P_muestras = GenerarMuestra_Iter (Pob = Lote, Tam = t_Muestras[i], Con = "Enfermo",Iter = iter)
+  par(mfrow=c(1,3))
+  hist(P_muestras, las=1, ylab = "Frecuencia", 
+       main = paste("Muestra de tamaño:", t_Muestras[i]), col = "gray", las=1,
+       font.axis=4)
+  abline(v=mean(P_muestras), col = "red", lwd = 3)
+  plot(density(P_muestras), las = 1, ylab = "Densidad", main = "")
+  qqnorm(P_muestras, xlab = "Cuantiles teóricos", ylab = "Cuantiles muestrales",las = 1, main = "qq-normalidad")
+  print(paste('Para una muestra de tamaño: ', t_Muestras[i])) 
+  print(shapiro.test(P_muestras))
+  
+} 
+
+
+```
+
+
+```{r}
+Lote2 = GenerarPoblacion(Tot = 1000, Enf = 0.1, San = 0.9)
+n2 = 300
+muestra = GenerarMuestra(Pob = Lote2, Tam = n2, Con = "Enfermo")
+
+print(paste("Para una muestra de tamaño:", n2, "un estimador de la proporción =",muestra))
+```
+
+
+```{r}
+GenerarMuestra_Iter = function(Pob, Tam, Con, Iter) {
+  if (Tam <= length(Pob)) {
+    muestra_iter = array(NA, Iter)
+    for (i in 1:Iter) {
+      muestra_iter[i] = GenerarMuestra(Pob, Tam, Con)
+    }
+    return(muestra_iter)
+  }
+  else {
+    print("Error: el tamaño de la muestra supera el tamaño de la población.")
+    return(-1)
+  }
+}
+
+
+iter = 500
+P_muestras = GenerarMuestra_Iter(Pob = Lote2, Tam = n2, Con = "Enfermo", Iter = iter)
+
+hist(P_muestras, main ="Histograma 500 iteraciones",
+     xlab="Probabilidad de las muestras", ylab="Frecuencia", las=1,
+     font.axis=4)
+line = mean(P_muestras)
+
+abline (v=line, lwd = 4, lty = 2, col="red")
+```
+```{r}
+library(skimr)
+skim(P_muestras)
+```
+
+```{r}
+t_Muestras = c(10,15,20,30,50,60,100,200,500)
+iter = 500
+
+for (i in 1:length(t_Muestras)) {
+  P_muestras = GenerarMuestra_Iter (Pob = Lote2, Tam = t_Muestras[i], Con = "Enfermo",Iter = iter)
+  par(mfrow=c(1,3))
+  hist(P_muestras, las=1, ylab = "Frecuencia", 
+       main = paste("Muestra de tamaño:", t_Muestras[i]), col = "gray", las=1,
+       font.axis=4)
+  abline(v=mean(P_muestras), col="red", lwd=3)
+  plot(density(P_muestras), las=1, ylab = "Densidad", main = "")
+  qqnorm(P_muestras, xlab="Cuantiles teóricos", ylab="Cuantiles muestrales",las=1,main="qq-normalidad")
+  print(paste('Para una muestra de tamaño: ', t_Muestras[i])) 
+  print(shapiro.test(P_muestras))
+  
+} 
+```
+
+```{r}
+
+Lote3 = GenerarPoblacion(Tot = 1000, Enf = 0.9, San = 0.1)
+n3 = 300
+muestra = GenerarMuestra (Pob = Lote3, Tam = n3, Con = "Enfermo")
+
+print(paste("Para una muestra de tamaño:", n3, "un estimador de la proporción =", muestra))
+```
+
+```{r}
+GenerarMuestra_Iter = function(Pob, Tam, Con, Iter) {
+  if (Tam <= length(Pob)) {
+    muestra_iter = array(NA,Iter)
+    for (i in 1:Iter) {
+      muestra_iter[i] = GenerarMuestra (Pob, Tam, Con)
+    }
+    return(muestra_iter)
+  }
+  else {
+    print("Error: el tamaño de la muestra supera el tamaño de la población.")
+    return(-1)
+  }
+}
+
+
+iter = 500
+P_muestras = GenerarMuestra_Iter(Pob = Lote3, Tam = n3, Con = "Enfermo",Iter = iter)
+
+hist(P_muestras, main = "Histograma 500 iteraciones",
+     xlab = "Probabilidad de las muestras", ylab = "Frecuencia", las = 1,
+     font.axis = 4)
+line = mean(P_muestras)
+
+abline (v=line, lwd = 4, lty = 2, col="red")
+```
+
+```{r}
+skim(P_muestras)
+```
+
+```{r}
+t_Muestras = c(10,15,20,30,50,60,100,200,500)
+iter = 500
+
+for (i in 1:length(t_Muestras)) {
+  P_muestras = GenerarMuestra_Iter (Pob = Lote3, Tam = t_Muestras[i], Con = "Enfermo",Iter = iter)
+  par(mfrow=c(1,3))
+  hist(P_muestras, las=1, ylab = "Frecuencia", 
+       main = paste("Muestra de tamaño:", t_Muestras[i]), col = "gray", las=1,
+       font.axis=4)
+  abline(v=mean(P_muestras), col="red", lwd=3)
+  plot(density(P_muestras), las=1, ylab = "Densidad", main = "")
+  qqnorm(P_muestras, xlab="Cuantiles teóricos", ylab="Cuantiles muestrales",las=1,main="qq-normalidad")
+  print(paste('Para una muestra de tamaño: ', t_Muestras[i])) 
+  print(shapiro.test(P_muestras))
+  
+} 
+
+```
+
+
+## **Conclusiones**
+Por medio del teorema del límite central podemos observar que a medida que aumenta el tamaño de la muestra, es valor de P estimado, se acerca más al valor de ***P***, disminuye la varianza, y converge hacia una distribución normal. Con respecto a la gráfica qq-normalidad a medida que aumenta el tamaño de la muestra, los puntos se van ajustando a la diagonal.

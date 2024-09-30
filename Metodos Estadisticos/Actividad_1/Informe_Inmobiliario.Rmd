@@ -1,0 +1,280 @@
+---
+title: "Informe de Análisis del Mercado Inmobiliario en Cali"
+author: "Juan José Restrepo Rosero"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output: 
+  html_document:
+      toc: true
+      toc_depth: 3
+      toc_float: true
+      collapsed: true
+      smooth_scroll: true
+      theme: journal
+      highlight: kate
+      df_print: paged
+      code_folding: show
+---
+
+# Introducción
+En este informe se presenta un análisis descriptivo del mercado inmobiliario en la ciudad de Cali, basado en los datos recopilados por la empresa B&C.
+
+El conjunto de datos 'vivienda' contiene información sobre [número] propiedades inmobiliarias en la ciudad de Cali. Las variables incluyen características como el área construida, número de habitaciones, baños, parqueaderos, precio, ubicación geográfica (zona y barrio) y tipo de propiedad (apartamento o casa).
+
+# Objetivos
+1. Analizar el precio de las viviendas en diferentes zonas de Cali.
+2. Identificar el tipo de viviendas más ofertadas en Cali.
+3. Determinar las características más relevantes de la oferta de vivienda en Cali.
+
+# Métodos
+Se utilizaron técnicas de análisis descriptivo para identificar tendencias y patrones en los datos.
+
+# Resultados
+
+```{r message=FALSE, warning=FALSE}
+library(paqueteMETODOS)
+library(tidyverse)
+library(visdat)
+library(naniar)
+library(sf)
+library(corrplot)
+library(stats)
+```
+
+## Exploración Inicial de Datos
+```{r, echo=TRUE}
+data(vivienda_faltantes)
+vivienda <- vivienda_faltantes
+```
+
+```{r}
+head(vivienda)
+dim(vivienda)
+str(vivienda)  
+summary(vivienda)
+```
+
+```{r}
+colId <- vivienda$id
+colZona <- vivienda$zona
+colPiso <- vivienda$piso
+colPrecio <- vivienda$preciom
+colAreaCons <- vivienda$areaconst
+colParque <- vivienda$parquea
+colBanios <- vivienda$banios
+colHabitac <- vivienda$habitac
+colTipo <- vivienda$tipo
+colBarrio <- vivienda$barrio
+colLongitud <- vivienda$longitud
+colLatitud <- vivienda$latitud
+```
+
+Al observar las primeras 6 filas del conjunto de datos, podemos ver que hay una variedad de tipos de propiedades, desde apartamentos hasta casas grandes, ubicadas en diferentes zonas de la ciudad. Los precios y las áreas construidas varían considerablemente.
+
+## Consideraciones para el análisis posterior:
+
+- Es importante notar que la variable zona y barrio pueden proporcionar información valiosa sobre la ubicación de las propiedades y su relación con el precio.
+
+- Las coordenadas geográficas (longitud y latitud) permiten realizar análisis espaciales.
+
+- Es necesario tratar los valores faltantes en las diferentes columnas.
+
+- Será necesario identificar patrones y tendencias en los datos, como la relación entre el precio y el área construida, la distribución de los precios por zona, y la frecuencia de cada tipo de propiedad.
+
+# Análisis Descriptivo
+
+## Identificación de datos faltantes
+```{r}
+colSums(is.na(vivienda))
+```
+
+Crearemos un dataframe con el número de valores faltantes por columna para visualizar la proporción de valores faltantes en cada columna
+
+```{r}
+faltantes <- colSums(is.na(vivienda))
+faltantes <- data.frame(Variable = names(faltantes), Faltantes = faltantes)
+
+ggplot(faltantes, aes(x = Variable, y = Faltantes)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Faltantes), vjust = -0.3) +
+  labs(title = "Valores Faltantes por Variable",
+       x = "Variable",
+       y = "Número de Valores Faltantes")
+```
+
+Para visualizar los patrones de datos faltantes y su relación con otras variables, utilizaremos las siguientes herramientas:
+
+```{r}
+vis_miss(vivienda, sort_miss = TRUE,
+         cluster = TRUE)
+
+boxplot(vivienda$piso)
+boxplot(vivienda$parquea)
+```
+
+```{r}
+which.min(vivienda$piso)
+which.max(vivienda$piso)
+```
+
+
+```{r}
+hist(vivienda$piso,
+     breaks = 10,
+     col = "steelblue",
+     pch = 19,
+     lwd = 5,
+     xlab = 'Pisos',
+     main = "Histograma pisos")
+```
+
+
+#### Observaciones Generales:
+
+- **Rango:** Tanto para "piso" como para "parquea", el rango de valores es similar, lo que sugiere que tanto el número de pisos como el número de parqueaderos se encuentran dentro de un intervalo relativamente estrecho.
+- **Mediana:** La mediana en ambos casos se encuentra cerca del centro del rango, lo que indica una distribución aproximadamente simétrica. La mediana de "parquea" parece ser ligeramente superior a la de "piso". Esto podría indicar que, en promedio, las viviendas tienen un número ligeramente mayor de parqueaderos que de pisos.
+- **Cuartiles:** El rango intercuartílico (IQR) es similar en ambos casos, lo que sugiere una dispersión similar en los datos.
+- **Valores atípicos:** Ambos resúmenes muestran valores máximos atípicos, lo que indica la existencia de viviendas con un número inusualmente alto de pisos o parqueaderos.
+
+
+
+
+
+A partir del gráfico, podemos observar lo siguiente:
+
+- **Variable "piso":** tiene una cantidad considerable de valores faltantes, lo cual podría indicar que no se recopiló esta información para muchas propiedades.
+- **Variable "parqueadero":** también presenta una cantidad significativa de valores faltantes, lo que sugiere que la clasificación socioeconómica no está disponible para todas las propiedades.
+
+Basándonos en el análisis previo, implementaremos las siguientes estrategias para manejar los valores faltantes:
+
+### 1. Imputación de Valores Faltantes en Variables Numéricas
+Para imputar los valores faltantes en las variables numéricas, utilizaremos la media de cada columna  y redondearemos a enteros
+
+```{r}
+vivienda$piso[is.na(vivienda$piso)] <- round(mean(vivienda$piso, na.rm = TRUE))
+vivienda$parquea[is.na(vivienda$parquea)] <- round(mean(vivienda$parquea, na.rm = TRUE))
+```
+
+### 2. Creación de Categoría para Variables Categóricas con Valores Faltantes
+
+```{r}
+vivienda$zona[is.na(vivienda$zona)] <- "Desconocido"
+vivienda$barrio[is.na(vivienda$barrio)] <- "Desconocido"
+```
+
+Verificamos que se hayan realizado correctamente los cambios al tratar los datos faltantes
+```{r}
+head(vivienda)
+colSums(is.na(vivienda))
+dim(vivienda)
+vivienda %>% gg_miss_upset()
+```
+
+## Verificamos si la distribución de estas variables era aproximadamente normal
+
+```{r}
+faltantesActualizado <- colSums(is.na(vivienda))
+faltantesActualizado <- data.frame(Variable = names(faltantesActualizado), Faltantes = faltantesActualizado)
+
+ggplot(faltantesActualizado, aes(x = Variable, y = Faltantes)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = Faltantes), vjust = -0.3) +
+  labs(title = "Valores Faltantes por Variable",
+       x = "Variable",
+       y = "Número de Valores Faltantes")
+```
+
+Aplicando imputación y creación de variables categóricas, se redujo significativamente la cantidad de datos faltantes. 
+La imputación de la media para variables numéricas y la categoría 'Desconocido' para variables categóricas produjeron un conjunto de datos más completo.
+
+
+## Frecuencia de tipos de vivienda
+```{r}
+table(vivienda$tipo)
+```
+
+Si nos fijamos en los tipos de propiedades, vemos un pequeño error en cuanto a la división de los tipos de vivienda, en donde se registraron con diferentes nomenclaturas. Arreglaremos esto con un diccionario de sinónimos
+
+### Diccionario de sinónimos
+```{r}
+sinonimos <- c("Apartamento" = "Apartamento", "APARTAMENTO" = "Apartamento", 
+               "apto" = "Apartamento", "casa" = "Casa", "Casa" = "Casa", "CASA" = "Casa")
+
+# Reemplazar sinónimos en la columna "tipo"
+vivienda$tipo <- plyr::revalue(vivienda$tipo, replace = sinonimos)
+```
+
+Verificamos que se hizo el cambio correctamente
+```{r}
+# Tabla de contingencia actualizada
+table(vivienda$tipo)
+```
+
+
+# Verificamos la relación entre los valores faltantes de 'piso' y el 'tipo'
+```{r}
+ggplot(vivienda, aes(x = tipo, fill = is.na(piso))) +
+  geom_bar(position = "fill") +
+  labs(title = "Proporción de Valores Faltantes en 'piso' por 'tipo'",
+       x = "Tipo de Propiedad",
+       y = "Proporción de Valores Faltantes")
+```
+
+La gráfica anterior nos revela que, después de la imputación de datos, todas las categorías de `tipo` tienen una proporción de `0` en valores faltantes para `piso`, lo que significa que se ha logrado imputar correctamente todos los valores faltantes en dicha variable, eliminando cualquier `NA` en esa columna y demostrando la efectividad del proceso de imputación, sin diferencias en la proporción de valores faltantes entre los diferentes tipos de propiedades.
+
+
+```{r}
+# Verificar la relación entre los valores faltantes de 'parqueadero' y el 'area construida'
+# Filtrar filas con valores no finitos en `areaconst`
+vivienda <- vivienda %>% filter(is.finite(areaconst))
+
+# Crear el histograma nuevamente
+ggplot(vivienda, aes(x = areaconst, fill = is.na(parquea))) +
+  geom_histogram(binwidth = 50, position = "identity", alpha = 0.5) +
+  labs(title = "Distribución de 'areaconst' y Valores Faltantes en 'parqueadero'",
+       x = "Área Construida",
+       y = "Frecuencia")
+```
+
+La gráfica revela que la mayoría de las propiedades tienen áreas construidas pequeñas, con una frecuencia decreciente a medida que aumenta el área construida. 
+
+
+## Análisis de correlación
+
+Calcularemos una matriz de correlación para identificar las variables que están más fuertemente relacionadas con el precio
+```{r}
+# Análisis de correlación
+cor(vivienda[, c("preciom", "areaconst", "habitac", "banios")])
+
+# Mapa de calor de la matriz de correlación
+corrplot(cor(vivienda[, c("preciom", "areaconst", "habitac", "banios")]), method = "color")
+```
+
+De lo anterior, se puede decir que la correlación entre:
+
+1. **Precio y Área Construida:** El coeficiente de correlación de 0.687 muestra una relación positiva fuerte, indicando que, en general, propiedades más grandes tienen precios más altos.
+
+2. **Precio y Número de Habitaciones:** El coeficiente de 0.263 sugiere una relación positiva moderada, pero menos intensa que la observada entre el precio y el área construida.
+
+3. **Área Construida y Número de Habitaciones:** El coeficiente de 0.517 indica una relación positiva moderada, lo cual es lógico ya que propiedades más grandes tienden a tener más habitaciones.
+
+4. **Precio y Número de Baños:** Existe una correlación positiva fuerte entre el precio y el número de baños. Esto indica que propiedades con más baños tienden a tener precios más altos.
+
+En base en estos análisis, se puede concluir que:
+
+- El área construida es un predictor más fuerte del precio que el número de habitaciones. Ambos factores influyen positivamente en el precio de la propiedad.
+- Se evidencia que la cantidad de baños también influye significativamente en el precio de las propiedades, junto con el área construida y el número de habitaciones.
+
+## Análisis por zona
+
+```{r}
+# Agrupar por zona y calcular estadísticas descriptivas
+vivienda_por_zona <- vivienda %>%
+  group_by(zona) %>%
+  summarize(precio_medio = mean(preciom),
+            desv_std = sd(preciom))
+
+# Gráfico de boxplot
+ggplot(vivienda_por_zona, aes(x = zona, y = precio_medio)) +
+  geom_boxplot() +
+  labs(title = "Distribución de precios por zona")
+```

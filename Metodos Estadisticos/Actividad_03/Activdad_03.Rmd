@@ -1,0 +1,224 @@
+---
+title: "Actividad_03"
+author: "Juan José Restrepo Rosero"
+date: "`r format(Sys.Date(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    latex_engine: xelatex
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(repos = c(CRAN = "https://cran.r-project.org"))
+```
+
+
+```{r cars, echo=FALSE, message=FALSE, warning=TRUE}
+
+#install.packages("devtools") # solo una vez
+#devtools::install_github("centromagis/paqueteMETODOS") 
+library(paqueteMETODOS)
+library('summarytools')
+library(corrplot)
+library(lmtest)
+library(car)
+```
+
+
+# **Definición del problema**
+Con base en los datos de ofertas de vivienda descargadas del portal Fincaraiz para apartamento de estrato 4 con área construida menor a 200 m^2 (vivienda4.RDS) la inmobiliaria A&C requiere el apoyo de un científico de datos en la construcción de un modelo que lo oriente sobre los precios de inmuebles. <br> <br>Con este propósito el equipo de asesores a diseñado los siguientes pasos para obtener un modelo y así poder a futuro determinar los precios de los inmuebles a negociar.
+
+
+## **1. Realice un análisis exploratorio de las variables precio de vivienda (millones de pesos COP) y área de la vivienda (metros cuadrados) - incluir gráficos e indicadores apropiados interpretados.**
+
+```{r}
+data(vivienda4)
+```
+
+### Cargamos las librerías necesarias para el análisis exploratorio
+- ***library(ggplot2):*** Para graficar
+- ***library(dplyr):*** Para manipulación de datos
+- ***library(summarytools):*** Para resúmenes descriptivos
+
+
+### Cargamos los datos del dataframe "vivienda4" si aún no se han cargado
+```{r message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE, include=FALSE}
+if (!exists("vivienda4")) {
+  data(vivienda4)
+}
+```
+
+
+```{r}
+# 1. Validar datos faltantes por variable
+missing_data <- sapply(vivienda4, function(x) sum(is.na(x)))
+cat("Datos faltantes por variable:\n")
+print(missing_data)
+```
+
+```{r}
+# 2. Validar si existen datos vacíos o null dentro de las variables del dataframe
+if (any(is.na(vivienda4))) {
+  cat("El dataframe contiene valores nulos o vacíos.\n")
+}
+```
+
+```{r}
+# 3. Contar los valores duplicados y eliminarlos
+duplicated_rows <- sum(duplicated(vivienda4))
+cat("Número de filas duplicadas:", duplicated_rows, "\n")
+```
+
+```{r}
+# Eliminar filas duplicadas
+vivienda4 <- unique(vivienda4)
+```
+
+```{r}
+# Correlación entre el precio y el área construída
+cor(vivienda4$preciom, vivienda4$areaconst)
+cor(vivienda4$preciom, vivienda4$areaconst, use = "complete.obs")
+```
+
+
+```{r}
+# 4. Dataframe final sin valores atípicos
+
+# Se eliminarán las observaciones con valores de "preciom" cuya SD (Desviación Estándar) sea mayor a 3 unidades de la media
+
+# Media y SD de la variable "preciom"
+media_preciom <- mean(vivienda4$preciom)
+desviacion_preciom <- sd(vivienda4$preciom)
+```
+
+```{r}
+print(media_preciom)
+print(desviacion_preciom)
+```
+
+```{r}
+# Crear un vector lógico unidimensional para filtrar los outliers que vamos a eliminar
+condicion_outliers <- abs((vivienda4$preciom - media_preciom) / desviacion_preciom) <= 3
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+cond_outliers2 = abs((vivienda4$preciom - media_preciom) / desviacion_preciom)
+print(cond_outliers2)
+```
+
+```{r include=FALSE}
+print(condicion_outliers)
+```
+
+```{r}
+vivienda4 <- vivienda4 %>%
+  filter(condicion_outliers)
+print(vivienda4)
+```
+```{r message=TRUE, warning=TRUE, include=FALSE}
+# Resumen descriptivo de las variables "preciom" y "areaconst"
+desc_vars <- dfSummary(vivienda4[c("preciom", "areaconst")])
+```
+
+```{r}
+# Correlación entre el precio y el área construída
+cor(vivienda4$preciom, vivienda4$areaconst)
+cor(vivienda4$preciom, vivienda4$areaconst, use = "complete.obs")
+```
+
+```{r}
+# Gráfico de dispersión (preciom vs areaconst)
+ggplot(vivienda4, aes(x = areaconst, y = preciom)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Línea de tendencia
+  labs(x = "Área Construida (m^2)", y = "Precio (millones de pesos COP)") +
+  ggtitle("Gráfica de Dispersión Precio vs Área Construida")
+```
+
+```{r}
+# Histograma del preciom
+ggplot(vivienda4, aes(x = preciom)) +
+  geom_histogram(binwidth = 2, fill = "cyan", color = "black") +
+  labs(x = "Precio (millones de pesos COP)", y = "Frecuencia") +
+  ggtitle("Histograma Precio de Vivienda")
+```
+
+```{r}
+# Histograma del areaconst
+ggplot(vivienda4, aes(x = areaconst)) +
+  geom_histogram(binwidth = 10, fill = "green", color = "black") +
+  labs(x = "Área Construida (metros cuadrados)", y = "Frecuencia") +
+  ggtitle("Histograma del Área Construida de Vivienda")
+```
+
+# **2. Realice un análisis exploratorio bivariado de datos, enfocado en la relación entre la variable respuesta (precio) en función de la variable predictora (area construida) - incluir gráficos e indicadores apropiados interpretados.**
+
+```{r}
+# Gráfico de dispersión (precio vs área construida) con línea de tendencia central
+ggplot(vivienda4, aes(x = areaconst, y = preciom)) +
+  geom_point() +
+  geom_smooth(method = "lm", color = "red", se = FALSE) +  # Línea de tendencia
+  labs(x = "Área Construida (m^2)", y = "Precio (millones de pesos COP)") +
+  ggtitle("Gráfico de Dispersión Precio vs Área Construida")
+```
+
+```{r}
+# Boxplot y bigotes para precio por estrato
+ggplot(vivienda4, aes(x = as.factor(estrato), y = preciom)) +
+  geom_boxplot(fill = "cyan") +
+  labs(x = "Estrato", y = "Precio (millones de pesos COP)") +
+  ggtitle("Boxplot y Bigotes de los Precios por Estrato")
+
+```
+
+```{r}
+# Resumen descriptivo de la relación entre precio y área construida
+summary_precio_area <- vivienda4 %>%
+  select(preciom, areaconst)
+summary(summary_precio_area)
+```
+
+```{r}
+print(summary_precio_area)
+```
+
+
+# **3. Estime el modelo de regresión lineal simple entre precio=f(area)+ε. Interprete los coeficientes del modelo β0, β1 en caso de ser correcto.**
+
+
+```{r}
+# Estimar el modelo de regresión lineal simple
+modelo_regresion <- lm(preciom ~ areaconst, data = vivienda4)
+
+# Mostrar un resumen del modelo
+summary(modelo_regresion)
+
+```
+
+```{r}
+shapiro.test(residuals(modelo_regresion))
+```
+
+```{r}
+dwtest(modelo_regresion)
+```
+
+```{r}
+ncvTest(modelo_regresion)
+```
+
+```{r}
+par()
+plot(modelo_regresion)
+```
+
+
+## **Análisis de la relación entre el precio de las viviendas y el área construida**
+Para abordar esta relación, se ha estimado un modelo de regresión lineal simple, donde el precio se considera la variable de respuesta (preciom) y el área construida actúa como variable predictora (areaconst).
+
+### Intercepto (β0) y Pendiente (β1):
+- El coeficiente del intercepto (β0) en el modelo de regresión lineal simple tiene un valor de 

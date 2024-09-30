@@ -1,0 +1,571 @@
+---
+title: "Actividad 2 - Problema 2"
+author: "Juan José Restrepo Rosero"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+# **Problema 2 - Propiedades de los estimadores**
+
+La simulación ayuda a entender y validad las propiedades de los estimadores estadísticos como son: insesgadez, eficiencia y la consistencia principalmente. El siguiente problema permite evidenciar las principales características de un grupo de estimadores propuestos para la estimación de un parámetro asociado a un modelo de probabilidad.
+
+Sean X1, X2, X3 y X4, una muestra aleatoria de tamaño n=4 cuya población la conforma una distribución exponencial con parámetro θ desconocido. Determine las características de cada uno de los siguientes estimadores propuestos:
+
+
+
+$$\hat{\theta}_1=[\frac{(X_1+X_2)}{6}+\frac{(X_3+X_4)}{3}]$$
+$$\hat{\theta}_2=[\frac{(X_1+2X_2+3X_3+4X_4)}{5}]$$
+
+$$\hat{\theta}_3=[\frac{(X_1+X_2+X_3+X_4)}{4}]$$
+
+$$\hat{\theta}_4=[\frac{\min(X_1+X_2+X_3+X_4)+\max(X_1+X_2+X_3+X_4)}{2}]$$
+
+
+a. Genere una muestras de n = 20, 50, 100 y 1000 para cada uno de los estimadores planteados.
+
+b. En cada caso evalue las propiedades de insesgadez, eficiencia y consistencia
+
+c. Suponga un valor para el parámetro θ
+
+**Resultados**
+
+## **Para n=20**
+a. Se generó una muestra de n=20 para cada uno de los estimadores. Esta presentó el sesgo, varianza y gráfico boxplot con la comparación de los estiamdores:
+
+```{r echo=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador20 <- numeric(numSimulaciones)
+set.seed(123)
+
+# primer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(20, rate = thetaReal)
+  theta1  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador20[i] <- theta1
+}
+sesgo1 <- mean(estimador20) - thetaReal
+varianza1 <- var(estimador20)
+estimador1 <-estimador20
+
+# segundo estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(20, rate = thetaReal)
+  theta2  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador20[i] <- theta2
+}
+sesgo2 <- mean(estimador20) - thetaReal
+varianza2 <- var(estimador20)
+estimador2 <-estimador20
+
+# tercer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(20, rate = thetaReal)
+  theta3  <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador20[i] <- theta3
+}
+sesgo3 <- mean(estimador20) - thetaReal
+varianza3 <- var(estimador20)
+estimador3 <-estimador20
+
+# cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(20, rate = thetaReal)
+  theta4  <- min(theta) + max(theta) / 2
+  estimador20[i] <- theta4
+}
+sesgo4 <- mean(estimador20) - thetaReal
+varianza4 <- var(estimador20)
+estimador4 <-estimador20
+
+sesgo20 <-c(sesgo1,sesgo2,sesgo3,sesgo4)
+sesgo20
+```
+
+```{r echo=FALSE}
+varianza20 <-c(varianza1,varianza2,varianza3,varianza4)
+varianza20
+```
+
+
+```{r echo=FALSE}
+estimadores20 <-data.frame(estimador1,estimador2,estimador3,estimador4)
+boxplot(estimadores20, main='Comparacion de estimadores con muestra n=20')
+abline(h=1/2,col='purple')
+```
+
+## **Para n=50**
+
+```{r echo=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador50 <- numeric(numSimulaciones)
+set.seed(123)
+
+# Primer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta5  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador50[i] <- theta5
+}
+sesgo5 <- mean(estimador50) - thetaReal
+varianza5 <- var(estimador50)
+estimador5 <-estimador50
+
+# Segundo estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta6  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador50[i] <- theta6
+}
+sesgo6 <- mean(estimador50) - thetaReal
+varianza6 <- var(estimador50)
+estimador6 <-estimador50
+
+
+# Tercer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta7  <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador50[i] <- theta7
+}
+sesgo7 <- mean(estimador50) - thetaReal
+varianza7 <- var(estimador50)
+estimador7 <-estimador50
+
+
+# Cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta8  <- min(theta) + max(theta) / 2
+  estimador50[i] <- theta8
+}
+sesgo8 <- mean(estimador50) - thetaReal
+varianza8 <- var(estimador50)
+estimador8 <-estimador50
+
+
+sesgo50 <-c(sesgo5,sesgo6,sesgo7,sesgo8)
+sesgo50
+```
+
+```{r echo=FALSE}
+varianza50 <-c(varianza5,varianza6,varianza7,varianza8)
+varianza50
+```
+
+```{r echo=FALSE}
+estimadores50 <-data.frame(estimador5,estimador6,estimador7,estimador8)
+boxplot(estimadores50, main='Comparacion de estimadores con muestra n=50')
+abline(h=1/2,col='purple')
+```
+
+## **Para n=100**
+
+```{r echo=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador100 <- numeric(numSimulaciones)
+set.seed(123)
+
+# Primer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(100, rate = thetaReal)
+  theta9  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador100[i] <- theta9
+}
+sesgo9 <- mean(estimador100) - thetaReal
+varianza9 <- var(estimador100)
+estimador9 <-estimador100
+
+
+# Segundo estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(100, rate = thetaReal)
+  theta10  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador100[i] <- theta10
+}
+sesgo10 <- mean(estimador100) - thetaReal
+varianza10 <- var(estimador100)
+estimador10 <-estimador100
+
+
+# Tercer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(100, rate = thetaReal)
+  theta11 <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador100[i] <- theta11
+}
+sesgo11 <- mean(estimador100) - thetaReal
+varianza11 <- var(estimador100)
+estimador11 <-estimador100
+
+
+# Cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(100, rate = thetaReal)
+  theta12  <- min(theta) + max(theta) / 2
+  estimador100[i] <- theta12
+}
+sesgo12 <- mean(estimador100) - thetaReal
+varianza12 <- var(estimador100)
+estimador12 <-estimador100
+
+
+sesgo100 <-c(sesgo9,sesgo10,sesgo11,sesgo12)
+sesgo100
+```
+
+```{r echo=FALSE}
+varianza100 <-c(varianza9,varianza10,varianza11,varianza12)
+varianza100
+```
+
+```{r echo=FALSE}
+estimadores100<-data.frame(estimador9,estimador10,estimador11,estimador12)
+boxplot(estimadores100, main='Comparacion de estimadores con muestra n=100')
+abline(h=1/2,col='purple')
+```
+
+
+## **Para n=1000**
+
+```{r echo=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador1000 <- numeric(numSimulaciones)
+set.seed(123)
+
+
+# Primer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(1000, rate = thetaReal)
+  theta13  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador1000[i] <- theta13
+}
+sesgo13 <- mean(estimador1000) - thetaReal
+varianza13 <- var(estimador1000)
+estimador13 <-estimador1000
+
+
+# Segundo estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(1000, rate = thetaReal)
+  theta14  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador1000[i] <- theta14
+}
+sesgo14 <- mean(estimador1000) - thetaReal
+varianza14 <- var(estimador1000)
+estimador14 <-estimador1000
+
+
+# Tercer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(1000, rate = thetaReal)
+  theta15 <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador1000[i] <- theta15
+}
+sesgo15 <- mean(estimador1000) - thetaReal
+varianza15 <- var(estimador1000)
+estimador15 <-estimador1000
+
+
+# Cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(1000, rate = thetaReal)
+  theta16 <- min(theta) + max(theta) / 2
+  estimador1000[i] <- theta16
+}
+sesgo16 <- mean(estimador1000) - thetaReal
+varianza16 <- var(estimador1000)
+estimador16 <-estimador1000
+
+
+sesgo1000 <-c(sesgo13,sesgo14,sesgo15,sesgo16)
+sesgo1000
+```
+
+```{r echo=FALSE}
+varianza1000 <-c(varianza13,varianza14,varianza15,varianza16)
+varianza1000
+```
+
+```{r echo=FALSE}
+estimadores1000 <-data.frame(estimador13,estimador14,estimador15,estimador16)
+boxplot(estimadores1000, main='Comparacion de estimadores con muestra n=1000')
+abline(h=1/2,col='purple')
+```
+
+# **Conclusiones**
+En base a los resultados anteriores, se puede evidenciar que para un tamaño de muestra con ***n=1000***, el estimador 4 es el que mejores resultados obtiene. Este estimador se puede clasificar como ***INSESGADO y EFICIENTE***, dado que tiene la menor varianza.
+
+## **Desarrollo del Código**
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador20 <- numeric(numSimulaciones)
+set.seed(123)
+
+# primer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(20, rate = thetaReal)
+  theta1  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador20[i] <- theta1
+}
+sesgo1 <- mean(estimador20) - thetaReal
+varianza1 <- var(estimador20)
+estimador1 <-estimador20
+
+# segundo estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(20, rate = thetaReal)
+  theta2  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador20[i] <- theta2
+}
+sesgo2 <- mean(estimador20) - thetaReal
+varianza2 <- var(estimador20)
+estimador2 <-estimador20
+
+# tercer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(20, rate = thetaReal)
+  theta3  <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador20[i] <- theta3
+}
+sesgo3 <- mean(estimador20) - thetaReal
+varianza3 <- var(estimador20)
+estimador3 <-estimador20
+
+# cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(20, rate = thetaReal)
+  theta4  <- min(theta) + max(theta) / 2
+  estimador20[i] <- theta4
+}
+sesgo4 <- mean(estimador20) - thetaReal
+varianza4 <- var(estimador20)
+estimador4 <-estimador20
+
+sesgo20 <-c(sesgo1,sesgo2,sesgo3,sesgo4)
+sesgo20
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+varianza20 <-c(varianza1,varianza2,varianza3,varianza4)
+varianza20
+```
+
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+estimadores20 <-data.frame(estimador1,estimador2,estimador3,estimador4)
+boxplot(estimadores20, main='Comparacion de estimadores con muestra n=20')
+abline(h=1/2,col='purple')
+```
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador50 <- numeric(numSimulaciones)
+set.seed(123)
+
+# Primer estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta5  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador50[i] <- theta5
+}
+sesgo5 <- mean(estimador50) - thetaReal
+varianza5 <- var(estimador50)
+estimador5 <-estimador50
+
+# Segundo estimador
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta6  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador50[i] <- theta6
+}
+sesgo6 <- mean(estimador50) - thetaReal
+varianza6 <- var(estimador50)
+estimador6 <-estimador50
+
+
+# Tercer estimador
+
+for (i in 1:numSimulaciones) {
+  theta <- rexp(50, rate = thetaReal)
+  theta7  <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador50[i] <- theta7
+}
+sesgo7 <- mean(estimador50) - thetaReal
+varianza7 <- var(estimador50)
+estimador7 <-estimador50
+
+
+# Cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(50, rate = thetaReal)
+  theta8  <- min(theta) + max(theta) / 2
+  estimador50[i] <- theta8
+}
+sesgo8 <- mean(estimador50) - thetaReal
+varianza8 <- var(estimador50)
+estimador8 <-estimador50
+
+
+sesgo50 <-c(sesgo5,sesgo6,sesgo7,sesgo8)
+sesgo50
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+varianza50 <-c(varianza5,varianza6,varianza7,varianza8)
+varianza50
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+estimadores50 <-data.frame(estimador5,estimador6,estimador7,estimador8)
+boxplot(estimadores50, main='Comparacion de estimadores con muestra n=50')
+abline(h=1/2,col='purple')
+```
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador100 <- numeric(numSimulaciones)
+set.seed(123)
+
+# Primer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(100, rate = thetaReal)
+  theta9  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador100[i] <- theta9
+}
+sesgo9 <- mean(estimador100) - thetaReal
+varianza9 <- var(estimador100)
+estimador9 <-estimador100
+
+
+# Segundo estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(100, rate = thetaReal)
+  theta10  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador100[i] <- theta10
+}
+sesgo10 <- mean(estimador100) - thetaReal
+varianza10 <- var(estimador100)
+estimador10 <-estimador100
+
+
+# Tercer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(100, rate = thetaReal)
+  theta11 <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador100[i] <- theta11
+}
+sesgo11 <- mean(estimador100) - thetaReal
+varianza11 <- var(estimador100)
+estimador11 <-estimador100
+
+
+# Cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(100, rate = thetaReal)
+  theta12  <- min(theta) + max(theta) / 2
+  estimador100[i] <- theta12
+}
+sesgo12 <- mean(estimador100) - thetaReal
+varianza12 <- var(estimador100)
+estimador12 <-estimador100
+
+
+sesgo100 <-c(sesgo9,sesgo10,sesgo11,sesgo12)
+sesgo100
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+varianza100 <-c(varianza9,varianza10,varianza11,varianza12)
+varianza100
+```
+
+```{r message=FALSE, warning=FALSE, include=FALSE}
+estimadores100<-data.frame(estimador9,estimador10,estimador11,estimador12)
+boxplot(estimadores100, main='Comparacion de estimadores con muestra n=100')
+abline(h=1/2,col='purple')
+```
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+thetaReal = 2
+numSimulaciones <- 1000
+estimador1000 <- numeric(numSimulaciones)
+set.seed(123)
+
+
+# Primer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(1000, rate = thetaReal)
+  theta13  <- (theta[1] + theta[2] / 6) + (theta[3] + theta[4] / 3)
+  estimador1000[i] <- theta13
+}
+sesgo13 <- mean(estimador1000) - thetaReal
+varianza13 <- var(estimador1000)
+estimador13 <-estimador1000
+
+
+# Segundo estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(1000, rate = thetaReal)
+  theta14  <- theta[1] + 2*theta[2] + 3*theta[3] + 4*theta[4] / 5
+  estimador1000[i] <- theta14
+}
+sesgo14 <- mean(estimador1000) - thetaReal
+varianza14 <- var(estimador1000)
+estimador14 <-estimador1000
+
+
+# Tercer estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(1000, rate = thetaReal)
+  theta15 <- theta[1] + theta[2] + theta[3] + theta[4] / 4
+ estimador1000[i] <- theta15
+}
+sesgo15 <- mean(estimador1000) - thetaReal
+varianza15 <- var(estimador1000)
+estimador15 <-estimador1000
+
+
+# Cuarto estimador
+for (i in 1:numSimulaciones) {
+  theta<- rexp(1000, rate = thetaReal)
+  theta16 <- min(theta) + max(theta) / 2
+  estimador1000[i] <- theta16
+}
+sesgo16 <- mean(estimador1000) - thetaReal
+varianza16 <- var(estimador1000)
+estimador16 <-estimador1000
+
+
+sesgo1000 <-c(sesgo13,sesgo14,sesgo15,sesgo16)
+sesgo1000
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE}
+varianza1000<-c(varianza13,varianza14,varianza15,varianza16)
+varianza1000
+```
+
+```{r message=FALSE, warning=FALSE}
+estimadores1000<-data.frame(estimador13,estimador14,estimador15,estimador16)
+boxplot(estimadores1000, main='Comparacion de estimadores con muestra n=1000')
+abline(h=1/2,col='purple')
+```
+

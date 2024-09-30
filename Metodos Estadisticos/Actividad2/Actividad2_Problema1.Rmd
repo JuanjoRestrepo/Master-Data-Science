@@ -1,0 +1,122 @@
+---
+title: "Actividad 2"
+author: "Juan José Restrepo Rosero"
+date: "2024-08-14"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Problema 1 - Estimación del valor de π**
+
+La siguiente figura sugiere como estimar el valor de π con una simulación. En la figura, un circuito con un área igual a ***π/4***, está inscrito en un cuadrado cuya área es igual a ***1***. Se elige de forma aleatoria n puntos dentro del cuadrado. La probabilidad de que un punto esté dentro del círculo es igual a la fracción del área del cuadrado que abarca a este, la cual es ***π/4***. Por tanto, se puede estimar el valor de ***π/4*** al contar el número de puntos dentro del círculo, para obtener la estimación de ***π/4***. De este último resultado se encontrar una aproximación para el valor de ***π***.
+
+<center>
+![Imágen problema 1](images/Problema1/Problema1.png){width=500px}
+</center>
+
+
+**Pasos sugeridos:**
+
+a. Genere n coordenadas ***x: X1, . . . , Xn.*** Utilice la distribución uniforme con valor mínimo de 0 y valor máximo de ***1***. La distribución uniforme genera variables aleatorias que tienen la misma probabilidad de venir de cualquier parte del intervalo ***(0,1).***
+
+b. Genere ***1000*** coordenadas ***y: Y1,…,Yn,*** utilizando nuevamente la distribución uniforme con valor mínimo de ***0*** y valor máximo de ***1***.
+
+c. Cada punto ***(Xi,Yi)*** se encuentra dentro del círculo si su distancia desde el centro ***(0.5,0.5)*** es menor a 0.5. Para cada par ***(Xi,Yi)*** determine si la distancia desde el centro es menor a ***0.5***. Esto último se puede realizar al calcular el valor ***(Xi−0.5)2+(Yi−0.5)^2***, que es el cuadrado de la distancia, y al determinar si es menor que ***0.25***.
+
+d. ¿Cuántos de los puntos están dentro del círculo? ¿Cuál es su estimación de ***π***?
+
+***Nota:***
+Con sólo 1000 puntos, es probable que la estimación presente un error de 0.05 o más. Una simulación con 10000 y 100000 puntos tiene mayores probabilidades de dar como resultado una estimación muy cercana al valor verdadero.
+
+
+## **Desarrollo del Código**
+```{r }
+# Definiendo la semilla. Se puede remplazar el valor por cualquier otro valor entero
+set.seed(123)
+
+#Definimos una función para simular los n valores 
+estimadorPI <- function(n) {
+  # Generamos n coordenadas Xn y Yn
+  x <- runif(n, min = 0, max = 1)
+  y <- runif(n, min = 0, max = 1)
+  
+  # Verificamos si cada punto X y Y se encuentra dentro del círculo
+  puntosDentro <- ((x - 0.5)^2) + ((y - 0.5)^2) < 0.25
+  
+  puntosCirculo <- sum(puntosDentro)
+  estimadorPI <- 4 * (puntosCirculo / n)
+  
+  # Graficamos los puntos, diferenciando los que están dentro del círculo
+  plot(x, y, col = ifelse(puntosDentro, "blue", "black"), pch = 19, asp = 1)
+  
+  # Dibujamos el círculo en la gráfica
+  symbols(0.5, 0.5, circles = 0.5, add = TRUE, inches = FALSE, lwd = 2, fg = "blue")
+  
+  return(list(puntosCirculo = puntosCirculo, estimadorPI = estimadorPI))
+}
+```
+
+```{r}
+# Función para graficar
+graficarCirculo <- function(x, y, puntosDentro) {
+  plot(x, y, col = ifelse(puntosDentro, "blue", "black"), pch = 19, asp = 1,
+       xlim = c(0, 1), ylim = c(0, 1))
+  
+  
+  # Dibujamos el círculo en la gráfica
+  symbols(0.5, 0.5, circles = 0.5, add = TRUE, inches = FALSE, lwd = 2, fg = "blue")
+}
+```
+
+
+```{r }
+# Prueba de casos
+resultado_1000 <- estimadorPI(1000)
+resultado_10000 <- estimadorPI(10000)
+resultado_100000 <- estimadorPI(100000)
+resultado_1000000 <- estimadorPI(1000000)
+resultado_1000000000 <- estimadorPI(1000000000)
+```
+
+```{r }
+# Error Absoluto
+errorAbsoluto_1000 <- abs(resultado_1000$estimadorPI - pi)
+errorAbsoluto_10000 <- abs(resultado_10000$estimadorPI - pi)
+errorAbsoluto_100000 <- abs(resultado_100000$estimadorPI - pi)
+errorAbsoluto_1000000 <- abs(resultado_1000000$estimadorPI - pi)
+errorAbsoluto_1000000000 <- abs(resultado_1000000000$estimadorPI - pi)
+```
+
+
+## **Resultados**
+
+```{r}
+# Resultados
+cat("Número de puntos dentro del círculo:", resultado_1000$puntosCirculo, "\n")
+cat("Estimación valor de PI para n=1000:", resultado_1000$estimadorPI, "\n")
+cat("Error absoluto para n=1000:", errorAbsoluto_1000, "\n\n")
+
+cat("Número de puntos dentro del círculo:", resultado_10000$puntosCirculo, "\n")
+cat("Estimación  valor de PI para n=10000:", resultado_10000$estimadorPI, "\n\n")
+cat("Error absoluto para n=10000:", errorAbsoluto_10000, "\n\n")
+
+cat("Número de puntos dentro del círculo:", resultado_100000$puntosCirculo, "\n")
+cat("Estimación valor de PI para n=100000:", resultado_100000$estimadorPI, "\n\n")
+cat("Error absoluto para n=100000:", errorAbsoluto_100000, "\n\n")
+
+cat("Número de puntos dentro del círculo:", resultado_1000000$puntosCirculo, "\n")
+cat("Estimación valor de PI para n=1000000:", resultado_1000000$estimadorPI, "\n\n")
+cat("Error absoluto para n=1000000:", errorAbsoluto_1000000, "\n\n")
+
+cat("Número de puntos dentro del círculo:", resultado_1000000000$puntosCirculo, "\n")
+cat("Estimación valor de PI para n=1000000000:", resultado_1000000000$estimadorPI, "\n")
+cat("Error absoluto para n=1000000000:", errorAbsoluto_1000000000, "\n\n")
+```
+
+## Including Plots
+
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
