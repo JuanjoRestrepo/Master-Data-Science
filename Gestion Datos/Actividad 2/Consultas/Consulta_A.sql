@@ -1,9 +1,9 @@
 -- Query A:
--- Listar todos los cursos ofrecidos en la carrera de Ingeniería de
+-- Listar todos los cursos ofrecidos en la carrera de IngenierÃ­a de
 -- Sistemas. Para este caso se debe tener en cuenta que un mismo curso
 -- puede ser dictado por profesores diferentes, en salones diferentes y en
 -- horarios diferentes. Se deben obtener los siguientes datos: el nombre
--- del curso, el nombre completo del profesor que dicta el curso, el salón
+-- del curso, el nombre completo del profesor que dicta el curso, el salÃ³n
 -- en que se dicta el curso y la hora en la que se dicta del curso.
 
 SELECT
@@ -30,6 +30,6 @@ INNER JOIN
 INNER JOIN 
     Carreras car ON carr.id_carrera = car.id_carrera
 WHERE
-    car.nombre = 'Ingeniería de Sistemas'
+    car.nombre = 'IngenierÃ­a de Sistemas'
 ORDER BY
     carrera_nombre, curso_nombre, cal.hora_inicio;
