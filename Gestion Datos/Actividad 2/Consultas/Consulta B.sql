@@ -9,11 +9,14 @@ SELECT
     prof.nombre || ' ' || prof.apellido AS profesor_completo
 FROM
     Usuarios prof
-INNER JOIN Calendario_Cursos calendario ON prof.id = calendario.id_profesor
-INNER JOIN Cursos curso ON calendario.id_curso = curso.id_curso
-INNER JOIN Facultades fac ON curso.id_facultad = fac.id
+INNER JOIN 
+    Calendario_Cursos calendario ON prof.id_usuario = calendario.id_profesor
+INNER JOIN 
+    Cursos curso ON calendario.id_curso = curso.id_curso
+INNER JOIN 
+    Facultades fac ON curso.id_facultad = fac.id_facultad
 WHERE
-    fac.nombre LIKE '%Humanidades%'  -- Aquí usamos el nombre para mayor legibilidad
+    fac.nombre LIKE '%Humanidades%'  -- AquÃ­ usamos el nombre para mayor legibilidad
 ORDER BY
     prof.nombre, prof.apellido, curso.nombre;
 
