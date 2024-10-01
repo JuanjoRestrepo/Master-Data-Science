@@ -1,9 +1,9 @@
 -- Query A:
--- Listar todos los cursos ofrecidos en la carrera de Ingeniería de
+-- Listar todos los cursos ofrecidos en la carrera de Ingenierï¿½a de
 -- Sistemas. Para este caso se debe tener en cuenta que un mismo curso
 -- puede ser dictado por profesores diferentes, en salones diferentes y en
 -- horarios diferentes. Se deben obtener los siguientes datos: el nombre
--- del curso, el nombre completo del profesor que dicta el curso, el salón
+-- del curso, el nombre completo del profesor que dicta el curso, el salï¿½n
 -- en que se dicta el curso y la hora en la que se dicta del curso.
 
 SELECT
@@ -30,7 +30,7 @@ INNER JOIN
 INNER JOIN 
     Carreras car ON carr.id_carrera = car.id_carrera
 WHERE
-    car.nombre = 'Ingeniería de Sistemas'
+    car.nombre = 'Ingenierï¿½a de Sistemas'
 ORDER BY
     carrera_nombre, curso_nombre, cal.hora_inicio;
     
@@ -54,7 +54,7 @@ INNER JOIN
 INNER JOIN 
     Facultades fac ON curso.id_facultad = fac.id_facultad
 WHERE
-    fac.nombre LIKE '%Humanidades%'  -- Aquí usamos el nombre para mayor legibilidad
+    fac.nombre LIKE '%Humanidades%'  -- Aquï¿½ usamos el nombre para mayor legibilidad
 ORDER BY
     prof.nombre, prof.apellido, curso.nombre;
 
@@ -64,7 +64,7 @@ ORDER BY
 -- Obtener la lista de profesores que dictan cursos en dos carreras
 -- diferentes. Se deben obtener los siguientes datos: el nombre completo
 -- del profesor, el nombre del curso que dicta y el nombre de la carrera a
--- la que pertenece el curso. Pista: averigua cómo funciona la sentencia WITH.
+-- la que pertenece el curso. Pista: averigua cï¿½mo funciona la sentencia WITH.
 
 WITH Profesores_Multiples_Carreras AS (
     SELECT
@@ -133,9 +133,11 @@ WHERE
 AND u.id_usuario = :id_estudiante
 order by cc.SEMESTRE;
 
--- punto E. Listar los estudiantes que se han inscrito a un curso determinado. Se deben obtener los siguientes datos: el nombre completo del estudiante y el nombre del curso.
+-- Query E. 
+-- Listar los estudiantes que se han inscrito a un curso determinado. 
+-- Se deben obtener los siguientes datos: el nombre completo del estudiante y el nombre del curso.
 
-   SELECT distinct
+SELECT distinct
    cc.id_curso,
     c.nombre AS nombre_curso,
     u.nombre || ' ' || u.apellido AS nombre_estudiante
