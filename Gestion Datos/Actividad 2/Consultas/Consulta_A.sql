@@ -30,6 +30,6 @@ INNER JOIN
 INNER JOIN 
     Carreras car ON carr.id_carrera = car.id_carrera
 WHERE
-    car.nombre = 'Ingeniería de Sistemas'
+    car.nombre = 'Ingenier?a de Sistemas'
 ORDER BY
     carrera_nombre, curso_nombre, cal.hora_inicio;
