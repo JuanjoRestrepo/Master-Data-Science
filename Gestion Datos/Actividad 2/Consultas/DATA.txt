@@ -1,0 +1,6 @@
+CONNECTION NAME: Modulo_Registro_Academico
+USERNAME: SYSTEM
+PASS: admin
+HOSTNAME: 192.168.63.1
+PORT: 1521
+SID: xe
