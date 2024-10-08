@@ -3,12 +3,12 @@ title: "Actividad_03"
 author: "Juan José Restrepo Rosero"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
-  pdf_document:
-    latex_engine: xelatex
-    toc: yes
   html_document:
     toc: yes
     toc_float: yes
+  pdf_document:
+    latex_engine: xelatex
+    toc: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -26,6 +26,7 @@ library('summarytools')
 library(corrplot)
 library(lmtest)
 library(car)
+library(gridExtra)
 ```
 
 
@@ -35,10 +36,6 @@ Con base en los datos de ofertas de vivienda descargadas del portal Fincaraiz pa
 
 ## **1. Realice un análisis exploratorio de las variables precio de vivienda (millones de pesos COP) y área de la vivienda (metros cuadrados) - incluir gráficos e indicadores apropiados interpretados.**
 
-```{r}
-data(vivienda4)
-```
-
 ### Cargamos las librerías necesarias para el análisis exploratorio
 - ***library(ggplot2):*** Para graficar
 - ***library(dplyr):*** Para manipulación de datos
@@ -46,12 +43,16 @@ data(vivienda4)
 
 
 ### Cargamos los datos del dataframe "vivienda4" si aún no se han cargado
-```{r message=FALSE, warning=FALSE, echo=FALSE, eval=FALSE, include=FALSE}
+```{r}
 if (!exists("vivienda4")) {
   data(vivienda4)
 }
 ```
 
+Visualizamos el tipo de vivienda y la cantidad
+```{r}
+table (vivienda4$tipo)
+```
 
 ```{r}
 # 1. Validar datos faltantes por variable
@@ -72,21 +73,21 @@ if (any(is.na(vivienda4))) {
 duplicated_rows <- sum(duplicated(vivienda4))
 cat("Número de filas duplicadas:", duplicated_rows, "\n")
 ```
-
 ```{r}
-# Eliminar filas duplicadas
+# 4. Eliminar filas duplicadas
 vivienda4 <- unique(vivienda4)
 ```
 
+
 ```{r}
-# Correlación entre el precio y el área construída
+# 5. Correlación entre el precio y el área construída
 cor(vivienda4$preciom, vivienda4$areaconst)
 cor(vivienda4$preciom, vivienda4$areaconst, use = "complete.obs")
 ```
 
 
 ```{r}
-# 4. Dataframe final sin valores atípicos
+# Dataframe final sin valores atípicos
 
 # Se eliminarán las observaciones con valores de "preciom" cuya SD (Desviación Estándar) sea mayor a 3 unidades de la media
 
@@ -125,7 +126,7 @@ desc_vars <- dfSummary(vivienda4[c("preciom", "areaconst")])
 ```
 
 ```{r}
-# Correlación entre el precio y el área construída
+# Correlación entre el precio y el área construída después de eliminar los outliers
 cor(vivienda4$preciom, vivienda4$areaconst)
 cor(vivienda4$preciom, vivienda4$areaconst, use = "complete.obs")
 ```
@@ -135,25 +136,96 @@ cor(vivienda4$preciom, vivienda4$areaconst, use = "complete.obs")
 ggplot(vivienda4, aes(x = areaconst, y = preciom)) +
   geom_point() +
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Línea de tendencia
-  labs(x = "Área Construida (m^2)", y = "Precio (millones de pesos COP)") +
+  labs(x = "Área Construida (m²)", y = "Precio (millones de pesos COP)") +
   ggtitle("Gráfica de Dispersión Precio vs Área Construida")
 ```
 
-```{r}
-# Histograma del preciom
-ggplot(vivienda4, aes(x = preciom)) +
-  geom_histogram(binwidth = 2, fill = "cyan", color = "black") +
-  labs(x = "Precio (millones de pesos COP)", y = "Frecuencia") +
-  ggtitle("Histograma Precio de Vivienda")
-```
+
+### 1.1 Análisis para Apartamentos
 
 ```{r}
-# Histograma del areaconst
-ggplot(vivienda4, aes(x = areaconst)) +
-  geom_histogram(binwidth = 10, fill = "green", color = "black") +
-  labs(x = "Área Construida (metros cuadrados)", y = "Frecuencia") +
-  ggtitle("Histograma del Área Construida de Vivienda")
+aptos <- subset(vivienda4, vivienda4$tipo == "Apartamento")
+summary(aptos)
 ```
+
+Como podemos apreciar al ver el resumen del dataframe para los apartamentos, se destaca lo siguiente: 
+- Los apartamentos de estrato 4 tienen un rango de precios que va desde $207.4 millones hasta $300.6 millones, con un precio promedio de $237.6 millones. 
+- El 50% de estos apartamentos se encuentran en un rango de precios entre $228.8 y $243.6 millones.
+- Un 25% de los apartamentos tiene un precio inferior a $228.8 millones, mientras que el otro 25% restante supera los $243.6 millones.
+- En cuanto al área construida, las propiedades varían desde 40 m² hasta un máximo de 200 m², con un promedio de 75.3 m². La mitad de los apartamentos tiene un área construida que oscila entre 60 m² y 83 m². El 25% tiene menos de 60 m² y el 25% supera los 83 m².
+
+```{r}
+# Validar si existen valores atípicos en los apartamentos
+par(mfrow = c(1, 2))
+boxplot(aptos$preciom, main = "Precio de apartamentos", col = "cyan")
+boxplot(aptos$areaconst, main = "Área construida de apartamentos", col ="green")
+par(mfrow = c(1, 1))
+```
+Como se aprecia en el gráfico anterior, tanto el precio como el área construida muestran la presencia de valores atípicos, ya que hay puntos extremos (bigotes) que sobresalen por encima de la caja. Además, los precios presentan un nivel de simetría, dado que los datos están distribuidos de manera equilibrada alrededor de la mediana. 
+
+En cuanto al área construida, se observa una ligera asimetría en los datos, con un sesgo leve hacia la parte inferior.
+
+
+```{r}
+par(mfrow = c(1, 2))
+
+# Histograma del precio
+hist(aptos$preciom, main = "Histograma de precio", xlab = "Precio", col = "cyan")
+
+# Histograma del área construida
+hist(aptos$areaconst, main = "Histograma de área construida", xlab = "Área construida", col ="green")
+```
+
+Como se puede apreciar, ambos histogramas revelan que los datos tanto del precio como del área construida presentan una distribución no normal, con un sesgo hacia la derecha. 
+
+Para corroborar esta no normalidad, se aplicó la prueba estadística de Shapiro-Wilk a ambas variables.
+
+```{r}
+library(stats)
+shapiro.test(aptos$preciom)
+shapiro.test(aptos$areaconst)
+```
+
+De lo anterior, es posible verficar que los p-valores son menores a 0.05, por lo cual, la hipótesis nula se rechaza y confirmando que las dos variables sigue una distribución normal.
+
+
+### 1.2 Análisis para Apartamentos
+
+```{r}
+casas <- subset(vivienda4, vivienda4$tipo == "Casa")
+summary(casas)
+```
+Por el lado de las casas, al ver el resumen del dataframe se destaca lo siguiente: 
+
+- Las casas son de estrato 4 y presentan precios que varían entre 221.3 millones y 302.3 millones, con un promedio de 265.7 millones. 
+- El 50% de las casas tiene precios que oscilan entre 250.4 y 284.1 millones, mientras que un 25% cuesta menos de 250.4 millones y el otro 25% supera los 284.1 millones.
+
+- En cuanto al área construida, las casas van desde 54 m² hasta 200 m², con una media de 135.9 m². - La mitad de las casas tiene un área construida que oscila entre 100 y 170 m².
+- Un 25% de las casas tiene menos de 100 m², mientras que otro 25% supera los 170 m².
+
+```{r}
+par(mfrow = c(1, 2))
+boxplot(casas$preciom, main = "Precio de casas", col = "#54FF9F")
+boxplot(casas$areaconst, main = "Área construida de casas", col ="#F0E68C")
+par(mfrow = c(1, 1))
+```
+Como se puede observar en el gráfico de cajas anterior, tanto el precio como el área construida muestran una cierta simetría en sus datos, sin evidencia de valores atípicos. 
+
+```{r}
+par(mfrow = c(1, 2))
+hist(casas$preciom, main = "Histograma de precio", xlab = "Precio", col = "#54FF9F")
+hist(casas$areaconst, main = "Histograma de área construida", xlab = "Área construida", col ="#F0E68C")
+par(mfrow = c(1, 1))
+```
+
+No obstante, el histograma revela que los datos no siguen una distribución normal para ambas variables. Para confirmar esta no normalidad, se aplica la prueba estadística de Shapiro-Wilk.
+
+```{r}
+shapiro.test(casa$preciom)
+shapiro.test(casa$areaconst)
+```
+
+El test anterior muestra p-valores menores a 0.05. lo que permite rechazar la hipótesis nula, afirmando así que ninguna de las dos variables presenta una distribución normal.
 
 # **2. Realice un análisis exploratorio bivariado de datos, enfocado en la relación entre la variable respuesta (precio) en función de la variable predictora (area construida) - incluir gráficos e indicadores apropiados interpretados.**
 
@@ -162,29 +234,22 @@ ggplot(vivienda4, aes(x = areaconst)) +
 ggplot(vivienda4, aes(x = areaconst, y = preciom)) +
   geom_point() +
   geom_smooth(method = "lm", color = "red", se = FALSE) +  # Línea de tendencia
-  labs(x = "Área Construida (m^2)", y = "Precio (millones de pesos COP)") +
+  labs(x = "Área Construida (m²)", y = "Precio (millones de pesos COP)") +
   ggtitle("Gráfico de Dispersión Precio vs Área Construida")
 ```
 
-```{r}
-# Boxplot y bigotes para precio por estrato
-ggplot(vivienda4, aes(x = as.factor(estrato), y = preciom)) +
-  geom_boxplot(fill = "cyan") +
-  labs(x = "Estrato", y = "Precio (millones de pesos COP)") +
-  ggtitle("Boxplot y Bigotes de los Precios por Estrato")
-
-```
+El gráfico de dispersión sugiere una relación lineal entre las dos variables, mostrando que a medida que aumenta el área construida, también lo hace el precio de los apartamentos. Para confirmar esta relación positiva, se aplicaremos la prueba no paramétrica de Spearman, debido a la distribución no normal de los datos.
 
 ```{r}
-# Resumen descriptivo de la relación entre precio y área construida
-summary_precio_area <- vivienda4 %>%
-  select(preciom, areaconst)
-summary(summary_precio_area)
+cor.test(apto$areaconst, apto$preciom)
+cor.test(apto$areaconst, apto$preciom, method = "spearman")
 ```
 
-```{r}
-print(summary_precio_area)
-```
+Con base en lo anterior, el test de Pearson arroja una correlación positiva de 0.84, mientras que la prueba no paramétrica de Spearman muestra un coeficiente de 0.74. De esto, podemos inferir que: 
+
+- Ambos resultados confirman una correlación positiva con un buen ajuste, siendo estadísticamente significativa con un p-value < 2.2e-16. 
+- Este resultado indica una elasticidad unitaria entre las variables, dado que a medida que aumenta el área construida, también aumenta el precio, y esta relación es muy fuerte, como lo evidencia el valor pequeño del p-value .
+
 
 
 # **3. Estime el modelo de regresión lineal simple entre precio=f(area)+ε. Interprete los coeficientes del modelo β0, β1 en caso de ser correcto.**
