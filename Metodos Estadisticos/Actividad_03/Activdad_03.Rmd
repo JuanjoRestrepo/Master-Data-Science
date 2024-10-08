@@ -3,12 +3,12 @@ title: "Actividad_03"
 author: "Juan José Restrepo Rosero"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
-  html_document:
-    toc: yes
-    toc_float: yes
   pdf_document:
     latex_engine: xelatex
     toc: yes
+  html_document:
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r setup, include=FALSE}
