@@ -2,7 +2,7 @@
 -- Listar los estudiantes que se han inscrito a un curso determinado. 
 -- Se deben obtener los siguientes datos: el nombre completo del estudiante y el nombre del curso.
 
-SELECT distinct
+   SELECT distinct
    cc.id_curso,
     c.nombre AS nombre_curso,
     u.nombre || ' ' || u.apellido AS nombre_estudiante
