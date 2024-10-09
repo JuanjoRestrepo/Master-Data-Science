@@ -221,8 +221,8 @@ par(mfrow = c(1, 1))
 No obstante, el histograma revela que los datos no siguen una distribución normal para ambas variables. Para confirmar esta no normalidad, se aplica la prueba estadística de Shapiro-Wilk.
 
 ```{r}
-shapiro.test(casa$preciom)
-shapiro.test(casa$areaconst)
+shapiro.test(casas$preciom)
+shapiro.test(casas$areaconst)
 ```
 
 El test anterior muestra p-valores menores a 0.05. lo que permite rechazar la hipótesis nula, afirmando así que ninguna de las dos variables presenta una distribución normal.
@@ -241,49 +241,96 @@ ggplot(vivienda4, aes(x = areaconst, y = preciom)) +
 El gráfico de dispersión sugiere una relación lineal entre las dos variables, mostrando que a medida que aumenta el área construida, también lo hace el precio de los apartamentos. Para confirmar esta relación positiva, se aplicaremos la prueba no paramétrica de Spearman, debido a la distribución no normal de los datos.
 
 ```{r}
-cor.test(apto$areaconst, apto$preciom)
-cor.test(apto$areaconst, apto$preciom, method = "spearman")
+cor.test(aptos$areaconst, aptos$preciom)
+cor.test(aptos$areaconst, aptos$preciom, method = "spearman")
 ```
 
-Con base en lo anterior, el test de Pearson arroja una correlación positiva de 0.84, mientras que la prueba no paramétrica de Spearman muestra un coeficiente de 0.74. De esto, podemos inferir que: 
+Con base en lo anterior, el test de Pearson arroja una correlación positiva de 0.83, mientras que la prueba no paramétrica de Spearman muestra un coeficiente de 0.738. De esto, podemos inferir que: 
 
 - Ambos resultados confirman una correlación positiva con un buen ajuste, siendo estadísticamente significativa con un p-value < 2.2e-16. 
 - Este resultado indica una elasticidad unitaria entre las variables, dado que a medida que aumenta el área construida, también aumenta el precio, y esta relación es muy fuerte, como lo evidencia el valor pequeño del p-value .
-
-
 
 # **3. Estime el modelo de regresión lineal simple entre precio=f(area)+ε. Interprete los coeficientes del modelo β0, β1 en caso de ser correcto.**
 
 
 ```{r}
 # Estimar el modelo de regresión lineal simple
-modelo_regresion <- lm(preciom ~ areaconst, data = vivienda4)
+#modelo_regresion <- lm(preciom ~ areaconst, data = vivienda4)
 
 # Mostrar un resumen del modelo
-summary(modelo_regresion)
+#summary(modelo_regresion)
 
 ```
+
+#### **Para los apartamentos**
 
 ```{r}
-shapiro.test(residuals(modelo_regresion))
+modelo_regresion1 <- lm(aptos$preciom~aptos$areaconst)
+resultado_prueba1 <- summary(modelo_regresion1)
+resultado_prueba1
+
+# Mostrar un resumen del modelo
+summary(resultado_prueba1)
+
 ```
+
+El coeficiente del intercepto (β0) en el modelo de regresión lineal es de 200.2 millones de pesos COP. Sin embargo, su interpretación en este contexto puede carecer de significado práctico, porque este valor hace referencia al precio estimado cuando el área construida es igual a cero, lo cual no tiene una interpretación realista en el contexto de bienes raíces. 
+
+Por otro lado, el coeficiente de la variable “areaconst” (β1) es de 0.4962, lo que significa que por cada metro cuadrado adicional de área construida, se espera un incremento promedio en el precio de 0.4962 millones de pesos COP, es decir, que el precio promedio de una vivienda de tipo apartamento aumenta en aproximadamente 0.4962 millones de pesos COP por cada metro cuadrado adicional de área construida. 
+
+#### **Para las casas**
+```{r}
+modelo_regresionCasas = lm (preciom ~ areaconst, casas)
+summary(modelo_regresionCasas)
+```
+
+Para este caso, el coeficiente del intercepto β0 es de 200.19, lo que indica el precio del terreno sin área construida en millones de pesos COP. Además, el coeficiente R2 tiene un valor de 0.8659, lo que significa que el modelo cuenta con un 87% aprox. de la variación del precio, teniendo en cuenta el área de la casa.
+
+Por el lado de la pendiente β1, presenta un valor de 0.49093, indicando que por cada aumento de un metro cuadrado de las casas el precio se incrementa en 0.49093 Millones. Adicionalmente, el valor de P es de <2e-16, lo que nos indica su significancia.
+
+
+# **4. Construir un intervalo de confianza (95%) para el coeficiente β1, interpretar y concluir si el coeficiente es igual a cero o no. Compare este resultado con una prueba de hipótesis t.**
+
+#### Análisis para los apartamentos
 
 ```{r}
-dwtest(modelo_regresion)
+intervalo_confianza <-confint(modelo_regresion1, level = 0.95)
+intervalo_confianza
 ```
+
+Determinando el intervalo de confianza del 95%, se puede inferir que por cada metro cuadrado adicional en el apartamento, el valor promedio de la variable endógena, el precio, aumentaría entre 
+el 0.478 y 0.51 millones de pesos.
+
+Para verificar este resultado mediante una prueba de hipótesis, se utiliza la prueba t para β1, con el objetivo de determinar si el coeficiente es igual a cero. 
+
+La hipótesis nula plantea que β1 = 0, lo que implicaría que no existe una relación lineal entre el precio (variable endógena) y el área construida (variable exógena).
 
 ```{r}
-ncvTest(modelo_regresion)
+valor_p <- resultado_prueba1$coefficients["aptos$areaconst", "Pr(>|t|)"]
+valor_p
 ```
+Dado que el valor p es menor que el nivel de significancia, se rechaza la hipótesis nula y se concluye que existe una relación lineal significativa entre los metros cuadrados de los apartamentos y su precio. Esto indica que la variable exógena, el área construida, efectivamente contribuye a explicar las variaciones en la variable endógena, el precio.
+
+
+#### Análisis para las casas
+```{r}
+intervalo_confianza <-confint(modelo_regresionCasas, level = 0.95)
+intervalo_confianza
+```
+
+Con un nivel de confianza del 95%, se puede concluir que por cada metro cuadrado adicional que se incremente en la casa, el precio podría aumentar entre 0.46 y 0.51 millones de pesos.
+
+# **5. Calcule e interprete el indicador de bondad R².**
 
 ```{r}
-par()
-plot(modelo_regresion)
+r_cuadrado <- summary(modelo_regresion1)$r.squared
+r_cuadrado
 ```
+Sabemos que el coeficiente de determinación (R²) es un indicador fundamental en análisis de regresión que mide la proporción de la variabilidad en la variable de respuesta (en este caso, el precio de las viviendas) que puede ser explicada por el modelo de regresión lineal simple con el área construida como variable predictora.
+
+En este análisis, el valor de R² es igual a 0.6901162, lo que indica que aproximadamente el 69% de la variabilidad en los precios de las viviendas está explicada por la relación lineal con el área construida. Es decir, más de la mitad de la variación en los precios de las viviendas puede atribuirse al tamaño del área construida según el modelo. Sin embargo, el 31% restante de la variación en los precios no puede ser explicada por el área construida y podría estar influenciada por otras variables o factores externos al modelo.
+
+# **6. Predicción de precio de apartamentos.**
+# **¿Cuál sería el precio promedio estimado para un apartamento de 110 metros cuadrados? Considera entonces con este resultado que un apartamento en la misma zona con 110 metros cuadrados en un precio de 200 millones sería una atractiva oferta? ¿Qué consideraciones adicionales se deben tener?.**
 
 
-## **Análisis de la relación entre el precio de las viviendas y el área construida**
-Para abordar esta relación, se ha estimado un modelo de regresión lineal simple, donde el precio se considera la variable de respuesta (preciom) y el área construida actúa como variable predictora (areaconst).
-
-### Intercepto (β0) y Pendiente (β1):
-- El coeficiente del intercepto (β0) en el modelo de regresión lineal simple tiene un valor de 
