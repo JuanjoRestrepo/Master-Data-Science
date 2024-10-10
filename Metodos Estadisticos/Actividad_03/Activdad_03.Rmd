@@ -294,37 +294,114 @@ Por el lado de la pendiente β1, presenta un valor de 0.49093, indicando que por
 #### Análisis para los apartamentos
 
 ```{r}
-intervalo_confianza <-confint(modelo_regresion1, level = 0.95)
-intervalo_confianza
+#intervalo_confianza <-confint(modelo_regresion1, level = 0.95)
+#intervalo_confianza
 ```
-
-Determinando el intervalo de confianza del 95%, se puede inferir que por cada metro cuadrado adicional en el apartamento, el valor promedio de la variable endógena, el precio, aumentaría entre 
-el 0.478 y 0.51 millones de pesos.
-
-Para verificar este resultado mediante una prueba de hipótesis, se utiliza la prueba t para β1, con el objetivo de determinar si el coeficiente es igual a cero. 
-
-La hipótesis nula plantea que β1 = 0, lo que implicaría que no existe una relación lineal entre el precio (variable endógena) y el área construida (variable exógena).
 
 ```{r}
-valor_p <- resultado_prueba1$coefficients["aptos$areaconst", "Pr(>|t|)"]
-valor_p
+# Obtener el valor crítico de la distribución t
+grados_libertadAptos <- length(aptos$areaconst) - 2
+t_criticoAptos <- qt(0.975, df = grados_libertadAptos)  # Para un intervalo de confianza del 95%
+
+# Calcular el intervalo de confianza para β1
+coef_beta1Aptos <- coef(modelo_regresion1)[2]  # Coeficiente β1
+se_beta1Aptos <- summary(modelo_regresion1)$coefficients[2, "Std. Error"]  # Error estándar de β1
+
+limite_inferiorAptos <- coef_beta1Aptos - t_criticoAptos * se_beta1Aptos
+limite_superiorAptos <- coef_beta1Aptos + t_criticoAptos * se_beta1Aptos
+
+# Mostrar el intervalo de confianza
+cat("Intervalo de Confianza (95%) para β1: [", limite_inferiorAptos, ", ", limite_superiorAptos, "]\nValor β1:", coef_beta1Aptos)
+
+
+
 ```
-Dado que el valor p es menor que el nivel de significancia, se rechaza la hipótesis nula y se concluye que existe una relación lineal significativa entre los metros cuadrados de los apartamentos y su precio. Esto indica que la variable exógena, el área construida, efectivamente contribuye a explicar las variaciones en la variable endógena, el precio.
+
+```{r}
+# Realizar la prueba de hipótesis t
+t_statAptos <- coef_beta1Aptos / se_beta1Aptos
+grados_libertadAptos <- length(aptos$areaconst) - 2
+p_valor <- 2 * (1 - pt(abs(t_statAptos), df = grados_libertadAptos))
+
+# Mostrar el estadístico t y el p-valor
+cat("Estadístico t para β1:", t_statAptos, "\n")
+```
+
+Determinando el intervalo de confianza del 95%, se puede inferir que el coeficiente β1 se encuentra dentro de este intervalo, lo que sugiere que por cada metro cuadrado adicional en el apartamento, el valor promedio de la variable endógena, el precio, aumentaría entre 0.47 y 0.51 millones de pesos COP. Además, el hecho de que el intervalo no contenga el valor cero indica que el coeficiente β1 es diferente de cero, lo que sugiere una relación significativa entre el precio y el área construida.
+
+Para verificar este resultado mediante una prueba de hipótesis, se utiliza la prueba t para β1, con el objetivo de determinar si el coeficiente es igual a cero (hipótesis nula) o no (hipótesis alternativa).
+
+
+```{r}
+cat("P-valor de la prueba de hipótesis t:", p_valor, "\n")
+```
+
+```{r}
+#valor_p <- resultado_prueba1$coefficients["aptos$areaconst", "Pr(>|t|)"]
+#valor_p
+```
+
+Dado que el p-valor es extremadamente bajo, (cero), y menor que el nivel de significancia, se rechaza la hipótesis nula que planteaba que el coeficiente β1 es igual a cero. 
+
+Esto indica que el coeficiente β1 es significativamente diferente de cero, lo que confirma la existencia de una relación lineal significativa entre los metros cuadrados de los apartamentos y su precio. El estadístico t, que es 54.95302, refuerza esta conclusión, proporcionando evidencia estadística sólida de que el área construida contribuye de manera importante a explicar las variaciones en el precio de los apartamentos.
+
+Se puede concluir que, tanto el intervalo de confianza como la prueba de hipótesis t confirman que el coeficiente β1 es significativamente diferente de cero, respaldando así la afirmación sobre el impacto considerable que tiene el área construida en el precio de los apartamentos.
 
 
 #### Análisis para las casas
 ```{r}
-intervalo_confianza <-confint(modelo_regresionCasas, level = 0.95)
-intervalo_confianza
+#intervalo_confianza <-confint(modelo_regresionCasas, level = 0.95)
+#intervalo_confianza
 ```
 
-Con un nivel de confianza del 95%, se puede concluir que por cada metro cuadrado adicional que se incremente en la casa, el precio podría aumentar entre 0.46 y 0.51 millones de pesos.
+```{r}
+# Obtener el valor crítico de la distribución t
+grados_libertadCasas <- length(casas$areaconst) - 2
+t_criticoCasas <- qt(0.975, df = grados_libertadCasas)  # Para un intervalo de confianza del 95%
+
+# Calcular el intervalo de confianza para β1
+coef_beta1Casas <- coef(modelo_regresionCasas)[2]  # Coeficiente β1
+se_beta1Casas <- summary(modelo_regresionCasas)$coefficients[2, "Std. Error"]  # Error estándar de β1
+
+limite_inferiorCasas <- coef_beta1Casas - t_criticoCasas * se_beta1Casas
+limite_superiorCasas <- coef_beta1Casas + t_criticoCasas * se_beta1Casas
+
+# Mostrar el intervalo de confianza
+cat("Intervalo de Confianza (95%) para β1: [", limite_inferiorCasas, ", ", limite_superiorCasas, "]\nValor β1:", coef_beta1Casas)
+
+```
+
+De igual manera, con un nivel de confianza del 95%, se puede concluir que por cada metro cuadrado adicional que se incremente en la casa, el precio podría aumentar entre 0.46 y 0.51 millones de pesos.
+
+
+```{r}
+# Gráfico del intervalo de confianza para β1
+library(ggplot2)
+
+intervalo_confianza <- data.frame(
+  Intervalo = c("Aptos", "Casas"), 
+  Limite_Inferior = c(limite_inferiorAptos, limite_inferiorCasas), 
+  Limite_Superior = c(limite_superiorAptos, limite_superiorCasas),
+  Estimado = c(coef_beta1Aptos, coef_beta1Casas)
+)
+
+# Crear el gráfico combinado para Aptos y Casas
+ggplot(intervalo_confianza, aes(x = Intervalo, y = Estimado, color = Intervalo)) +
+  geom_point(size = 3) +
+  geom_errorbar(aes(ymin = Limite_Inferior, ymax = Limite_Superior), width = 0.2, color = "red") +
+  geom_text(aes(label = round(Estimado, 3)), vjust = -1, color = "black") +
+  scale_color_manual(values = c("Aptos" = "blue", "Casas" = "green")) +
+  labs(x = "", y = "Coeficiente β1") +
+  ggtitle("Intervalos de Confianza (95%) para β1: Aptos y Casas") +
+  theme_minimal()
+
+```
 
 # **5. Calcule e interprete el indicador de bondad R².**
 
 ```{r}
-r_cuadrado <- summary(modelo_regresion1)$r.squared
-r_cuadrado
+R_cuadrado <- summary(modelo_regresion1)$r.squared
+cat("Coeficiente de Determinación (R²):", R_cuadrado, "\n")
 ```
 Sabemos que el coeficiente de determinación (R²) es un indicador fundamental en análisis de regresión que mide la proporción de la variabilidad en la variable de respuesta (en este caso, el precio de las viviendas) que puede ser explicada por el modelo de regresión lineal simple con el área construida como variable predictora.
 
@@ -334,3 +411,75 @@ En este análisis, el valor de R² es igual a 0.6901162, lo que indica que aprox
 # **¿Cuál sería el precio promedio estimado para un apartamento de 110 metros cuadrados? Considera entonces con este resultado que un apartamento en la misma zona con 110 metros cuadrados en un precio de 200 millones sería una atractiva oferta? ¿Qué consideraciones adicionales se deben tener?.**
 
 
+#### Para los Apartamentos
+
+```{r}
+# Definir el valor de área construida
+area_construida_estimada <- 110  # Metros cuadrados
+# Calcular el precio estimado utilizando el modelo de regresión
+precio_estimado <- coef(modelo_regresion1)[1] + coef(modelo_regresion1)[2] * area_construida_estimada
+cat("Precio estimado para un apartamento de 110 metros cuadrados:", precio_estimado, "millones de pesos COP\n")
+
+```
+
+Utilizando el modelo de regresión lineal, se obtiene que el precio estimado para un apartamento de unos 110 m² es de 254.8028 millones de pesos COP. Sin embargo, compararemos si este resultado puede ser mejor, es decir, si hay una oferta más atractiva en la misma zona y con la misma área de construcción del apartamento.
+
+```{r}
+# Precio de la oferta y precio estimado
+precio_oferta <- 200  # Precio de la oferta en millones de pesos COP
+precio_estimado <- 260.5378  # Precio estimado en millones de pesos COP
+
+# Crear un dataframe para el gráfico
+data_grafico <- data.frame(Variable = c("Precio de la Oferta", "Precio Estimado"),
+                           Precio = c(precio_oferta, precio_estimado))
+
+# Crear el gráfico de barras
+ggplot(data_grafico, aes(x = Variable, y = Precio, fill = Variable)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  labs(y = "Precio (millones de pesos COP)", title = "Comparación de Precio de Oferta y Precio Estimado") +
+  theme_minimal() +
+  scale_fill_manual(values = c("Precio de la Oferta" = "orange", "Precio Estimado" = "cyan"))
+```
+
+# **7. Realice la validación de los supuestos del modelo por medio de gráficos apropiados, interpretarlos y sugerir posibles soluciones si se violan algunos de ellos. Utilice las pruebas de hipótesis para la validación de supuestos y compare los resultados con lo observado en los gráficos asociados.**
+
+```{r}
+par (mfrow=c(2,2))
+plot(modelo_regresion1)
+```
+
+
+```{r}
+# Gráfico de Residuales vs. Valores Ajustados
+plot(modelo_regresion1, which = 1)
+```
+```{r}
+durbinWatsonTest(modelo_regresion1)
+```
+
+
+
+```{r}
+# Gráfico de Residuales vs. Orden
+plot(modelo_regresion1, which = 2)
+```
+
+```{r}
+# Prueba de Ljung-Box
+library(astsa)
+Box.test(resid(modelo_regresion1), lag = 20, type = "Ljung")
+```
+
+
+
+```{r}
+# Gráfico Q-Q
+qqnorm(resid(modelo_regresion1))
+qqline(resid(modelo_regresion1))
+```
+
+
+```{r}
+# Prueba de Shapiro-Wilk
+shapiro.test(resid(modelo_regresion1))
+```
