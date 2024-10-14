@@ -3,12 +3,12 @@ title: "Actividad_03"
 author: "Juan José Restrepo Rosero"
 date: "`r format(Sys.Date(), '%d %B %Y')`"
 output:
-  html_document:
-    toc: yes
-    toc_float: yes
   pdf_document:
     latex_engine: xelatex
     toc: yes
+  html_document:
+    toc: yes
+    toc_float: yes
 ---
 
 ```{r setup, include=FALSE}
@@ -473,13 +473,219 @@ Box.test(resid(modelo_regresion1), lag = 20, type = "Ljung")
 
 
 ```{r}
-# Gráfico Q-Q
+# Gráfico Q-Q (Quantile-Quantile)
 qqnorm(resid(modelo_regresion1))
 qqline(resid(modelo_regresion1))
 ```
 
+Para cada gráfica los hallazgos son los siguientes:
+
+## **7.1. Gráfico de Linealidad**
+La gráfica de Residuals vs Fitted permite evaluar si los residuales (errores) del modelo tienen una relación sistemática con los valores ajustados (predichos).
+
+ En este caso, se observa que los residuales no presentan una dispersión completamente aleatoria, lo que indica que no se cumple el supuesto de linealidad. Además, se puede notar que la variabilidad de los errores no es constante, lo que infringe el supuesto de homocedasticidad y de igual forma, se aprecia una concentración mayor de errores hacia la izquierda, sugiriendo una distribución asimétrica o algún patrón que podría afectar la validez del modelo.
+ 
+## **7.2. Gráfico de Normalidad**
+
+En el gráfico Q-Q, se observa que los puntos al inicio y al final se desvían de la línea recta diagonal, lo que indica que los residuales del modelo no siguen una distribución normal. Esto sugiere que las inferencias estadísticas basadas en los supuestos de normalidad, como las pruebas de hipótesis del modelo, pueden estar sesgadas. Sin embargo, es importante destacar que, aunque los residuales no se ajusten completamente a una distribución normal, en algunos casos, los modelos aún pueden ofrecer predicciones útiles y fiables, dependiendo de la magnitud del desajuste y de la aplicación práctica.
+
+Lo anterior, es posible verificar por medio de la prueba de shapiro:
 
 ```{r}
 # Prueba de Shapiro-Wilk
 shapiro.test(resid(modelo_regresion1))
 ```
+
+Teniendo en cuenta el resultado anterior, se puede evidenciar que los residuales no siguen una distribución normal en el modelo
+
+
+## **7.3. Gráfico Homocedasticidad**
+
+Este tipo de gráfico nos permite examinar si la variabilidad de los residuales es constante a lo largo de los valores ajustados. Se puede observar que la dispersión de los residuos del modelo de apartamentos no es uniforme alrededor de la línea de regresión, mostrando una mayor dispersión a medida que aumentan los valores ajustados. Esto sugiere la presencia de heterocedasticidad. Además, se aprecia que la varianza de los residuos crece conforme incrementan los valores ajustados, lo que implica una violación del supuesto de homocedasticidad.
+
+```{r}
+lmtest::bptest(modelo_regresion1)
+
+```
+Al aplicar la prueba de Breusch-Pagan y observar un valor p significativamente bajo, se concluye que hay evidencia suficiente para rechazar la hipótesis nula de homocedasticidad. Esto confirma la presencia de heterocedasticidad en los residuos del modelo, lo que sugiere que la variabilidad de los errores no es constante a lo largo de los valores ajustados.
+
+## **7.4. Gráfico de Outliers**
+
+Con este gráfico podemos identificar observaciones atípicas (outlier). Las observaciones con valores inusualmente extremos en las variables predictoras pueden tener un alto impacto en las estimaciones de los coeficientes del modelo. En el eje X vemos el leverage (medida de cuánto se aleja el valor de una observación del valor promedio de las variables predictoras) y en el eje Y se representan los residuales estandarizados. Las observaciones que están lejos del resto de los puntos en el eje y pueden ser consideradas atípicas. Con el gráfico generado, se observa que sí hay valores extremos, aunque no es un supuesto formal, no se esperaría que hayan datos atípicos que generen sesgos en los estimadores de los coeficientes.
+
+
+## **7.5. No autocorrelación**
+```{r}
+lmtest::dwtest(modelo_regresion1)
+```
+
+Los errores que corresponden a diferentes individuos o factores deben ser independientes entre sí, lo que implica que la covarianza entre ellos (Cov[εi, εj]) debe ser igual a 0. El **test de Durbin-Watson** de primer orden, cuyo rango va de 0 a 4, ayuda a detectar la autocorrelación en los residuos. 
+
+Un valor cercano a 2 indica la ausencia de autocorrelación positiva o negativa. Si el valor es significativamente menor que 2, sugiere autocorrelación positiva. Según el criterio, valores entre 1.54 y 2.45 indican la no existencia de autocorrelación. 
+
+El valor de **2.02** obtenido en la prueba para este modelo indica que no hay autocorrelación positiva en los residuos, confirmando que los errores no están correlacionados positivamente entre sí.
+
+
+# **8. De ser necesario realice una transformación apropiada para mejorar el ajuste y supuestos del modelo.**
+
+## **8.1. Transformación Lin-Log**
+
+```{r}
+modelo_LinLog = lm(preciom ~ log(areaconst), data=aptos)      
+summary(modelo_LinLog)
+par (mfrow=c(2,2))
+plot(modelo_LinLog)
+
+```
+
+Al haber realizado la transformación logarítmica de la ***variable X***, los resultados muestran que, tras aplicar la transformación Lin-Log, el valor del R² disminuye a ***0.68*** aproximadamente, en comparación con el modelo inicial. Sin embargo, a pesar de la reducción en R², el modelo sigue siendo significativo, como lo indica el estadístico p-value, lo cual sugiere que la relación entre las variables sigue siendo estadísticamente relevante.
+
+## **8.1. Transformación Lin-Log**
+
+```{r}
+modelo_LogLin = lm(log(preciom) ~ areaconst, data=aptos)      
+summary(modelo_LogLin)
+par (mfrow=c(2,2))
+plot(modelo_LogLin)
+
+```
+
+Al haber realizado la transformación logarítmica de la ***variable Y***, los resultados muestran que,la transformación Log-Lin produce un valor de R² de apróximadamente ***0.69*** ligeramente inferior al del modelo original. Aunque también se reduce el R², el modelo sigue siendo significativo, como lo indica el estadístico valor de p (p-value), confirmando así la relación que existe entre las variables continúa siendo estadísticamente relevante.
+
+
+## **8.3. Transformación Log-Log**
+```{r}
+modelo_LogLog = lm(log(preciom) ~ log(areaconst), data=aptos) 
+summary(modelo_LogLog)
+par (mfrow=c(2,2))
+plot(modelo_LogLog)
+```
+
+Al haber realizado la transformación logarítmica de la ***variable X*** y la ***variable Y***, los resultados muestran que con la transformación Log-Log, el valor de R² disminuye a ***0.67*** apróximadamente, siendo inferior al del modelo original y a los modelos Lin-Log y Log-Lin. No obstante, el estadístico p-value sigue siendo significativo, lo que indica que la relación entre las variables, aunque menos explicativa en comparación con los otros modelos, sigue siendo estadísticamente significativa.
+
+## **8.4. Transformación Box-Cox**
+
+```{r}
+# Instalar paquetes si no están instalados
+if(!require(MASS)) install.packages("MASS")
+if(!require(car)) install.packages("car")
+if(!require(lmtest)) install.packages("lmtest")
+
+# Cargar la librería MASS para la transformación de Box-Cox
+library(MASS)
+modelo_regresion1 = lm(preciom ~ areaconst, data=aptos)
+summary(modelo_regresion1)
+
+par(mfrow = c(1,2))
+boxcox( lm( aptos$preciom ~ aptos$areaconst, data=aptos ), lambda = -3:3)
+graficoBoxcox <- boxcox( lm( aptos$preciom ~ aptos$areaconst, data=aptos ), lambda = -1:1)
+
+(lambda <- graficoBoxcox$x[which.max( graficoBoxcox$y )])
+
+```
+
+
+```{r}
+Y_Ajustado <- ((aptos$preciom ^ lambda) -1)/ lambda
+modeloBoxCox <- lm(Y_Ajustado~areaconst, data=aptos)
+
+summary(modeloBoxCox)
+par (mfrow=c(2,2))
+plot(modeloBoxCox)
+```
+
+Sabemos que la transformación sobre la variable Y se utiliza comúnmente  para abordar problemas relacionados con la validación de supuestos y para mejorar el ajuste del modelo. En este caso, se obtiene un lambda con valor de uno y en ambas gráficas, el intervalo de confianza se incluye el valor de 1. Este resultado, ***λ = 1***, sugiere que la variable dependiente no necesita estar en escala logarítmica, por lo que no es necesario realizar dicha transformación.
+
+### Tabla comparativa de modelos
+```{r}
+library (stargazer)
+stargazer(modelo_regresion1, modelo_LinLog, modelo_LogLin, modelo_LogLog, type = "text", df=FALSE, title = "Tabla comparativa de modelos")
+```
+
+
+Luego de haber realizado las transformaciones correspondientes tanto a la variable independiente ***(areaconst)*** como en la dependiente ***(Preciom)***, para el tipo de vivienda apartamentos y de haber comparado los modelos, es posible determinar que el **modelo 1** de regresión simple proporciona los mejores resultados para la variable dependiente, dado que presenta un R² de 70.6%, siendo superior a los modelos con transformaciones e indicando de igual forma que el **área construida** tiene una mayor influencia en el precio. 
+
+Por otro lado, el modelo 1 de regresión lineal explica de una forma más precisa y con un mayor ajuste en cuanto al precio en función del área construída, específicamente en un 3.033% más.
+
+
+# **9 y 10. Estime varios modelos y compare los resultados obtenidos. En el mejor de los modelos, ¿Se cumplen los supuestos sobre los errores?**
+
+## **10.1. Coeficientes de determinación:**
+```{r}
+RSquared_LinLog <- summary(modelo_LinLog)$r.squared
+RSquared_LogLin <- summary(modelo_LogLin)$r.squared
+RSquared_LogLog <- summary(modelo_LogLog)$r.squared
+RSquared_BoxCox <- summary(modeloBoxCox)$r.squared
+print(paste("Coeficiente de determinación Modelo lin-Log: ", RSquared_LinLog))
+print(paste("Coeficiente de determinación Modelo Log-Lin: ", RSquared_LogLin))
+print(paste("Coeficiente de determinación Modelo Log-Log: ",RSquared_LogLog))
+print(paste("Coeficiente de determinación Modelo Box Cox: ", RSquared_BoxCox))
+
+```
+
+## **10.2. Supuestos**
+## **Normalidad:**
+
+```{r}
+par (mfrow=c(2,3))
+qqnorm(modelo_regresion1$residuals, main = "Q-Q Modelo Original", col = "blue")
+qqline(modelo_regresion1$residuals)
+
+qqnorm(modelo_LinLog$residuals, main = "Q-Q Modelo Lin-Log", col = "red")
+qqline(modelo_LinLog$residuals)
+
+qqnorm(modelo_LogLin$residuals, main = "Q-Q Modelo Log-Lin", col = "green")
+qqline(modelo_LogLin$residuals)
+
+qqnorm(modelo_LogLog$residuals, main = "Q-Q Modelo Log-Log", col = "gray")
+qqline(modelo_LogLog$residuals)
+
+qqnorm(modeloBoxCox$residuals, main = "Q-Q Modelo Box Cox", col = "orange")
+qqline(modeloBoxCox$residuals)
+```
+
+Al observar los gráficos Q-Q de los cinco modelos (Original, Lin-Log, Log-Lin, Log-Log, y Box-Cox), podemos notar lo siguiente:
+
+- **Modelo Original:** Aunque la mayoría de los puntos siguen de cerca la línea diagonal, los extremos se desvían, lo que indica que los residuales no siguen una distribución normal. Esto sugiere la presencia de datos atípicos o colas más pesadas de lo esperado en los extremos de la distribución.
+
+- **Modelo Lin-Log y Log-Lin:** Estas transformaciones no lograron mejorar significativamente la normalidad. Aunque hay una mejor alineación de los puntos en el centro, los extremos aún presentan una notable desviación respecto a la línea de referencia, lo que implica que los residuales siguen sin ajustarse bien a una distribución normal.
+
+- **Modelo Log-Log:** Similar a los modelos anteriores, la transformación Log-Log tampoco muestra una mejora significativa en la distribución de los residuales. Los puntos en los extremos continúan desviándose, sugiriendo que los problemas de normalidad persisten.
+
+- **Modelo Box-Cox:** Aunque esta transformación está diseñada para mejorar la normalidad y homocedasticidad de los errores, el gráfico muestra que aún persisten desviaciones en los extremos. Sin embargo, este modelo presenta el mejor ajuste en la parte central en comparación con los otros, pero no es suficiente para garantizar normalidad.
+
+**Conclusión:** Ninguno de los modelos transformados, incluyendo el Box-Cox, ha sido capaz de corregir completamente la falta de normalidad en los residuales. Esto podría indicar que los problemas en la distribución de los errores no se deben únicamente a la elección de la transformación de las variables, sino a posibles otras fuentes de error en el modelo, como la presencia de variables omitidas, la necesidad de modificar la especificación del modelo, o la influencia de valores atípicos. Por lo tanto, aunque las transformaciones han sido útiles para mejorar otros aspectos del modelo, el supuesto de normalidad de los errores no se cumple en ninguno de los casos, lo que podría afectar las inferencias estadísticas derivadas de este análisis.
+
+## **Homocedasticidad**
+
+```{r}
+par (mfrow=c(2,3))
+
+plot(modelo_regresion1$fitted.values, modelo_regresion1$residuals, xlab = "Valores Ajustados", ylab = "Residuos", main = "Modelo original", col = "blue")
+
+plot(modelo_LinLog$fitted.values, modelo_LinLog$residuals, xlab = "Valores Ajustados", ylab = "Residuos", main = "Modelo Lin-Log",  col = "red")
+
+plot(modelo_LogLin$fitted.values, modelo_LogLin$residuals, xlab = "Valores Ajustados", ylab = "Residuos", main = "Modelo Log-Lin", col = "green")
+
+plot(modelo_LogLog$fitted.values, modelo_LogLog$residuals, xlab = "Valores Ajustados", ylab = "Residuos", main = "Modelo Log-Log", col = "gray")
+
+plot(modeloBoxCox$fitted.values, modeloBoxCox$residuals, xlab = "Valores Ajustados", ylab = "Residuos", main = "Modelo Box", col = "orange")
+
+```
+
+
+Como se observa en los gráficos anteriores, existe una variabilidad de los residuos que se amplía a medida que aumentan los valores ajustados, lo que indica una mayor dispersión de los errores en los valores más altos y una mayor concentración hacia la izquierda. Esta clase de patrón evidencia una violación del supuesto de homocedasticidad, donde se espera que los errores mantengan una varianza constante a lo largo de los valores predichos.
+
+Adicionalmente, al aplicar la prueba de Breusch-Pagan para evaluar la homocedasticidad en todos los modelos (el original y las distintas transformaciones), el valor p obtenido es significativamente menor que el nivel de significancia estándar (0.05) en todos los casos. Esto nos lleva a rechazar la hipótesis nula de homocedasticidad, concluyendo que hay heterocedasticidad en los residuos de los modelos.
+
+Por último, es importante destacar que ninguna de las transformaciones aplicadas (Lin-Log, Log-Lin, Log-Log y Box-Cox) logró mejorar este aspecto, ya que la heterocedasticidad persiste en los residuos de cada uno de los modelos. Esto sugiere que se podrían explorar otras estrategias para tratar esta violación, como el uso de estimaciones robustas o métodos que corrijan la heterocedasticidad en los modelos ajustados.
+
+En general, ninguno de los modelos evaluados cumple con los supuestos clave sobre los errores, lo que incluye la normalidad, la ausencia de autocorrelación y la homocedasticidad. Las transformaciones aplicadas no lograron el efecto esperado en ninguno de los casos, lo que significa que ninguno de los modelos puede considerarse totalmente confiable en sus estimaciones, implicando que los resultados y la información obtenida deben ser interpretados con precaución.
+
+Los modelos de regresión están basados en ciertos supuestos sobre los errores, y cuando estos no se cumplen, las predicciones del modelo pueden volverse imprecisas o poco confiables, generando posibles señales equivocadas o sesgadas.
+
+- **Heterocedasticidad:** Si no se aborda, puede sesgar los coeficientes y llevar a estimaciones incorrectas del efecto de las variables independientes en la variable dependiente.
+- **Distribución normal de los errores:** Si no se cumple, los intervalos de confianza pueden ser incorrectos, lo que afecta la representación de la incertidumbre en las estimaciones de los coeficientes.
+
+Dado que las transformaciones no mejoraron el cumplimiento de estos supuestos, se limitan las decisiones que se puedan tomar en base a estos modelos transformados. En consecuencia, sería preferible mantener el modelo original o inicial, pues las transformaciones no ofrecieron una mejora significativa en términos de ajustarse a los supuestos del modelo.
+
