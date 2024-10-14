@@ -689,3 +689,7 @@ Los modelos de regresión están basados en ciertos supuestos sobre los errores,
 
 Dado que las transformaciones no mejoraron el cumplimiento de estos supuestos, se limitan las decisiones que se puedan tomar en base a estos modelos transformados. En consecuencia, sería preferible mantener el modelo original o inicial, pues las transformaciones no ofrecieron una mejora significativa en términos de ajustarse a los supuestos del modelo.
 
+# Anexos
+Para consultar el código con mayor detalle, se puede a través del siguiente enlace:
+
+[Github - Actividad 3](https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Metodos%20Estadisticos/Actividad_03)
