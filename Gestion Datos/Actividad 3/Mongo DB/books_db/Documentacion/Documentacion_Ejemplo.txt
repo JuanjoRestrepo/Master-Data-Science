@@ -1,0 +1,34 @@
+Collection: autores
+[Document {
+    "_id": ObjectId,
+    "nombre": String
+}]
+
+Collection: editores
+[Document {
+    "_id": ObjectId,
+    "nombre": String
+}]
+
+Collection: librerias
+[Document {
+    "_id": ObjectId,
+    "nombre": String,
+    "ciudad": String,
+    "libros": [{
+        "libro": ObjectId_libros,
+        "stock": Integer
+    }]
+}]
+
+Collection: libros
+[Document {
+    "_id": ObjectId,
+    "nombre": String,
+    "paginas": Integer,
+    "fecha_publicacion": Date,
+    "editor": ObjectId_editores,
+    "autores": [
+        ObjectId_autores
+    ]
+}]

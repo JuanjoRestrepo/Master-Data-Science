@@ -1,0 +1,232 @@
+[{
+  "_id": {
+    "$oid": "63f69d4b8fe78bbda1b4fe4f"
+  },
+  "nombre": "Librería Nacional",
+  "ciudad": "Bogotá D.C.",
+  "libros": [
+    {
+      "libro": {
+        "$oid": "63f659d6f251d82c4c943afb"
+      },
+      "stock": 2
+    },
+    {
+      "libro": {
+        "$oid": "63f67186f251d82c4c943b0e"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f6794cf251d82c4c943b1d"
+      },
+      "stock": 1
+    },
+    {
+      "libro": {
+        "$oid": "63f68a91f251d82c4c943b3b"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f68c47f251d82c4c943b44"
+      },
+      "stock": 8
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6a08f8fe78bbda1b4fe50"
+  },
+  "nombre": "Librería Nacional",
+  "ciudad": "Medellín",
+  "libros": [
+    {
+      "libro": {
+        "$oid": "63f67186f251d82c4c943b0e"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f6789cf251d82c4c943b1b"
+      },
+      "stock": 4
+    },
+    {
+      "libro": {
+        "$oid": "63f68779f251d82c4c943b2a"
+      },
+      "stock": 3
+    },
+    {
+      "libro": {
+        "$oid": "63f6887cf251d82c4c943b2c"
+      },
+      "stock": 3
+    },
+    {
+      "libro": {
+        "$oid": "63f68c47f251d82c4c943b44"
+      },
+      "stock": 7
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6a0d08fe78bbda1b4fe51"
+  },
+  "nombre": "Librería Nacional",
+  "ciudad": "Santiago de Cali",
+  "libros": [
+    {
+      "libro": {
+        "$oid": "63f659d6f251d82c4c943afb"
+      },
+      "stock": 7
+    },
+    {
+      "libro": {
+        "$oid": "63f670eef251d82c4c943b0d"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f6789cf251d82c4c943b1b"
+      },
+      "stock": 7
+    },
+    {
+      "libro": {
+        "$oid": "63f678eff251d82c4c943b1c"
+      },
+      "stock": 8
+    },
+    {
+      "libro": {
+        "$oid": "63f68779f251d82c4c943b2a"
+      },
+      "stock": 2
+    },
+    {
+      "libro": {
+        "$oid": "63f68a91f251d82c4c943b3b"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f68c47f251d82c4c943b44"
+      },
+      "stock": 8
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6b7608fe78bbda1b4fe6d"
+  },
+  "nombre": "Librería Panamericana",
+  "ciudad": "Bogotá D.C.",
+  "libros": [
+    {
+      "libro": {
+        "$oid": "63f6789cf251d82c4c943b1b"
+      },
+      "stock": 9
+    },
+    {
+      "libro": {
+        "$oid": "63f687edf251d82c4c943b2b"
+      },
+      "stock": 4
+    },
+    {
+      "libro": {
+        "$oid": "63f68a91f251d82c4c943b3b"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f68c47f251d82c4c943b44"
+      },
+      "stock": 7
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6b78f8fe78bbda1b4fe6e"
+  },
+  "nombre": "Librería Panamericana",
+  "ciudad": "Medellín",
+  "libros": [
+    {
+      "libro": {
+        "$oid": "63f659d6f251d82c4c943afb"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f670eef251d82c4c943b0d"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f6789cf251d82c4c943b1b"
+      },
+      "stock": 2
+    },
+    {
+      "libro": "63f68c47f251d82c4c943b44",
+      "stock": 9
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6b7be8fe78bbda1b4fe6f"
+  },
+  "nombre": "Librería Panamericana",
+  "ciudad": "Santiago de Cali",
+  "libros": [
+    {
+      "libro": {
+        "$oid": "63f659d6f251d82c4c943afb"
+      },
+      "stock": 5
+    },
+    {
+      "libro": {
+        "$oid": "63f67186f251d82c4c943b0e"
+      },
+      "stock": 7
+    },
+    {
+      "libro": {
+        "$oid": "63f678eff251d82c4c943b1c"
+      },
+      "stock": 1
+    },
+    {
+      "libro": {
+        "$oid": "63f6794cf251d82c4c943b1d"
+      },
+      "stock": 1
+    },
+    {
+      "libro": {
+        "$oid": "63f68c47f251d82c4c943b44"
+      },
+      "stock": 5
+    }
+  ]
+}]

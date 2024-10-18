@@ -1,0 +1,237 @@
+[{
+  "_id": {
+    "$oid": "63f659d6f251d82c4c943afb"
+  },
+  "nombre": "Fundación",
+  "paginas": 230,
+  "fecha_publicacion": {
+    "$date": {
+      "$numberLong": "-599598000000"
+    }
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65d59f251d82c4c943b02"
+    },
+    "nombre": "Gnome Press"
+  },
+  "autores": [
+    {
+      "$oid": "63f66f74f251d82c4c943b08"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f670eef251d82c4c943b0d"
+  },
+  "nombre": "Fundación e Imperio",
+  "paginas": 230,
+  "fecha_publicacion": {
+    "$date": {
+      "$numberLong": "-568062000000"
+    }
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65d59f251d82c4c943b02"
+    },
+    "nombre": "Gnome Press"
+  },
+  "autores": [
+    {
+      "$oid": "63f66f74f251d82c4c943b08"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f67186f251d82c4c943b0e"
+  },
+  "nombre": "Segunda Fundación",
+  "paginas": 230,
+  "fecha_publicacion": {
+    "$date": {
+      "$numberLong": "-536439600000"
+    }
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f56f251d82c4c943b05"
+    },
+    "nombre": "Cenit"
+  },
+  "autores": [
+    {
+      "$oid": "63f66f74f251d82c4c943b08"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6789cf251d82c4c943b1b"
+  },
+  "nombre": "El Testamento Maya",
+  "paginas": 592,
+  "fecha_publicacion": {
+    "$date": "2012-06-07T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f12f251d82c4c943b03"
+    },
+    "nombre": "Grijalbo"
+  },
+  "autores": [
+    {
+      "$oid": "63f66f8ff251d82c4c943b09"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f678eff251d82c4c943b1c"
+  },
+  "nombre": "La Resurrección Maya",
+  "paginas": 656,
+  "fecha_publicacion": {
+    "$date": "2011-06-10T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f12f251d82c4c943b03"
+    },
+    "nombre": "Grijalbo"
+  },
+  "autores": [
+    {
+      "$oid": "63f66f8ff251d82c4c943b09"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6794cf251d82c4c943b1d"
+  },
+  "nombre": "Apocalipsis Maya: La Era del Miedo",
+  "paginas": 568,
+  "fecha_publicacion": {
+    "$date": "2011-06-03T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f2ff251d82c4c943b04"
+    },
+    "nombre": "Plaza y Janes Editores"
+  },
+  "autores": [
+    {
+      "$oid": "63f66f8ff251d82c4c943b09"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f68779f251d82c4c943b2a"
+  },
+  "nombre": "El Problema de los Tres Cuerpos",
+  "paginas": 300,
+  "fecha_publicacion": {
+    "$date": "2006-01-01T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f71f251d82c4c943b06"
+    },
+    "nombre": "Ediciones B"
+  },
+  "autores": [
+    {
+      "$oid": "63f66fa2f251d82c4c943b0a"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f687edf251d82c4c943b2b"
+  },
+  "nombre": "El Bosque Oscuro",
+  "paginas": 300,
+  "fecha_publicacion": {
+    "$date": "2008-01-01T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f71f251d82c4c943b06"
+    },
+    "nombre": "Ediciones B"
+  },
+  "autores": [
+    {
+      "$oid": "63f66fa2f251d82c4c943b0a"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f6887cf251d82c4c943b2c"
+  },
+  "nombre": "El Fin de la Muerte",
+  "paginas": 300,
+  "fecha_publicacion": {
+    "$date": "2010-01-01T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f71f251d82c4c943b06"
+    },
+    "nombre": "Ediciones B"
+  },
+  "autores": [
+    {
+      "$oid": "63f66fa2f251d82c4c943b0a"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f68a91f251d82c4c943b3b"
+  },
+  "nombre": "El Color que Cayó del Cielo",
+  "paginas": 72,
+  "fecha_publicacion": {
+    "$date": "2021-09-15T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65f90f251d82c4c943b07"
+    },
+    "nombre": "Libros del Zorro Rojo"
+  },
+  "autores": [
+    {
+      "$oid": "63f66fd1f251d82c4c943b0b"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "63f68c47f251d82c4c943b44"
+  },
+  "nombre": "Juego de Tronos",
+  "paginas": 650,
+  "fecha_publicacion": {
+    "$date": "1996-08-06T05:00:00.000Z"
+  },
+  "editor": {
+    "_id": {
+      "$oid": "63f65d3ff251d82c4c943b01"
+    },
+    "nombre": "DeBolsillo"
+  },
+  "autores": [
+    {
+      "$oid": "63f66ff5f251d82c4c943b0c"
+    }
+  ]
+}]
