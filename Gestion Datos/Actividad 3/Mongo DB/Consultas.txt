@@ -1,0 +1,133 @@
+CONSULTA A:
+[
+  {
+    $match:
+      {
+        nombre: "Ingeniería de Sistemas"
+      }
+  },
+  
+	{
+    $unwind: "$cursos"
+  },
+  {
+    $lookup: {
+      from: "cursos",
+      localField: "cursos.curso",
+      foreignField: "_id",
+      as: "cursoDetalles"
+    }
+  },
+  {
+    $unwind: "$cursoDetalles"
+  },
+
+
+  
+	{
+    $lookup: {
+      from: "profesores",
+      localField: "cursoDetalles.profesor",
+      foreignField: "_id",
+      as: "profesorDetalles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$profesorDetalles",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+
+  /* Profesores Detalles NULL
+  {
+    $project: {
+      _id: 1, // 0 - cero, para Excluir el _id de la carrera
+      nombreCurso: "$cursoDetalles.nombre",
+      nombreProfesor: { $concat: ["$profesorDetalles.nombre", " ", "$profesorDetalles.apellido"] },
+      calendario: "$cursoDetalles.calendario"
+    }
+  }*/
+  {
+    $project: {
+      _id: 1, // Excluir el _id de la carrera
+      nombreCurso: "$cursoDetalles.nombre",
+      nombreProfesor: {
+        $concat: [
+          { $ifNull: ["$profesorDetalles.nombre", "Sin nombre"] },
+          //" ",
+          //{ $ifNull: ["$profesorDetalles.apellido", "Sin apellido"] }
+        ]
+      },
+      calendario: "$cursoDetalles.calendario"
+    }
+  }
+  
+]
+
+
+
+
+CONSULTA B:
+[
+  {
+    $lookup: {
+      from: "profesores",  // Colección de profesores
+      localField: "profesor",  // Suponiendo que el campo en cursos se llama "profesor"
+      foreignField: "_id",
+      as: "profesorDetalles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$profesorDetalles",
+      preserveNullAndEmptyArrays: true // Mantiene los cursos sin profesor
+    }
+  },
+
+	{
+    $lookup: {
+      from: "carreras",  // Colección de carreras
+      localField: "carrera", // Suponiendo que cada curso tiene un campo "carrera" que relaciona con la carrera
+      foreignField: "_id",
+      as: "carreraDetalles"
+    }
+  },
+  
+	{
+    $unwind: {
+      path: "$carreraDetalles",
+      preserveNullAndEmptyArrays: true // Esto permite que si no hay carrera, siga funcionando
+    }
+  },
+
+  /* SALE NULL
+  {
+    $project: {
+      nombreCurso: "$nombre",
+      nombreProfesor: { $concat: ["$profesorDetalles.nombre", " ", "$profesorDetalles.apellido"] },
+      nombreCarrera: "$carreraDetalles.nombre" // Asegúrate de que el campo correcto está aquí
+    }
+  }*/
+
+  {
+    $project: {
+      nombreCurso: "$nombre",
+      nombreProfesor: {
+        $concat: [
+          { $ifNull: ["$profesorDetalles.nombre", "Sin nombre"] }, // Maneja posibles valores null
+          " ",
+          { $ifNull: ["$profesorDetalles.apellido", "Sin apellido"] }
+        ]
+      },
+      nombreCarrera: { $ifNull: ["$carreraDetalles.nombre", "Sin carrera"] } // Maneja posibles valores null
+    }
+  }
+  
+]
+
+
+
+CONSULTA C:
+
+
