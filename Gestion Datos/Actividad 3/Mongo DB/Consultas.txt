@@ -128,6 +128,76 @@
 
 
 
-CONSULTA C:
-
+// CONSULTA C: FALTA POR TERMINAR
+[
+  {
+    $lookup: {
+      from: "estudiantes", // Asumiendo que estás comenzando desde la colección de estudiantes
+      localField: "_id",   // ID del estudiante
+      foreignField: "_id",
+      as: "estudianteDetalles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$estudianteDetalles",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $lookup: {
+      from: "cursos",  // Hacemos el lookup con la colección de cursos
+      localField: "estudianteDetalles.cursos", // Campo en "estudiantes" que lista los cursos
+      foreignField: "_id",
+      as: "cursosMatriculados" // Nombre del array que contendrá los cursos ya matriculados
+    }
+  },
+  {
+    $unwind: {
+      path: "$cursosMatriculados",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $lookup: {
+      from: "cursos", // Hacemos el lookup con la colección de cursos
+      localField: "cursosMatriculados._id", // Usamos el ID del curso matriculado
+      foreignField: "_id",
+      as: "cursosDetalles" // Nombre del array para detalles de cursos
+    }
+  },
+  {
+    $unwind: {
+      path: "$cursosDetalles",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $lookup: {
+      from: "carreras", // Hacemos el lookup con la colección de carreras
+      localField: "cursosDetalles.carrera", // Campo en "cursosDetalles" que relaciona con "carreras"
+      foreignField: "_id",
+      as: "carreraDetalles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$carreraDetalles",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $match: {
+      // Filtra cursos que no están matriculados por el estudiante
+      "cursosDetalles._id": { $ne: { $arrayElemAt: ["$cursosMatriculados._id", 0] } } // Comparar con el ID del curso matriculado
+    }
+  },
+  {
+    $project: {
+      nombreCurso: "$cursosDetalles.nombre", // Nombre del curso
+      nombreCarrera: "$carreraDetalles.nombre", // Nombre de la carrera
+      semestre: "$cursosDetalles.semestre" // Semestre del curso
+    }
+  }
+]
 
