@@ -1,4 +1,4 @@
-CONSULTA A:
+//CONSULTA A: sobre Colección cursos
 [
   {
     $match:
@@ -68,7 +68,7 @@ CONSULTA A:
 
 
 
-CONSULTA B:
+//CONSULTA B: sobre Colección carreras
 [
   {
     $lookup: {
