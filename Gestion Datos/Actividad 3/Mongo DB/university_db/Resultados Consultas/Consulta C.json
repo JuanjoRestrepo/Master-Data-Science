@@ -1,0 +1,161 @@
+[{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Estructuras de Datos",
+  "Semestre": {
+    "semestre": 2,
+    "curso": {
+      "$oid": "642708ed3bfa44cdd942c9ca"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Lógica para Ciencias de la Computación",
+  "Semestre": {
+    "semestre": 3,
+    "curso": {
+      "$oid": "642709713bfa44cdd942c9cf"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Fundamentos de Matemáticas",
+  "Semestre": {
+    "semestre": 1,
+    "curso": {
+      "$oid": "64270e1a3bfa44cdd942c9f2"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Geometría Plana y Analítica",
+  "Semestre": {
+    "semestre": 1,
+    "curso": {
+      "$oid": "64270e353bfa44cdd942c9f3"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Matemáticas Discretas",
+  "Semestre": {
+    "semestre": 2,
+    "curso": {
+      "$oid": "64270e7d3bfa44cdd942c9f6"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Álgebra Moderna",
+  "Semestre": {
+    "semestre": 4,
+    "curso": {
+      "$oid": "64270f093bfa44cdd942c9fa"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Ecuaciones Diferenciales",
+  "Semestre": {
+    "semestre": 5,
+    "curso": {
+      "$oid": "64270f523bfa44cdd942c9fc"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Estadística Aplicada",
+  "Semestre": {
+    "semestre": 5,
+    "curso": {
+      "$oid": "64270f8d3bfa44cdd942c9fd"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Optimización Matemática",
+  "Semestre": {
+    "semestre": 6,
+    "curso": {
+      "$oid": "64270f9f3bfa44cdd942c9fe"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Optimización Matemática",
+  "Semestre": {
+    "semestre": 6,
+    "curso": {
+      "$oid": "64270fd23bfa44cdd942c9ff"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Estadística Avanzada",
+  "Semestre": {
+    "semestre": 7,
+    "curso": {
+      "$oid": "64270fe63bfa44cdd942ca00"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Humanidades",
+  "Semestre": {
+    "semestre": 2,
+    "curso": {
+      "$oid": "6427106b3bfa44cdd942ca05"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Ética",
+  "Semestre": {
+    "semestre": 7,
+    "curso": {
+      "$oid": "642711223bfa44cdd942ca0d"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Ética",
+  "Semestre": {
+    "semestre": 7,
+    "curso": {
+      "$oid": "642711383bfa44cdd942ca0e"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Trabajo de Grado",
+  "Semestre": {
+    "semestre": 8,
+    "curso": {
+      "$oid": "64273d8e3bfa44cdd942ca13"
+    }
+  }
+},{
+  "Nombre": "Olive Stone",
+  "carrera": "Matemáticas Aplicadas",
+  "Curso": "Práctica Estudiantil",
+  "Semestre": {
+    "semestre": 8,
+    "curso": {
+      "$oid": "64273da33bfa44cdd942ca14"
+    }
+  }
+}]

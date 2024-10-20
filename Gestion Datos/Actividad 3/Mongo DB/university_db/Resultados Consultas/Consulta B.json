@@ -1,0 +1,39 @@
+[{
+  "nombreProfesor": "Ben Stone",
+  "nombreCurso": "Introducción a la Programación"
+},
+{
+  "nombreProfesor": "Ulrich Nielsen",
+  "nombreCurso": "Programación Paralela"
+},
+{
+  "nombreProfesor": "Grace Stone",
+  "nombreCurso": "Cálculo Diferencial"
+},
+{
+  "nombreProfesor": "Zeke Landon",
+  "nombreCurso": "Filosofía Antigua"
+},
+{
+  "nombreProfesor": "Robert Vance",
+  "nombreCurso": "Aprendizaje Automático"
+},
+{
+  "nombreProfesor": "Claudia Tiedemann",
+  "nombreCurso": "Propiedades de los Materiales"
+},
+{
+  "nombreProfesor": "Jared Vásquez",
+  "nombreCurso": "Ética"
+},
+{
+  "nombreCurso": "Sistemas Operativos"
+},
+{
+  "nombreProfesor": "Mikaela Stone",
+  "nombreCurso": "Álgebra Moderna"
+},
+{
+  "nombreProfesor": "Saanvi Bahl",
+  "nombreCurso": "Electricidad y Magnetismo"
+}]

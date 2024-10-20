@@ -1,0 +1,41 @@
+_id,nombreCurso,nombreProfesor,dia,inicio,fin,salon,edificio
+642703703bfa44cdd942c9c0,Introducción a la Programación,Ben Stone,Martes,08:00 AM,10:00 AM,1.4,El Lago
+642703703bfa44cdd942c9c0,Introducción a la Programación,Ben Stone,Jueves,08:00 AM,10:00 AM,1.4,El Lago
+642703703bfa44cdd942c9c0,Cálculo Diferencial,Grace Stone,Martes,08:00 AM,10:00 AM,2.5,El Lago
+642703703bfa44cdd942c9c0,Cálculo Diferencial,Grace Stone,Jueves,08:00 AM,10:00 AM,2.5,El Lago
+642703703bfa44cdd942c9c0,Optimización Matemática,Jared Vásquez,Lunes,02:00 PM,04:00 PM,2.2,El Lago
+642703703bfa44cdd942c9c0,Optimización Matemática,Jared Vásquez,Miércoles,02:00 PM,04:00 PM,2.2,El Lago
+642703703bfa44cdd942c9c0,Estructuras de Datos,Ben Stone,Martes,10:00 AM,12:00 PM,3.4,Almendros
+642703703bfa44cdd942c9c0,Estructuras de Datos,Ben Stone,Jueves,10:00 AM,12:00 PM,3.4,Almendros
+642703703bfa44cdd942c9c0,Técnicas y Prácticas de Programación,Ben Stone,Lunes,04:00 PM,06:00 PM,3.4,Almendros
+642703703bfa44cdd942c9c0,Técnicas y Prácticas de Programación,Ben Stone,Miércoles,04:00 PM,04:00 PM,3.4,Almendros
+642703703bfa44cdd942c9c0,Álgebra Lineal,Grace Stone,Martes,10:00AM,12:00 PM,3.1,El Lago
+642703703bfa44cdd942c9c0,Álgebra Lineal,Grace Stone,Jueves,10:00 AM,12:00 PM,3.1,El Lago
+642703703bfa44cdd942c9c0,Cálculo Integral,Jared Vásquez,Martes,10:00 AM,12:00 PM,3.3,El Lago
+642703703bfa44cdd942c9c0,Cálculo Integral,Jared Vásquez,Jueves,10:00 AM,12:00 PM,3.3,El Lago
+642703703bfa44cdd942c9c0,Teología,Zeke Landon,Lunes,10:00 AM,12:00 PM,1.8,El Samán
+642703703bfa44cdd942c9c0,Lógica Digital y Lenguaje Máquina,Grace Stone,Miércoles,02:00 PM,04:00 PM,1.2,El Lago
+642703703bfa44cdd942c9c0,Lógica Digital y Lenguaje Máquina,Grace Stone,Viernes,02:00 PM,04:00 PM,1.2,El Lago
+642703703bfa44cdd942c9c0,Cálculo Multivariado,Jared Vásquez,Martes,02:00 PM,04:00 PM,2.1,El Lago
+642703703bfa44cdd942c9c0,Cálculo Multivariado,Jared Vásquez,Jueves,02:00 PM,04:00 PM,2.1,El Lago
+642703703bfa44cdd942c9c0,Arquitectura del Computador,Grace Stone,Lunes,04:00 PM,06:00 PM,2.6,El Lago
+642703703bfa44cdd942c9c0,Arquitectura del Computador,Grace Stone,Viernes,04:00 PM,06:00 PM,2.6,El Lago
+642703703bfa44cdd942c9c0,Cinemática y Dinámica,Saanvi Bahl,Lunes,02:00 PM,04:00 PM,2.2,El Lago
+642703703bfa44cdd942c9c0,Cinemática y Dinámica,Saanvi Bahl,Miércoles,02:00 PM,04:00 PM,2.2,El Lago
+642703703bfa44cdd942c9c0,Cinemática y Dinámica,Saanvi Bahl,,02:00 PM,04:00 PM,2.2,El Lago
+642703703bfa44cdd942c9c0,Electricidad y Magnetismo,Saanvi Bahl,Lunes,04:00 PM,06:00 PM,1.5,El Lago
+642703703bfa44cdd942c9c0,Electricidad y Magnetismo,Saanvi Bahl,Miércoles,04:00 PM,06:00 PM,1.5,El Lago
+642703703bfa44cdd942c9c0,Electricidad y Magnetismo,Saanvi Bahl,Viernes,04:00 PM,06:00 PM,1.5,El Lago
+642703703bfa44cdd942c9c0,Programación Paralela,Ulrich Nielsen,Martes,08:00 AM,10:00 AM,3.3,Palmas
+642703703bfa44cdd942c9c0,Programación Paralela,Ulrich Nielsen,Jueves,08:00 AM,10:00 AM,3.3,Palmas
+642703703bfa44cdd942c9c0,Aprendizaje Automático,Robert Vance,Martes,04:00 PM,06:00 PM,1.1,El Samán
+642703703bfa44cdd942c9c0,Aprendizaje Automático,Robert Vance,Jueves,04:00 PM,06:00 PM,1.1,El Samán
+642703703bfa44cdd942c9c0,Introducción a la Seguridad Informática,Robert Vance,Miércoles,04:00 PM,06:00 PM,3.5,Palmas
+642703703bfa44cdd942c9c0,Introducción a la Seguridad Informática,Robert Vance,Viernes,04:00 PM,06:00 PM,3.5,Palmas
+642703703bfa44cdd942c9c0,Sistemas Inteligentes,Robert Vance,Lunes,10:00 AM,12:00 PM,2.2,Cedro Rosado
+642703703bfa44cdd942c9c0,Sistemas Inteligentes,Robert Vance,Miércoles,10:00 AM,12:00 PM,2.2,Cedro Rosado
+642703703bfa44cdd942c9c0,Desarrollo de Videojuegos,Ben Stone,Martes,02:00 PM,05:00 PM,3.2,Palmas
+642703703bfa44cdd942c9c0,Desarrollo de Videojuegos,Ben Stone,Viernes,02:00 PM,05:00 PM,3.2,Palmas
+642703703bfa44cdd942c9c0,Ética,Jared Vásquez,Viernes,08:00 AM,10:00 AM,3.7,Almendros
+642703703bfa44cdd942c9c0,Ética,Mikaela Stone,Miércoles,08:00 AM,10:00 AM,3.1,Almendros
+642703703bfa44cdd942c9c0,Práctica Estudiantil,Jared Vásquez,Viernes,02:00 PM,04:00 PM,1.6,El Samán
