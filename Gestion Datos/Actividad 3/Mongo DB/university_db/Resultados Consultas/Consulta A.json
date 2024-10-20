@@ -1,0 +1,476 @@
+[{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Introducción a la Programación",
+  "nombreProfesor": "Ben Stone",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "1.4",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "1.4",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Cálculo Diferencial",
+  "nombreProfesor": "Grace Stone",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "2.5",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "2.5",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Optimización Matemática",
+  "nombreProfesor": "Jared Vásquez",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.2",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Miércoles",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.2",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Optimización Matemática",
+  "nombreProfesor": "Ulrich Nielsen"
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Estructuras de Datos",
+  "nombreProfesor": "Ben Stone",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "3.4",
+      "edificio": "Almendros"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "3.4",
+      "edificio": "Almendros"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Técnicas y Prácticas de Programación",
+  "nombreProfesor": "Ben Stone",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "3.4",
+      "edificio": "Almendros"
+    },
+    {
+      "dia": "Miércoles",
+      "inicio": "04:00 PM",
+      "fin": "04:00 PM",
+      "salon": "3.4",
+      "edificio": "Almendros"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Álgebra Lineal",
+  "nombreProfesor": "Grace Stone",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "10:00AM",
+      "fin": "12:00 PM",
+      "salon": "3.1",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "3.1",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Cálculo Integral",
+  "nombreProfesor": "Jared Vásquez",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "3.3",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "3.3",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Teología",
+  "nombreProfesor": "Zeke Landon",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "1.8",
+      "edificio": "El Samán"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Lógica Digital y Lenguaje Máquina",
+  "nombreProfesor": "Grace Stone",
+  "calendario": [
+    {
+      "dia": "Miércoles",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "1.2",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Viernes",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "1.2",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Cálculo Multivariado",
+  "nombreProfesor": "Jared Vásquez",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.1",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.1",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Arquitectura del Computador",
+  "nombreProfesor": "Grace Stone",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "2.6",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Viernes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "2.6",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Cinemática y Dinámica",
+  "nombreProfesor": "Saanvi Bahl",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.2",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Miércoles",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.2",
+      "edificio": "El Lago"
+    },
+    {
+      "dia ": "Viernes",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "2.2",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Electricidad y Magnetismo",
+  "nombreProfesor": "Saanvi Bahl",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "1.5",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Miércoles",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "1.5",
+      "edificio": "El Lago"
+    },
+    {
+      "dia": "Viernes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "1.5",
+      "edificio": "El Lago"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Programación Paralela",
+  "nombreProfesor": "Ulrich Nielsen",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "3.3",
+      "edificio": "Palmas"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "3.3",
+      "edificio": "Palmas"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Aprendizaje Automático",
+  "nombreProfesor": "Robert Vance",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "1.1",
+      "edificio": "El Samán"
+    },
+    {
+      "dia": "Jueves",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "1.1",
+      "edificio": "El Samán"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Introducción a la Seguridad Informática",
+  "nombreProfesor": "Robert Vance",
+  "calendario": [
+    {
+      "dia": "Miércoles",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "3.5",
+      "edificio": "Palmas"
+    },
+    {
+      "dia": "Viernes",
+      "inicio": "04:00 PM",
+      "fin": "06:00 PM",
+      "salon": "3.5",
+      "edificio": "Palmas"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Sistemas Inteligentes",
+  "nombreProfesor": "Robert Vance",
+  "calendario": [
+    {
+      "dia": "Lunes",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "2.2",
+      "edificio": "Cedro Rosado"
+    },
+    {
+      "dia": "Miércoles",
+      "inicio": "10:00 AM",
+      "fin": "12:00 PM",
+      "salon": "2.2",
+      "edificio": "Cedro Rosado"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Desarrollo de Videojuegos",
+  "nombreProfesor": "Ben Stone",
+  "calendario": [
+    {
+      "dia": "Martes",
+      "inicio": "02:00 PM",
+      "fin": "05:00 PM",
+      "salon": "3.2",
+      "edificio": "Palmas"
+    },
+    {
+      "dia": "Viernes",
+      "inicio": "02:00 PM",
+      "fin": "05:00 PM",
+      "salon": "3.2",
+      "edificio": "Palmas"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Ética",
+  "nombreProfesor": "Jared Vásquez",
+  "calendario": [
+    {
+      "dia": "Viernes",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "3.7",
+      "edificio": "Almendros"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Ética",
+  "nombreProfesor": "Mikaela Stone",
+  "calendario": [
+    {
+      "dia": "Miércoles",
+      "inicio": "08:00 AM",
+      "fin": "10:00 AM",
+      "salon": "3.1",
+      "edificio": "Almendros"
+    }
+  ]
+},
+{
+  "_id": {
+    "$oid": "642703703bfa44cdd942c9c0"
+  },
+  "nombreCurso": "Práctica Estudiantil",
+  "nombreProfesor": "Jared Vásquez",
+  "calendario": [
+    {
+      "dia": "Viernes",
+      "inicio": "02:00 PM",
+      "fin": "04:00 PM",
+      "salon": "1.6",
+      "edificio": "El Samán"
+    }
+  ]
+}]

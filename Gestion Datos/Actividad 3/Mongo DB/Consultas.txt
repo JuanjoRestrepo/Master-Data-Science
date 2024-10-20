@@ -68,12 +68,75 @@
 
 
 
+//CONSULTA A MEJORADA
+[
+  {
+    $match: {
+      nombre: "Ingeniería de Sistemas"
+    }
+  },
+  {
+    $unwind: {
+      path: "$cursos"
+    }
+  },
+  {
+    $lookup: {
+      from: "cursos",
+      localField: "cursos.curso",
+      foreignField: "_id",
+      as: "cursoDetalles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$cursoDetalles"
+    }
+  },
+  {
+    $lookup: {
+      from: "profesores",
+      localField: "cursoDetalles.profesor",
+      foreignField: "_id",
+      as: "profesorDetalles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$profesorDetalles",
+      preserveNullAndEmptyArrays: true
+    }
+  },
+  {
+    $match: {
+      profesorDetalles: {
+        $ne: null
+      }
+    }
+  },
+  {
+    $project: {
+      _id: 1,
+      nombreCurso: "$cursoDetalles.nombre",
+      nombreProfesor: "$profesorDetalles.nombre",
+      calendario: "$cursoDetalles.calendario",
+      fechaInicio: "$cursoDetalles.fechaInicio"
+    }
+  }
+]
+
+
+
+
+
+
+
 //CONSULTA B: sobre Colección carreras
 [
   {
     $lookup: {
-      from: "profesores",  // Colección de profesores
-      localField: "profesor",  // Suponiendo que el campo en cursos se llama "profesor"
+      from: "profesores", // Colección de profesores
+      localField: "profesor", // Suponiendo que el campo en cursos se llama "profesor"
       foreignField: "_id",
       as: "profesorDetalles"
     }
@@ -85,16 +148,16 @@
     }
   },
 
-	{
+  {
     $lookup: {
-      from: "carreras",  // Colección de carreras
+      from: "carreras", // Colección de carreras
       localField: "carrera", // Suponiendo que cada curso tiene un campo "carrera" que relaciona con la carrera
       foreignField: "_id",
       as: "carreraDetalles"
     }
   },
-  
-	{
+
+  {
     $unwind: {
       path: "$carreraDetalles",
       preserveNullAndEmptyArrays: true // Esto permite que si no hay carrera, siga funcionando
@@ -115,15 +178,29 @@
       nombreCurso: "$nombre",
       nombreProfesor: {
         $concat: [
-          { $ifNull: ["$profesorDetalles.nombre", "Sin nombre"] }, // Maneja posibles valores null
+          {
+            $ifNull: [
+              "$profesorDetalles.nombre",
+              "Sin nombre"
+            ]
+          }, // Maneja posibles valores null
           " ",
-          { $ifNull: ["$profesorDetalles.apellido", "Sin apellido"] }
+          {
+            $ifNull: [
+              "$profesorDetalles.apellido",
+              "Sin apellido"
+            ]
+          }
         ]
       },
-      nombreCarrera: { $ifNull: ["$carreraDetalles.nombre", "Sin carrera"] } // Maneja posibles valores null
+      nombreCarrera: {
+        $ifNull: [
+          "$carreraDetalles.nombre",
+          "Sin carrera"
+        ]
+      } // Maneja posibles valores null
     }
   }
-  
 ]
 
 
