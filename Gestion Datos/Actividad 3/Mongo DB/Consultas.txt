@@ -140,76 +140,110 @@
 
 
 
-// CONSULTA C: FALTA POR TERMINAR
+//CONSULTA C: sobre Colección estudiantes
 [
   {
+    $match: {
+      nombre: "Olive Stone"
+    }
+  },
+  {
     $lookup: {
-      from: "estudiantes", // Asumiendo que estás comenzando desde la colección de estudiantes
-      localField: "_id",   // ID del estudiante
+      from: "carreras",
+      localField: "carreras",
       foreignField: "_id",
-      as: "estudianteDetalles"
+      as: "carrerasDetalles"
     }
   },
   {
     $unwind: {
-      path: "$estudianteDetalles",
+      path: "$carrerasDetalles"
+    }
+  },
+  {
+    $lookup: {
+      from: "cursos",
+      localField: "carrerasDetalles.cursos.curso",
+      foreignField: "_id",
+      as: "cursosDisponibles"
+    }
+  },
+  {
+    $unwind: {
+      path: "$cursosDisponibles",
       preserveNullAndEmptyArrays: true
     }
   },
   {
     $lookup: {
-      from: "cursos",  // Hacemos el lookup con la colección de cursos
-      localField: "estudianteDetalles.cursos", // Campo en "estudiantes" que lista los cursos
+      from: "estudiantes",
+      localField: "_id",
       foreignField: "_id",
-      as: "cursosMatriculados" // Nombre del array que contendrá los cursos ya matriculados
+      as: "estudiante"
     }
   },
   {
     $unwind: {
-      path: "$cursosMatriculados",
-      preserveNullAndEmptyArrays: true
-    }
-  },
-  {
-    $lookup: {
-      from: "cursos", // Hacemos el lookup con la colección de cursos
-      localField: "cursosMatriculados._id", // Usamos el ID del curso matriculado
-      foreignField: "_id",
-      as: "cursosDetalles" // Nombre del array para detalles de cursos
-    }
-  },
-  {
-    $unwind: {
-      path: "$cursosDetalles",
-      preserveNullAndEmptyArrays: true
-    }
-  },
-  {
-    $lookup: {
-      from: "carreras", // Hacemos el lookup con la colección de carreras
-      localField: "cursosDetalles.carrera", // Campo en "cursosDetalles" que relaciona con "carreras"
-      foreignField: "_id",
-      as: "carreraDetalles"
-    }
-  },
-  {
-    $unwind: {
-      path: "$carreraDetalles",
-      preserveNullAndEmptyArrays: true
+      path: "$estudiante"
     }
   },
   {
     $match: {
-      // Filtra cursos que no están matriculados por el estudiante
-      "cursosDetalles._id": { $ne: { $arrayElemAt: ["$cursosMatriculados._id", 0] } } // Comparar con el ID del curso matriculado
+      $expr: {
+        $not: {
+          $in: [
+            "$cursosDisponibles._id",
+            "$estudiante.cursos"
+          ]
+        }
+      }
+    }
+  },
+  {
+    $group: {
+      _id: "$cursosDisponibles.nombre",
+      cursoId: {
+        $first: "$cursosDisponibles._id"
+      },
+      estudiante: {
+        $first: "$estudiante.nombre"
+      },
+      Carrera: {
+        $first: "$carrerasDetalles.nombre"
+      },
+      semestre: {
+        $first: {
+          $arrayElemAt: [
+            {
+              $filter: {
+                input: "$carrerasDetalles.cursos",
+                as: "curso",
+                cond: {
+                  $eq: [
+                    "$$curso.curso",
+                    "$cursosDisponibles._id"
+                  ]
+                }
+              }
+            },
+            0
+          ]
+        }
+      }
+    }
+  },
+  {
+    $sort: {
+      "semestre.semestre": 1
     }
   },
   {
     $project: {
-      nombreCurso: "$cursosDetalles.nombre", // Nombre del curso
-      nombreCarrera: "$carreraDetalles.nombre", // Nombre de la carrera
-      semestre: "$cursosDetalles.semestre" // Semestre del curso
+      _id: 0,
+      Nombre: "$estudiante",
+      carrera: "$Carrera",
+      Curso: "$_id",
+      Semestre: "$semestre.semestre"
     }
   }
 ]
-
