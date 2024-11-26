@@ -1,0 +1,58 @@
+<Schema name="New Schema1">
+  <Cube name="DM_cube2" visible="true" cache="true" enabled="true">
+    <Table name="VUELOS_USUARIO" schema="C##DM">
+    </Table>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_CIUDAD_ORIGEN_FK" highCardinality="false" name="ciudad_origen">
+      <Hierarchy name="ciudad" visible="true" hasAll="true" primaryKey="ID_CIUDAD">
+        <Table name="CIUDAD" schema="C##DM">
+        </Table>
+        <Level name="ciudad" visible="true" column="NOMBRE" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_AEROLINEA_FK" highCardinality="false" name="aerolinea">
+      <Hierarchy name="aerolinea" visible="true" hasAll="true" primaryKey="ID_AEROLINEA">
+        <Table name="AEROLINEAS" schema="C##DM">
+        </Table>
+        <Level name="aerolinea" visible="true" column="NOMBRE" type="String" uniqueMembers="false" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_MODELO_AVION_FK" highCardinality="false" name="MODELOS">
+      <Hierarchy name="MODELO" visible="true" hasAll="true" primaryKey="ID_MODELO">
+        <Table name="MODELOS" schema="C##IATA">
+        </Table>
+        <Level name="MODELO" visible="true" column="NOMBRE" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_USUARIO_FK" highCardinality="false" name="USUARIOS">
+      <Hierarchy name="USUARIO" visible="true" hasAll="true" primaryKey="CEDULA">
+        <Table name="USUARIOS" schema="C##IATA">
+        </Table>
+        <Level name="USUARIO" visible="true" column="NOMBRE" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="StandardDimension" visible="true" foreignKey="ID_CIUDAD_DESTINO_FK" name="CIUDAD_DESTINO">
+      <Hierarchy name="CIUDAD_DESTINO" visible="true" hasAll="true" primaryKey="ID_CIUDAD">
+        <Table name="CIUDADES" schema="C##IATA">
+        </Table>
+        <Level name="CIUDAD_DESTINO" visible="true" column="NOMBRE" type="String" uniqueMembers="true" levelType="Regular" hideMemberIf="Never">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Dimension type="TimeDimension" visible="true" foreignKey="FECHA_SALIDA" name="FECHA_SALIDA">
+      <Hierarchy name="FECHA_SALIDA" visible="true" hasAll="true" primaryKey="FECHA_SALIDA">
+        <Table name="ITINERARIOS" schema="C##IATA">
+        </Table>
+        <Level name="FECHA_SALID" visible="true" column="FECHA_SALIDA" type="Date" uniqueMembers="true">
+        </Level>
+      </Hierarchy>
+    </Dimension>
+    <Measure name="CostoTotal" column="COSTO" datatype="Numeric" aggregator="sum" visible="true">
+    </Measure>
+    <Measure name="vuelos" column="ID_ITINERARIO" datatype="Numeric" aggregator="distinct-count" visible="true">
+    </Measure>
+  </Cube>
+</Schema>
