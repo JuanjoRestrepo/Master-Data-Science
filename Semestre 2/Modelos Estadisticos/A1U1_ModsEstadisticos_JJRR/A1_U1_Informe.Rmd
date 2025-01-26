@@ -364,24 +364,26 @@ fviz_cluster(kmeans_model, geom = "point", data = scale(df_cluster))  # Gráfico
 
 
 
-Los resultados muestran tres centroides de los clusters identificados por el algoritmo K-means en función de las variables preciom (precio por metro cuadrado) y areaconst (área construida). Los centroides de los clusters se pueden entender como:
+Los resultados del análisis previo, muestran tres centroides correspondientes a los clusters identificados por el algoritmo ***K-means***, utilizando las variables **preciom** (precio por metro cuadrado) y **areaconst** (área construida). Los centroides de los clusters pueden interpretarse de la siguiente manera:
 
-Cluster 1: Caracterizado por valores moderadamente bajos tanto en preciom como en areaconst.
-Cluster 2: Caracterizado por valores moderadamente altos tanto en preciom como en areaconst.
-Cluster 3: Caracterizado por valores relativamente altos tanto en preciom como en areaconst.
+- **Cluster 1:** Se caracteriza por valores moderadamente bajos tanto en preciom como en areaconst.
+- **Cluster 2:** Se distingue por valores moderadamente altos en ambas variables, preciom y areaconst.
+- **Cluster 3:** Está caracterizado por valores relativamente altos en preciom y areaconst.
+
+Este análisis permite observar cómo se agrupan las viviendas según estas dos variables clave, proporcionando una comprensión más clara de las distintas categorías en el mercado inmobiliario.
 
 
 ## 3.Análisis de Correspondencia:
 
-El análisis de correspondencia múltiple (ACM) realizado revela información importante sobre las relaciones entre las variables categóricas en el conjunto de datos. Las dimensiones principales identificadas muestran la estructura subyacente en los datos y cuánto de la varianza total de los datos explican.
+El análisis de correspondencia múltiple (ACM) realizado proporciona valiosa información sobre las interacciones entre las variables categóricas en el conjunto de datos. A continuación se presenta un resumen de las dimensiones principales identificadas, que reflejan la estructura subyacente de los datos y la cantidad de varianza total que explican:
 
-En primer lugar, las dimensiones principales capturan el grado de asociación entre las categorías de las variables. Por ejemplo, la Dimensión 1, con una varianza explicada del 0.711 y que representa el 0.770% de la varianza total, muestra una relación entre el tipo de propiedad (apartamento o casa) y la zona geográfica (centro, norte, oeste, oriente, sur), con valores de contraste significativos.
+- **Dimensión 1**: Con una varianza explicada de 0.711, representando el 77.0% de la varianza total, esta dimensión muestra una relación entre el tipo de propiedad (apartamento o casa) y la zona geográfica (centro, norte, oeste, oriente, sur), con contrastes significativos en los valores.
+  
+- **Dimensión 2**: Explicando el 66.3% de la varianza (0.718% de la varianza total), esta dimensión destaca la relación entre la zona geográfica y otras variables categóricas como "3 de julio", "acopi", y "aguablanca", mostrando asociaciones adicionales.
 
-La Dimensión 2, con una varianza explicada del 0.663 y que representa el 0.718% de la varianza total, revela una asociación diferente, destacando la relación entre la zona geográfica y otras variables categóricas específicas, como "3 de julio", "acopi", y "aguablanca".
+- **Dimensión 3**: Con una varianza explicada de 0.658 (0.713% de la varianza total), esta dimensión complementa la información sobre la distribución espacial y las características de ciertas zonas en relación con otras variables categóricas.
 
-La Dimensión 3, con una varianza explicada del 0.658 y que representa el 0.713% de la varianza total, proporciona información adicional sobre la distribución espacial y las características particulares de ciertas zonas en relación con otras variables categóricas.
-
-Además, el análisis individual de las categorías muestra cómo cada una contribuye a las dimensiones principales y su relación con otras categorías. Por ejemplo, la categoría "Casa" se asocia positivamente con la Dimensión 1, mientras que la categoría "Zona Sur" tiene una fuerte relación positiva con la Dimensión 2.
+El análisis también revela cómo cada categoría contribuye a las dimensiones principales y su asociación con otras categorías. Por ejemplo, la categoría *"Casa"* se relaciona positivamente con la **Dimensión 1**, mientras que *"Zona Sur"* presenta una fuerte correlación positiva con la **Dimensión 2**, reflejando las tendencias de agrupamiento geográfico y las características del tipo de propiedad en las diferentes zonas.
 
 ```{r , include=TRUE,  , echo=FALSE}
 
@@ -415,14 +417,16 @@ summary(mca)
 
 <h2>Conclusiones</h2>
 
-Basadas en el análisis realizado, se extraen las siguientes conclusiones clave:
+A partir del análisis realizado, se pueden extraer las siguientes conclusiones clave:
 
-1. Existe una fuerte asociación entre el tamaño de la vivienda, la ubicación y el precio.
-2. Se identificaron segmentos de mercado distintos a través del análisis de conglomerados, lo que sugiere la posibilidad de desarrollar estrategias de marketing personalizadas.
-3. Las preferencias del mercado varían según la zona geográfica y el barrio, lo que resalta la importancia de adaptar la oferta de viviendas a las necesidades locales.
+1. **Asociación entre tamaño, ubicación y precio**: Se observó una fuerte relación entre el tamaño de la vivienda, su ubicación geográfica y el precio. Esto sugiere que tanto el área construida como la zona donde se encuentra la propiedad son factores determinantes en la fijación de precios en el mercado inmobiliario.
+
+2. **Segmentación de mercado**: El análisis de conglomerados permitió identificar distintos segmentos de mercado, lo que abre la puerta a la creación de estrategias de marketing personalizadas. Al comprender las características de cada grupo de viviendas, es posible ofrecer soluciones más específicas y dirigidas a las preferencias de cada segmento.
+
+3. **Variación de preferencias según zona geográfica**: Las preferencias del mercado varían considerablemente según la zona geográfica y el barrio. Esto resalta la importancia de adaptar la oferta de viviendas a las necesidades y demandas específicas de cada área, lo que podría mejorar la competitividad y la satisfacción del cliente en el sector inmobiliario.
 
 
 <h2>Repositorio Github</h2>
 
 
-<a href="https://github.com/Jartpuro/A1U1_ModsEstadisticos"> Ver código completo</a>
+<a href="https://github.com/Jartpuro/A1U1_ModsEstadisticos"> Repositorio con código</a>
