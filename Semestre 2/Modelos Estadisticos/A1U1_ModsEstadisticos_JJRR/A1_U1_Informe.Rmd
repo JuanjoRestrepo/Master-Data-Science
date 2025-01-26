@@ -79,7 +79,7 @@ El reto principal consisten en realizar un análisis integral y multidimensional
 </ol>
 
 
-## Analisis exploratorio de datos
+## Análisis exploratorio de datos
 
 En esta etapa inicial, como se presenta durante el momento de *Acción* en Brightspace, se procede a explorar el conjunto de datos para obtener una visión compacta de su dimensión y atributos. Es importante resaltar que la base de datos de vivienda consta de 8,322 filas y 13 columnas, información clave para identificar las características particulares de los datos, tal como se analiza en la unidad de análisis multivariado.
 
@@ -219,14 +219,9 @@ ggplot(vivienda, aes(x = areaconst, y = tipo, color = tipo)) +
 ```
 
 
-
-
-
-
-  
 <h2>Preprocesamiento de datos:</n></h2>
 
-A partir de este momento con el conocimiento del conjunto de datos, se procede a la eliminación de la columna ID,longitud y latitud que a mi concepto no aportan valor al informe. De otra parte se da el tratamiento correspondiente a los valores ausentes o faltantes que en el análisis exploratorio de datos impidieron que se analizara la correlación por estar presentes.
+En base al análisis exploratorio anterior, se procede a eliminar las columnas ID, longitud y latitud, debido a que se considera que no aportan valor significativo al análisis del informe. Además, se realizará el tratamiento correspondiente a los valores faltantes o ausentes, que, como se observó durante la exploración de los datos, impidieron la evaluación de la correlación entre las variables. Estos valores serán gestionados adecuadamente para asegurar que no interfieran con los análisis posteriores, permitiendo un estudio más preciso y fiable.
 
 ```{r  , echo=FALSE}
 
@@ -248,17 +243,18 @@ kable(str(df_fit))
 
 ## 1. Análisis de Componentes Principales (PCA):
 
-Para efectos de este analisis, se presentan a continuación los  valores de desviación estándar indican la cantidad de variabilidad en los datos explicada por cada componente principal. Además para facilitar este paso se escogieron unicamente las variables numericas, en donde; la proporción de varianza y la proporción acumulativa de varianza indican la cantidad de variabilidad total en los datos explicada por cada componente principal y por las componentes principales anteriores, respectivamente. En este caso:
+A continuación se presentan los valores de la desviación estándar, los cuales reflejan el grado de dispersión de los datos que cada componente principal es capaz de explicar. Para simplificar este procedimiento, se seleccionaron únicamente las variables numéricas. En este contexto, la proporción de varianza y la proporción acumulada de varianza indican, respectivamente, el porcentaje de variabilidad total en los datos explicado por cada componente principal y por las componentes anteriores.
 
-La primera componente principal (PC1) explica aproximadamente el 59.32% de la varianza total en los datos.
-Las dos primeras componentes principales (PC1 y PC2) explican aproximadamente el 79.06% de la varianza total en los datos.
-Las tres primeras componentes principales (PC1, PC2 y PC3) explican aproximadamente el 87.12% de la varianza total en los datos.
-Las cuatro primeras componentes principales (PC1, PC2, PC3 y PC4) explican aproximadamente el 92.83% de la varianza total en los datos.
-Las cinco primeras componentes principales (PC1, PC2, PC3, PC4 y PC5) explican aproximadamente el 96.94% de la varianza total en los datos.
-Todas las seis componentes principales explican el 100% de la varianza total en los datos, lo cual es esperado ya que estamos utilizando todas las variables en el análisis.
+De acuerdo con estos cálculos:
+
+- La *primera componente principal (PC1)* explica aproximadamente el 59.32% de la varianza total.
+- Las *dos primeras componentes principales (PC1 y PC2)* juntas explican aproximadamente el 79.06% de la varianza total.
+- Las *tres primeras componentes principales (PC1, PC2 y PC3)* explican aproximadamente el 87.12% de la varianza total.
+- Las *cuatro primeras componentes principales (PC1, PC2, PC3 y PC4)* explican aproximadamente el 92.83% de la varianza total.
+- Las *cinco primeras componentes principales (PC1, PC2, PC3, PC4 y PC5)* explican aproximadamente el 96.94% de la varianza total.
+- Finalmente, *todas las seis componentes principales* explican el *100%* de la varianza total, lo cual es esperado ya que se están utilizando todas las variables en el análisis.
 
 ```{r  , echo=FALSE}
-
 
 # Seleccionar solo las variables numéricas para el PCA
 df_numeric <- df_fit %>%
@@ -271,7 +267,8 @@ pca <- prcomp(df_numeric, scale. = TRUE)
 # Resumen del PCA
 summary(pca)
 ```
-En este caso, el resumen del PCA muestra seis componentes, pero se observa que la mayoría de la varianza se explica con las dos primeras componentes principales (PC1 y PC2), que capturan el 79.06% de la varianza total. Esto sugiere que solo las dos primeros componentes principales se pueden considerar para simplificar el análisis, ya que representan la mayor parte de la variabilidad en los datos.
+En este orden de ideas, se puede apreciar que el análisis de componentes principales (PCA) muestra un total de seis componentes, pero se observa que la mayor parte de la varianza es explicada por las dos primeras componentes principales (PC1 y PC2), que juntas capturan el 79.06% de la varianza total. Este hallazgo sugiere que, para simplificar el análisis, bastaría con considerar solo estas dos primeras componentes, ya que representan la mayor parte de la variabilidad presente en los datos.
+
 ```{r , include=TRUE,  , echo=FALSE}
 # Crear un dataframe con la información del PCA
 pca_info <- data.frame(
@@ -283,7 +280,7 @@ pca_info <- data.frame(
 
 # Graficar la proporción de varianza explicada por cada componente principal
 ggplot(pca_info, aes(x = Component, y = Proportion_of_Variance)) +
-  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  geom_bar(stat = "identity", fill = "blue", color = "black") +
   labs(title = "Proporción de Varianza Explicada por Componente Principal",
        x = "Componente Principal",
        y = "Proporción de Varianza") +
@@ -291,8 +288,8 @@ ggplot(pca_info, aes(x = Component, y = Proportion_of_Variance)) +
 
 # Graficar la varianza acumulada explicada por los primeros n componentes principales
 ggplot(pca_info, aes(x = Component, y = Cumulative_Proportion)) +
-  geom_line(color = "blue") +
-  geom_point(color = "blue") +
+  geom_line(color = "red") +
+  geom_point(color = "red") +
   labs(title = "Varianza Acumulada Explicada por Componentes Principales",
        x = "Componente Principal",
        y = "Varianza Acumulada Explicada") +
@@ -303,7 +300,10 @@ biplot(pca, scale = 0)
 
 
 ```
-De acuerdo al material de la asignatura y lo observado en literatura se puede aplicar la "regla del codo" en el análisis de componentes principales, en esta se calculara la varianza explicada por cada componente principal y se trazaría un gráfico para identificar el punto en el que se produce un cambio significativo en la pendiente (el "codo"), en este se observa que la curva se genera para el primer y segun componente para confirmar lo observado anteriormente.
+
+Ahora bien, basándonos en lo visto en el curso, es posible aplicar la *"regla del codo"* en el análisis de componentes principales.,En esta etapa se calculará la varianza explicada por cada componente principal y se trazaría un gráfico para identificar el punto en el que se produce un cambio significativo en la pendiente (el *"codo"*), en este se observa que la curva se genera para el primer y segun componente para confirmar lo observado anteriormente.
+
+
 ```{r , include=TRUE,  , echo=FALSE}
 
 # Función para identificar el punto de 'codo'
