@@ -146,59 +146,63 @@ ggplot(vivienda, aes(x = preciom)) +
 
 ```
 
-
-Aquí podemos observar que con los datos ácidos el conjunto de datos revela que las zonas mas representativas con registros de viviendas son la zona sur con una participación de 56,8% y la zona norte con una participación de 20,1% para un gran total de 76,9%, por tanto la acción comercial fuerte se ubica en estas zonas estrategicas de operación.
+En el análisis anterior, es posible observar los datos ácidos, es decir, que se puede notar que las zonas más representativas en cuanto a registros de viviendas son la zona sur, con una participación del 56,8%, y la zona norte, con una participación del 20,1%. Juntas, estas zonas representan un total del 76,9%, lo que indica que la acción comercial más fuerte se concentra en estas áreas estratégicas de operación.
 
 ```{r , warning=FALSE, echo=FALSE}
+
 # Calcular la participación del total de filas por zona
 total_rows <- nrow(vivienda)
 zona_counts <- table(vivienda$zona)
 participacion <- round(zona_counts / total_rows * 100, 2)  # Calcular la participación en porcentaje y redondear a dos decimales
 
 # Crear el gráfico de barras con etiquetas de frecuencia y participación
-ggplot(vivienda, aes(x = zona)) +
-  geom_bar(fill = rainbow(length(unique(vivienda$zona))), color = "black") +
+ggplot(vivienda, aes(x = zona, fill = zona)) +
+  geom_bar(color = "black") +  # Colorear las barras por zona
   stat_count(geom = "text", aes(label = paste(after_stat(count), " (", participacion, "%)")), vjust = -0.5, size = 3, angle = 90) +  # Etiquetas de frecuencia y participación
   labs(title = "Distribución y participación de las viviendas por zona",
        x = "Zona",
        y = "Frecuencia") +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotar etiquetas del eje X para mejor visualización
 
+
 ```
 
-En este siguiente grafico la concentración de puntos alrededor de la coordenada (250, 500) indica que hay una gran cantidad de viviendas con un área construida alrededor de 250 unidades y un precio alrededor de 500 unidades. Esto puede  sugerir que hay una tendencia común en el mercado inmobiliario para este tipo de viviendas, donde se establece un precio promedio basado en el área construida.
+
+En este gráfico, se puede apreciar que la concentración de puntos cerca de la coordenada (250, 500) sugiere que existe una gran cantidad de viviendas con un área construida alrededor de las 250 unidades y un precio cercano a las 500 unidades. Este patrón podría indicar una tendencia común en el mercado inmobiliario, donde las viviendas con características similares (en términos de área) tienden a tener precios promedio establecidos de manera proporcional. Esto podría reflejar una relación entre el área construida y el precio, que podría ser un factor clave en la determinación del valor de estas propiedades.
+
 ```{r , warning=FALSE, echo=FALSE}
 # Gráfico de dispersión para 'preciom' vs 'areaconst'
 ggplot(vivienda, aes(x = areaconst, y = preciom)) +
-  geom_point(color = "skyblue") +
+  geom_point(color = "blue") +
   labs(title = "Relación entre el área construida y el precio",
        x = "Área construida",
        y = "Precio")
 
 ```
 
-En este se determina que en general, las viviendas clasificadas en el estrato 6 tienen precios más altos en comparación con otras categorías de estratos. Mientras que las viviendas del estrato 5 tienen precios en un rango más bajo en comparación con el estrato 6, pero aún así, relativamente más altos que otros estratos inferiores.
+En este análisis, se observa que, en general, las viviendas clasificadas en el estrato 6 tienen precios significativamente más altos en comparación con las de otras categorías de estratos. Por otro lado, las viviendas del estrato 5 presentan precios en un rango más bajo en comparación con el estrato 6, pero aún así, sus precios son relativamente más altos que los de los estratos inferiores. Esto sugiere que el estrato 6 es el segmento más caro del mercado, seguido de cerca por el estrato 5, mientras que los estratos más bajos reflejan precios más accesibles.
+
 ```{r , warning=FALSE, echo=FALSE}
 
 # Gráfico de cajas para 'estrato'
 ggplot(vivienda, aes(x = as.factor(estrato), y = preciom, fill = as.factor(estrato))) +
   geom_boxplot() +
-  scale_fill_manual(values = rainbow(length(unique(vivienda$estrato)))) +  # Asignar colores diferentes
+  scale_fill_manual(values = c("blue", "orange", "green", "red", "purple", "yellow")) +  # Colores personalizados
   labs(title = "Distribución de precios por estrato",
        x = "Estrato",
        y = "Precio" ,
        fill = "Estrato")
+
 ```
 
-En los siguientes gráficos se presenta la distribución de tipo de vivienda, en este primero, se observa que si bien existen mas apartamentos que casas en el conjunto de datos, el segundo gráfico nos da cuenta que existe al menor por tipo de vivienda una mayor área construida en las casas.
+En los siguientes gráficos se muestra la distribución de tipos de vivienda. En el primero, se observa que, aunque hay más apartamentos que casas en el conjunto de datos, el segundo gráfico revela que, al menos por tipo de vivienda, las casas tienen una mayor área construida en comparación con los apartamentos. Esto sugiere que, aunque la cantidad de apartamentos es mayor, las casas, en promedio, tienden a ser más grandes en términos de superficie construida.
 
 ```{r , warning=FALSE, echo=FALSE}
-
 # Gráfico de barras para 'tipo'
 ggplot(vivienda, aes(x = tipo, fill = tipo)) +
   geom_bar(color = "black") +
   geom_text(stat = "count", aes(label = after_stat(count)), vjust = -0.5, size = 3) +  # Agregar etiquetas de datos
-  scale_fill_manual(values = rainbow(length(unique(vivienda$tipo)))) +  # Asignar colores diferentes
+  scale_fill_manual(values = c("skyblue", "orange")) +  # Colores personalizados para "casa" y "apartamento"
   labs(title = "Distribución de las viviendas por tipo",
        x = "Tipo",
        y = "Frecuencia") +
@@ -206,11 +210,12 @@ ggplot(vivienda, aes(x = tipo, fill = tipo)) +
 
 # Gráfico de dispersión para 'areaconst' vs 'tipo'
 ggplot(vivienda, aes(x = areaconst, y = tipo, color = tipo)) +
-  geom_point() +
-  scale_color_manual(values = rainbow(length(unique(vivienda$tipo)))) +  # Asignar colores diferentes
+  geom_point(alpha = 0.6) +  # Añadir transparencia para evitar solapamiento de puntos
+  scale_color_manual(values = c("skyblue", "orange")) +  # Colores personalizados para "casa" y "apartamento"
   labs(title = "Relación entre el área construida y el tipo de vivienda",
        x = "Área construida",
        y = "Tipo de vivienda")
+
 ```
 
 
