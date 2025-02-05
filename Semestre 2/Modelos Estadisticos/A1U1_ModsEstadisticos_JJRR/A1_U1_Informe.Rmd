@@ -424,3 +424,7 @@ A partir del análisis realizado, se pueden extraer las siguientes conclusiones 
 2. **Segmentación de mercado**: El análisis de conglomerados permitió identificar distintos segmentos de mercado, lo que abre la puerta a la creación de estrategias de marketing personalizadas. Al comprender las características de cada grupo de viviendas, es posible ofrecer soluciones más específicas y dirigidas a las preferencias de cada segmento.
 
 3. **Variación de preferencias según zona geográfica**: Las preferencias del mercado varían considerablemente según la zona geográfica y el barrio. Esto resalta la importancia de adaptar la oferta de viviendas a las necesidades y demandas específicas de cada área, lo que podría mejorar la competitividad y la satisfacción del cliente en el sector inmobiliario.
+
+
+
+<a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos/A1U1_ModsEstadisticos_JJRR"> Repositorio con código</a>
