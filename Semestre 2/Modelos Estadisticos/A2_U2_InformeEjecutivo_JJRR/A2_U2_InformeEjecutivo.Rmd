@@ -1233,7 +1233,7 @@ Las ofertas potenciales presentan una variedad de opciones en términos de tama�
 
 ## 8. Anexos - Repositorio Código fuente
 
-Si deseas consultar como fue construido y desarrollado mi informe, ingresa al siguiente enlace: <b><a href="https://github.com/Jartpuro/A2_U2_InformeEjecutivo">Repositorio Github</a></b>
+<b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos/A2_U2_InformeEjecutivo_JJRR">Repositorio Github</a></b>
 
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
