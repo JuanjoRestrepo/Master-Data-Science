@@ -1,7 +1,7 @@
 ---
 title: "Actividad2 Unidad 2 InformeEjecutivo"
 author: "Juan José Restrepo Rosero"
-date: "2024-03-09"
+date: "2025-03-03"
 output: 
   html_document:
     toc: yes

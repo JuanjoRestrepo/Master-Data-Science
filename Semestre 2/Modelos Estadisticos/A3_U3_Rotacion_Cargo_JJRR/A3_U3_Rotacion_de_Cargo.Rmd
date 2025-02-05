@@ -1,0 +1,575 @@
+---
+title: "Actividad3 Unidad3: Rotación de Cargo"
+author: "Juan José Restrepo Rosero"
+date: "2025-03-31"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = TRUE)
+
+# Configurar opciones
+options(repos = "https://cloud.r-project.org/")
+
+# Instalar y cargar paquetes necesarios
+required_packages <- c("paqueteMODELOS", "leaflet", "ggplot2", "effects", "plotly", "leaflet.extras", "dplyr", "lmtest", "corrplot", "tidyverse", "skimr", "vioplot", "pROC")
+
+
+install_if_missing <- function(package) {
+  if (!require(package, character.only = TRUE)) {
+    install.packages(package)
+    library(package, character.only = TRUE)
+  }
+}
+
+# Instalación de paquete MODELOS desde GitHub
+if (!require(paqueteMODELOS)) {
+  devtools::install_github("dgonxalex80/paqueteMODELOS", force = TRUE)
+}
+
+# Instalar y cargar paquetes
+invisible(sapply(required_packages, install_if_missing))
+
+# Cargar conjunto de datos si es necesario
+if (!exists("rotacion")) {
+  data("rotacion")
+}
+
+# Instalar y cargar paquete knitr si es necesario
+if (!require("knitr")) {
+  install.packages("knitr")
+  library("knitr")
+}
+
+
+```
+
+##Rotación de cargo
+
+<p>En una organización, se busca comprender y prever los factores que influyen en la rotación de empleados entre distintos cargos. La empresa ha recopilado datos históricos sobre el empleo de sus trabajadores, incluyendo variables como la antigüedad en el cargo actual, el nivel de satisfacción laboral, el salario actual, edad y otros factores relevantes. La gerencia planea desarrollar un modelo de regresión logística que permita estimar la probabilidad de que un empleado cambie de cargo en el próximo período y determinar cuales factores indicen en mayor proporción a estos cambios.
+
+
+
+Con esta información, la empresa podrá tomar medidas proactivas para retener a su talento clave, identificar áreas de mejora en la gestión de recursos humanos y fomentar un ambiente laboral más estable y tranquilo. La predicción de la probabilidad de rotación de empleados ayudará a la empresa a tomar decisiones estratégicas informadas y a mantener un equipo de trabajo comprometido y satisfecho en sus roles actuales.
+
+
+
+A continuación se describen los pasos que la gerencia ha propuesto para el análisis: </p>
+
+## 1. Selección de variables
+
+<p>Seleccione 3 variables categóricas (distintas de rotación) y 3 variables cuantitativas, que se consideren estén relacionadas con la rotación. <p>
+
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+# Cargar datos
+data("rotacion")
+
+
+summary(rotacion)
+str(rotacion)
+
+```
+<p>Con  base en la estructura del dataframe acerca de la rotación laboral se muestra la información de 1470 empleados. Se detallan aspectos clave como la edad promedio de los empleados (36.92 años) y su experiencia laboral (11.28 años), junto con una diversidad de características demográficas y laborales como género, estado civil, departamento y cargo. Además, se exploran variables relacionadas con la satisfacción y el rendimiento laboral, así como factores potencialmente influyentes en la rotación, como el equilibrio entre trabajo y vida personal, horas extras y antigüedad en la empresa. </p>
+
+<p> Teniendo en cuenta la información que contiene el dataframe, se seleccionan las siguientes variables
+
+
+<ul>
+<b>Variables categóricas:</b>
+
+
+<li>Viaje de Negocios: Esta variable representa la frecuencia de los viajes de negocios de los empleados. Podría estar relacionada con la rotación, ya que los viajes constantes podrían afectar el equilibrio entre el trabajo y la vida personal de los empleados.</li>
+<li>Departamento: El departamento en el que trabaja un empleado puede influir en su satisfacción laboral y en sus oportunidades de crecimiento. Esto podría estar relacionado con la rotación.</li>
+<li>Horas Extra: La cantidad de horas extra trabajadas por los empleados podría estar relacionada con la rotación, ya que el exceso de trabajo puede llevar al agotamiento y a la insatisfacción laboral.
+</li>
+
+
+<b>Variables cuantitativas:</b>
+
+<li>Edad: La edad de los empleados podría estar relacionada con la rotación, ya que las personas en diferentes etapas de su vida pueden tener diferentes prioridades y necesidades laborales.</li>
+<li>Ingreso Mensual: El salario de los empleados puede influir en su decisión de quedarse o irse de una empresa. Una remuneración más alta podría estar relacionada con una menor rotación.<7li>
+<li>Antigüedad en el Cargo: Cuánto tiempo ha estado un empleado en su puesto actual puede estar relacionado con su rotación. Los empleados con menos tiempo en el cargo podrían ser más propensos a rotar en busca de nuevas oportunidades.</li>
+</p>
+</ul>
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+# Crear un subset de datos con las variables seleccionadas
+subset_datos <- select(rotacion, `Viaje de Negocios`, Departamento, Horas_Extra, Edad, Ingreso_Mensual, Antigüedad_Cargo)
+
+str(subset_datos)
+
+summary(subset_datos)
+
+head(subset_datos)
+
+# Verificar si todas las observaciones en las variables numéricas son realmente numéricas
+cat("Clase de las variables seleccionadas:\n")
+sapply(subset_datos, class)
+
+```
+
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+# Convertir las variables categóricas a factores
+subset_datos$`Viaje de Negocios` <- as.factor(subset_datos$`Viaje de Negocios`)
+subset_datos$Departamento <- as.factor(subset_datos$Departamento)
+subset_datos$Horas_Extra <- as.factor(subset_datos$Horas_Extra)
+
+# Calcular matriz de correlación para el subset de datos
+# Excluir variables categóricas de la matriz de correlación
+matriz_correlacion <- cor(subset_datos[, c("Edad", "Ingreso_Mensual", "Antigüedad_Cargo")])
+
+# Crear gráfico de correlación interactivo
+plot_ly(
+  x = colnames(matriz_correlacion),
+  y = colnames(matriz_correlacion),
+  z = as.matrix(matriz_correlacion),
+  type = "heatmap",
+  colorscale = "Viridis",
+  text = round(as.matrix(matriz_correlacion), 2),
+  hoverinfo = "text"
+) %>%
+  layout(
+    title = "Matriz de Correlación",
+    xaxis = list(title = ""),
+    yaxis = list(title = "")
+  )
+
+# Mostrar la tabla de correlación
+print(matriz_correlacion)
+
+```
+
+
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+# Análisis Exploratorio de Datos (EDA)
+# Visualizaciones para variables cuantitativas
+
+
+# Boxplots interactivos
+boxplot_edad <- plot_ly(data = rotacion, y = ~Edad, type = "box", name = "Edad", marker = list(color = "blue")) %>%
+  layout(title = "Boxplot de Edad")
+
+boxplot_ingreso <- plot_ly(data = rotacion, y = ~Ingreso_Mensual, type = "box", name = "Ingreso Mensual", marker = list(color = "green")) %>%
+  layout(title = "Boxplot de Ingreso Mensual")
+
+boxplot_antiguedad <- plot_ly(data = rotacion, y = ~Antigüedad_Cargo, type = "box", name = "Antigüedad en el Cargo", marker = list(color = "orange")) %>%
+  layout(title = "Boxplot de Antigüedad en el Cargo")
+
+# Visualizaciones para variables categóricas
+# Gráficos de barras interactivos
+barplot_viaje <- plot_ly(data = rotacion, x = ~`Viaje de Negocios`, type = "histogram", colors = "blue", 
+                         marker = list(line = list(color = "white", width = 0.5))) %>%
+  layout(title = "Frecuencia de Viajes de Negocios")
+
+barplot_departamento <- plot_ly(data = rotacion, x = ~Departamento, type = "histogram", colors = "green", 
+                                marker = list(line = list(color = "white", width = 0.5))) %>%
+  layout(title = "Frecuencia de Departamentos")
+
+barplot_horas <- plot_ly(data = rotacion, x = ~Horas_Extra, type = "histogram", colors = "orange", 
+                         marker = list(line = list(color = "white", width = 0.5))) %>%
+  layout(title = "Frecuencia de Horas Extra")
+
+# Crear mosaicos
+subplot(
+  subplot(boxplot_edad, boxplot_ingreso, boxplot_antiguedad, nrows = 3),
+  nrows = 1
+) 
+subplot(
+  subplot(barplot_viaje, barplot_departamento, barplot_horas, nrows = 3),
+  nrows = 1
+)
+```
+<b>Hipótesis:</b>
+
+1. Viaje de Negocios: Se espera que exista una relación entre la frecuencia de los viajes de negocios y la rotación de empleados. La hipótesis es que los empleados que viajan frecuentemente por negocios tienen una mayor probabilidad de rotar que aquellos que viajan raramente.
+
+2. Departamento: Se espera que exista una relación entre el departamento en el que trabaja un empleado y su rotación. La hipótesis es que ciertos departamentos pueden tener tasas de rotación más altas que otros debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de crecimiento.
+
+3. Horas Extra: Se espera que exista una relación entre trabajar horas extra y la rotación de empleados. La hipótesis es que los empleados que trabajan horas extra tienen una mayor probabilidad de rotar que aquellos que no lo hacen.
+
+4. Edad: Se espera que exista una relación entre la edad de los empleados y su rotación. La hipótesis es que los empleados más jóvenes pueden tener una mayor probabilidad de rotar debido a la búsqueda de oportunidades de crecimiento, mientras que los empleados mayores pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y personal.
+
+5. Ingreso Mensual: Se espera que exista una relación entre el nivel de ingresos de los empleados y su rotación. La hipótesis es que los empleados con salarios más bajos pueden tener una mayor probabilidad de rotar en busca de oportunidades de mejor remuneración, mientras que aquellos con salarios más altos pueden tener una menor probabilidad de rotar debido a la estabilidad financiera.
+
+6. Antigüedad en el Cargo: Se espera que exista una relación entre la antigüedad en el cargo de los empleados y su rotación. La hipótesis es que los empleados con menos antigüedad en el cargo pueden tener una mayor probabilidad de rotar en busca de mejores oportunidades de carrera, mientras que aquellos con más antigüedad pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y las oportunidades de promoción.
+
+## 2. Análisis univariado
+
+<p>Realiza un análisis univariado (caracterización) de la información contenida en la base de datos rotación.
+
+
+
+Nota:
+Los indicadores o gráficos se usan dependiendo del tipo de variable (cuantitativas o cualitativas). Incluir interpretaciones de la variable rotación.</p>
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Variables cuantitativas
+# Estadísticas descriptivas
+edad_stats <- summary(subset_datos$Edad)
+ingreso_stats <- summary(subset_datos$Ingreso_Mensual)
+antiguedad_stats <- summary(subset_datos$Antigüedad_Cargo)
+
+# Crear tabla con estadísticas descriptivas
+tabla_cuantitativas <- data.frame(
+  Variable = c("Edad", "Ingreso Mensual", "Antigüedad en el Cargo"),
+  `Mínimo` = c(edad_stats["Min."], ingreso_stats["Min."], antiguedad_stats["Min."]),
+  `1er Cuartil` = c(edad_stats["1st Qu."], ingreso_stats["1st Qu."], antiguedad_stats["1st Qu."]),
+  Mediana = c(edad_stats["Median"], ingreso_stats["Median"], antiguedad_stats["Median"]),
+  `Media` = c(edad_stats["Mean"], ingreso_stats["Mean"], antiguedad_stats["Mean"]),
+  `3er Cuartil` = c(edad_stats["3rd Qu."], ingreso_stats["3rd Qu."], antiguedad_stats["3rd Qu."]),
+  `Máximo` = c(edad_stats["Max."], ingreso_stats["Max."], antiguedad_stats["Max."])
+)
+
+# Mostrar tabla de estadísticas descriptivas para variables cuantitativas
+cat("Tabla de estadísticas descriptivas para variables cuantitativas:\n")
+kable(tabla_cuantitativas)
+
+# Variables cualitativas
+# Frecuencia de las categorías
+viaje_negocios_freq <- table(subset_datos$`Viaje de Negocios`)
+departamento_freq <- table(subset_datos$Departamento)
+horas_extra_freq <- table(subset_datos$Horas_Extra)
+
+# Crear tabla con frecuencia de las categorías
+tabla_cualitativas <- data.frame(
+  Variable = c("Viaje de Negocios", "Departamento", "Horas Extra"),
+  `Frecuencia` = c(length(unique(subset_datos$`Viaje de Negocios`)), length(unique(subset_datos$Departamento)), length(unique(subset_datos$Horas_Extra)))
+)
+
+# Mostrar tabla de frecuencia de las categorías para variables cualitativas
+cat("\nTabla de frecuencia de las categorías para variables cualitativas:\n")
+kable(tabla_cualitativas)
+```
+
+## 3. Análisis bivariado
+
+<p>Realiza un análisis de bivariado en donde la variable respuesta sea rotacion codificada de la siguiente manera (y=1 es si rotación, y=0  es no rotación). Con base en estos resultados identifique cuales son las variables determinantes de la rotación e interpretar el signo del coeficiente estimado. Compare estos resultados con la hipótesis planteada en el punto 2.</p>
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Convertir la variable "Rotación" a 0 y 1
+rotacion$Rotación <- ifelse(rotacion$Rotación == "Si", 1, 0)
+
+# Ajustar modelos de regresión logística para cada variable predictoria
+modelo_viaje_negocios <- glm(Rotación ~ `Viaje de Negocios`, data = rotacion, family = "binomial")
+modelo_departamento <- glm(Rotación ~ Departamento, data = rotacion, family = "binomial")
+modelo_horas_extra <- glm(Rotación ~ Horas_Extra, data = rotacion, family = "binomial")
+modelo_edad <- glm(Rotación ~ Edad, data = rotacion, family = "binomial")
+modelo_ingreso_mensual <- glm(Rotación ~ Ingreso_Mensual, data = rotacion, family = "binomial")
+modelo_antiguedad_cargo <- glm(Rotación ~ Antigüedad_Cargo, data = rotacion, family = "binomial")
+
+# Resumen de cada modelo
+summary(modelo_viaje_negocios)
+summary(modelo_departamento)
+summary(modelo_horas_extra)
+summary(modelo_edad)
+summary(modelo_ingreso_mensual)
+summary(modelo_antiguedad_cargo)
+
+```
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Ajustar un modelo de regresión logística
+modelo <- glm(Rotación ~ `Viaje de Negocios` + Departamento + Horas_Extra + Edad + Ingreso_Mensual + Antigüedad_Cargo, data = rotacion, family = "binomial")
+
+# Generar el gráfico de odds ratios solo si el modelo se ajustó correctamente
+if (exists("modelo")) {
+  # Obtener los coeficientes del modelo
+  coeficientes <- coef(modelo)
+
+  # Calcular los odds ratios
+  odds_ratios <- exp(coeficientes)
+
+  # Obtener los nombres de las variables predictoras
+  nombres_variables <- names(coeficientes)
+
+  # Crear un dataframe con los odds ratios
+  df_odds_ratios <- data.frame(Variables = nombres_variables, Odds_Ratios = odds_ratios)
+
+  # Ordenar el dataframe por los odds ratios
+  df_odds_ratios <- df_odds_ratios[order(df_odds_ratios$Odds_Ratios, decreasing = TRUE), ]
+
+  # Cargar la librería plotly
+  library(plotly)
+
+  # Crear el gráfico interactivo de barras
+  plot_ly(df_odds_ratios, x = ~Variables, y = ~Odds_Ratios, type = "bar", color = I("skyblue")) %>%
+    layout(title = "Odds Ratios para Variables Predictoras",
+           xaxis = list(title = "Variables Predictoras"),
+           yaxis = list(title = "Odds Ratios"),
+           hovermode = "closest") %>%
+    config(displayModeBar = FALSE)  # Ocultar la barra de herramientas
+} else {
+  cat("El modelo no se ha ajustado correctamente. Por favor, revise el código.")
+}
+
+```
+
+<p>
+**Comparación de Coeficientes con Hipótesis:**
+
+- **Viaje de Negocios:**
+  - **Coeficiente:** Viaje de Negocios No_Viaja: -1.3389, Raramente: -0.6346
+  - **Hipótesis:** Se esperaba que los empleados que viajan frecuentemente por negocios tuvieran una mayor probabilidad de rotación que aquellos que viajan raramente.
+  - **Conclusión:** Consistente con la hipótesis, ya que los coeficientes son negativos, indicando que aquellos que viajan menos tienen menores probabilidades de rotación.
+
+- **Departamento:**
+  - **Coeficiente:** Departamento RH: 0.38175, Ventas: 0.48116
+  - **Hipótesis:** Se esperaba que ciertos departamentos tuvieran tasas de rotación más altas que otros debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de crecimiento.
+  - **Conclusión:** Consistente con la hipótesis, ya que algunos departamentos tienen coeficientes positivos, indicando tasas de rotación más altas.
+
+- **Horas Extra:**
+  - **Coeficiente:** Horas Extra Si: 1.3274
+  - **Hipótesis:** Se esperaba que los empleados que trabajan horas extra tuvieran una mayor probabilidad de rotación que aquellos que no lo hacen.
+  - **Conclusión:** Consistente con la hipótesis, ya que el coeficiente es positivo, indicando que aquellos que trabajan horas extra tienen mayores probabilidades de rotación.
+
+- **Edad:**
+  - **Coeficiente:** Edad: -0.05225
+  - **Hipótesis:** Se esperaba que los empleados más jóvenes tuvieran una mayor probabilidad de rotación que los mayores.
+  - **Conclusión:** Inconsistente con la hipótesis, ya que el coeficiente es negativo pero pequeño, indicando una relación débil entre la edad y la rotación.
+
+- **Ingreso Mensual:**
+  - **Coeficiente:** Ingreso Mensual: -0.0001271
+  - **Hipótesis:** Se esperaba que los empleados con salarios más bajos tuvieran una mayor probabilidad de rotación.
+  - **Conclusión:** Inconsistente con la hipótesis, ya que el coeficiente es negativo pero cercano a cero, indicando una relación débil entre el ingreso mensual y la rotación.
+
+- **Antigüedad en el Cargo:**
+  - **Coeficiente:** Antigüedad en el Cargo: -0.14628
+  - **Hipótesis:** Se esperaba que los empleados con menos antigüedad en el cargo tuvieran una mayor probabilidad de rotación que los que tienen más antigüedad.
+  - **Conclusión:** Inconsistente con la hipótesis, ya que el coeficiente es negativo pero pequeño, indicando una relación débil entre la antigüedad en el cargo y la rotación.
+
+</p>
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Ajustar un modelo de regresión logística
+modelo <- glm(Rotación ~ `Viaje de Negocios` + Departamento + Horas_Extra + Edad + Ingreso_Mensual + Antigüedad_Cargo, data = rotacion, family = "binomial")
+
+# Generar el gráfico de odds ratios solo si el modelo se ajustó correctamente
+if (exists("modelo")) {
+  # Obtener los coeficientes del modelo
+  coeficientes <- coef(modelo)
+
+  # Calcular los odds ratios
+  odds_ratios <- exp(coeficientes)
+
+  # Obtener los nombres de las variables predictoras
+  nombres_variables <- names(coeficientes)
+
+  # Crear un dataframe con los odds ratios
+  df_odds_ratios <- data.frame(Variables = nombres_variables, Odds_Ratios = odds_ratios)
+
+  # Ordenar el dataframe por los odds ratios
+  df_odds_ratios <- df_odds_ratios[order(df_odds_ratios$Odds_Ratios, decreasing = TRUE), ]
+
+  # Imprimir la tabla de odds ratios utilizando kable
+  library(knitr)
+
+  kable(df_odds_ratios, caption = "Odds Ratios para Variables Predictoras")
+} else {
+  cat("El modelo no se ha ajustado correctamente. Por favor, revise el código.")
+}
+
+```
+<p> 
+La información de los Odds Ratios para las variables predictoras añade valor al informe al proporcionar una medida de la asociación entre cada variable y la probabilidad de rotación de empleados. Los Odds Ratios muestran cuánto aumenta o disminuye la probabilidad de rotación cuando una variable aumenta en una unidad, manteniendo todas las demás variables constantes.
+
+Horas Extra (Horas_ExtraSi): Un Odds Ratio de 4.155 indica que los empleados que trabajan horas extra tienen aproximadamente 4.155 veces más probabilidades de rotar que aquellos que no lo hacen, manteniendo todas las demás variables constantes.
+
+Departamento (DepartamentoVentas y DepartamentoRH): Los Odds Ratios de 1.914 y 1.547 respectivamente sugieren que pertenecer a los departamentos de Ventas o Recursos Humanos aumenta la probabilidad de rotación en aproximadamente 1.914 y 1.547 veces en comparación con otros departamentos, manteniendo todas las demás variables constantes.
+
+Ingreso Mensual (Ingreso_Mensual): Un Odds Ratio de 0.9999181 sugiere que por cada aumento unitario en el ingreso mensual, la probabilidad de rotación disminuye en un 0.0000819%, manteniendo todas las demás variables constantes. Esto indica una asociación muy débil entre el ingreso mensual y la rotación.
+
+Edad (Edad) y Antigüedad en el Cargo (Antigüedad_Cargo): Los Odds Ratios de 0.968 y 0.894 respectivamente indican que por cada aumento unitario en la edad o la antigüedad en el cargo, la probabilidad de rotación disminuye en un 3.2% y un 10.6% respectivamente, manteniendo todas las demás variables constantes.
+
+Viaje de Negocios (Viaje de Negocios Raramente y No Viaja): Los Odds Ratios de 0.5067 y 0.2582 respectivamente sugieren que los empleados que viajan raramente o no viajan tienen una menor probabilidad de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
+
+En resumen, los Odds Ratios proporcionan información adicional sobre la fuerza y la dirección de la asociación entre cada variable y la probabilidad de rotación de empleados, lo que ayuda a comprender mejor la influencia relativa de cada variable en el fenómeno de la rotación.</p>
+
+
+<p>
+**Discusión:**
+
+Al interpretar los coeficientes de regresión logística, nos centramos en la dirección y la magnitud del efecto de cada variable en la probabilidad de rotación. Sin embargo, al considerar los Odds Ratios, obtenemos una perspectiva más detallada de esta relación.
+
+Algunas discrepancias entre la interpretación de los coeficientes y los Odds Ratios pueden surgir debido a la transformación logarítmica aplicada en el modelo de regresión logística para calcular los coeficientes. Esta transformación no siempre refleja directamente la asociación entre las variables y la probabilidad de rotación.
+
+Por ejemplo, en el caso del ingreso mensual, el coeficiente estimado podría indicar una relación débil con la rotación, pero el Odds Ratio sugiere que incluso pequeños aumentos en el ingreso mensual pueden estar asociados con reducciones significativas en la probabilidad de rotación. Esta discrepancia resalta la importancia de considerar tanto los coeficientes como los Odds Ratios para obtener una comprensión completa de la relación entre las variables predictoras y la variable de respuesta.Mientras que los coeficientes de regresión logística nos proporcionan información sobre la dirección y la magnitud de la relación entre las variables predictoras y la probabilidad de rotación, los Odds Ratios nos ofrecen una perspectiva más intuitiva de cómo estos cambios afectan la probabilidad de rotación en términos de probabilidades relativas.
+
+</p>
+
+
+## 4. Estimación del modelo
+<p>Realiza la estimación de un modelo de regresión logístico en el cual la variable respuesta es rotacion (y=1
+ es si rotación, y=0 es no rotación) y las covariables las 6 seleccionadas en el punto 1. Interprete los coeficientes del modelo y la significancia de los parámetros.</p>
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Ajustar el modelo de regresión logística
+modelo <- glm(Rotación ~ `Viaje de Negocios` + Departamento + Horas_Extra + Edad + Ingreso_Mensual + Antigüedad_Cargo, data = rotacion, family = "binomial")
+
+# Obtener un resumen del modelo
+summary_modelo <- summary(modelo)
+
+# Visualizar los coeficientes del modelo
+coeficientes <- coef(modelo)
+coeficientes_df <- data.frame(Variables = names(coeficientes), Coeficientes = coeficientes, Significancia = ifelse(summary_modelo$coefficients[,4] < 0.05, "*", ""))
+coeficientes_df$Variables <- factor(coeficientes_df$Variables, levels = coeficientes_df$Variables[order(coeficientes_df$Coeficientes, decreasing = TRUE)])
+library(ggplot2)
+coef_plot <- ggplot(coeficientes_df, aes(x = Variables, y = Coeficientes, fill = Significancia)) +
+  geom_bar(stat = "identity", color = "black") +
+  labs(title = "Coeficientes del Modelo de Regresión Logística",
+       x = "Variables Predictoras",
+       y = "Coeficientes",
+       fill = "Significancia") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(coef_plot)
+
+# Si es necesario, generar tablas adicionales
+kable(coeficientes_df)
+
+```
+
+A continuación se procede con la interpretación de los coeficientes:
+
+1. Intercept: Este es el intercepto del modelo. Representa el logaritmo de la razón de probabilidades de rotación cuando todas las variables predictoras son cero. En este caso, es 0.1619797, lo que significa que cuando todas las demás variables son cero, el log-odds de rotación es de aproximadamente 0.16.
+
+2. Viaje de NegociosNo_Viaja: Un coeficiente negativo (-1.3541771) indica que los empleados que no viajan por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan por negocios, manteniendo todas las demás variables constantes. 
+
+3. Viaje de NegociosRaramente: Un coeficiente negativo (-0.6797980) indica que los empleados que viajan raramente por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
+
+4. DepartamentoRH y DepartamentoVentas: Los coeficientes positivos (0.4363905 y 0.6494927 respectivamente) indican que pertenecer al departamento de Recursos Humanos o al departamento de Ventas está asociado con mayores log-odds de rotación, en comparación con el departamento de referencia (probablemente otro departamento no mencionado).
+
+5. Horas_ExtraSi: Un coeficiente positivo (1.4243441) indica que trabajar horas extra está asociado con mayores log-odds de rotación.
+
+6. Edad y Antigüedad_Cargo: Los coeficientes negativos (-0.0321813 y -0.1117549 respectivamente) indican que el aumento en la edad y en la antigüedad en el cargo están asociados con menores log-odds de rotación.
+
+7. Ingreso_Mensual: Un coeficiente negativo (-0.0000819) indica que un aumento en el ingreso mensual está asociado con menores log-odds de rotación, aunque el efecto es muy pequeño y casi despreciable.
+
+## 5. Evaluación
+<p>Evaluar el poder predictivo del modelo con base en la curva ROC y el AUC.</p>
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+
+# Predecir las probabilidades de rotación utilizando el modelo
+prob_pred <- predict(modelo, type = "response")
+
+# Calcular la curva ROC y el AUC
+roc_obj <- roc(rotacion$Rotación, prob_pred)
+
+# Graficar la curva ROC
+plot(roc_obj, main = "Curva ROC del Modelo", col = "blue", lwd = 2)
+
+# Calcular el AUC
+auc_result <- auc(roc_obj)
+cat("El área bajo la curva (AUC) es:", auc_result)
+
+```
+<p>
+
+**Curva ROC:**
+
+La curva ROC muestra la probabilidad de detección verdadera (TPR) en función de la probabilidad de falsa alarma (FPR) para diferentes umbrales de clasificación.
+La curva ROC se traza en un espacio bidimensional, con la FPR en el eje X y la TPR en el eje Y.
+Una curva ROC ideal es la que se encuentra en la esquina superior izquierda del gráfico, lo que indica que el modelo es capaz de detectar todos los casos positivos sin generar ninguna falsa alarma.
+
+**Área bajo la curva (AUC):**
+
+El AUC es la proporción de la superficie total del gráfico ROC que se encuentra debajo de la curva.
+El AUC se expresa como un valor numérico entre 0 y 1.
+Un AUC de 1 indica que el modelo es perfecto, mientras que un AUC de 0 indica que el modelo no es mejor que una adivinanza aleatoria.
+
+
+
+Finalmente, en la imagen que se muestra, la curva ROC se encuentra por encima de la diagonal aleatoria. Esto indica que el modelo es mejor que una adivinanza aleatoria para clasificar los casos.
+El AUC de la curva ROC es de 0.7654207. Este valor indica que el modelo tiene un buen rendimiento para clasificar los casos. Se puede concluir que el modelo tiene un buen rendimiento para clasificar los casos. La curva ROC se encuentra por encima de la diagonal aleatoria y el AUC es de 0.7654207, lo que indica que el modelo es capaz de detectar los verdaderos positivos con una alta probabilidad y generar pocas falsas alarmas.
+</p>
+
+## 6. Predicciones
+<p>Realiza una predicción la probabilidad de que un individuo (hipotético) rote y defina un corte para decidir si se debe intervenir a este empleado o no (posible estrategia para motivar al empleado).</p>
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Definir las variables predictoras del empleado hipotético
+nuevo_dato <- data.frame(
+  `Viaje de Negocios` = "No",
+  Departamento = "Ventas",
+  Horas_Extra = "Si",
+  Edad = 35,
+  Ingreso_Mensual = 3800000,
+  Antigüedad_Cargo = 5
+)
+
+print(nuevo_dato)
+
+```
+<p>Lucía, una empleada dedicada y comprometida con su trabajo en una empresa de ventas. Lucía ha decidido establecerse en un puesto que no requiere viajes de negocios, ya que prefiere pasar tiempo en casa con su familia. A pesar de su dedicación, últimamente ha tenido que trabajar horas extras para cumplir con las demandas del trabajo. A sus 35 años, Lucía se encuentra en una etapa estable de su vida laboral, con una antigüedad en su cargo de 5 años. Con un ingreso mensual de 3,800,000 pesos.  </p>
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+# Predecir las probabilidades de rotación utilizando el modelo y los datos definidos
+prob_pred <- predict(modelo, data = nuevo_dato, type = "response")
+
+# Definir el punto de corte
+punto_corte <- 0.5
+
+
+
+# Crear una tabla resumen
+tabla_resumen <- data.frame(
+  "Probabilidad de rotación" = round(prob_pred, 4),
+  "Recomendación de intervención" = ifelse(prob_pred > punto_corte, "Sí (Probabilidad > 0.5)", "No (Probabilidad <= 0.5)")
+)
+
+# Mostrar los primeros 20 registros de la tabla resumen
+print(head(tabla_resumen, 20))
+
+
+
+#Evaluar la necesidad de intervención
+intervencion <- ifelse(prob_pred > punto_corte, "Se recomienda intervenir al empleado.", "No se recomienda intervenir al empleado.")
+
+df_intervencion <- data.frame(Probabilidad = "Probabilidad de Rotación", Intervencion = intervencion)
+
+
+# Crear un gráfico de barras con ggplot2
+
+grafico <- ggplot(df_intervencion, aes(x = Probabilidad, fill = Intervencion)) +
+  geom_bar() +
+  labs(title = "Evaluación de Intervención", x = "", y = "") +
+  scale_fill_manual(values = c("red", "green")) +
+  theme_minimal()
+
+# Mostrar el gráfico
+print(grafico)
+
+
+```
+<p>En este caso, teniendo en cuenta la información procesada por el modelo, se determina que no es necesario la intervención a la colaboradora Lucia, ya que, Lucía se siente cómoda y valorada en su posición actual. .</p>
+
+## 7. Conclusiones
+<p>En las conclusiones adicione una discusión sobre cuál sería la estrategia para disminuir la rotación en la empresa (con base en las variables que resultaron significativas en el punto 3).
+
+</p>
+
+
+<p>Tenieendo cuenta las variables identificadas en el análisis bivariado del punto 3. se presentan a continuación el diseño de 4 estraegias basadas en: Viaje de Negocios, Departamento y Horas Extra.
+
+Mejorar el ambiente laboral y la conciliación: Se busca reducir la necesidad de viajar frecuentemente por negocios, especialmente en departamentos con altas tasas de rotación, mediante la implementación de políticas que fomenten un equilibrio adecuado entre el trabajo y la vida personal. Esto puede incluir la promoción de flexibilidad laboral, programas de trabajo remoto y beneficios para empleados que favorezcan la conciliación.
+
+Optimizar la distribución de tareas y responsabilidades: Se propone revisar la distribución de carga laboral en departamentos con altas tasas de rotación, como Ventas, para minimizar la necesidad de trabajar horas extras de manera constante. Esto implica una evaluación de la carga de trabajo, la asignación de recursos adecuados y la implementación de sistemas de rotación de turnos que reduzcan la fatiga laboral.
+
+Incentivar el desarrollo profesional y el crecimiento interno: Para contrarrestar la rotación en departamentos específicos, se sugiere implementar programas de desarrollo profesional y oportunidades de crecimiento interno. Estos programas pueden incluir capacitación continua, mentoría y planes de carrera personalizados para motivar a los empleados a permanecer en la organización y avanzar en sus roles.
+
+Revisar y ajustar la política de compensación: Se propone evaluar la estructura de remuneración para garantizar que sea competitiva y equitativa, especialmente en departamentos con altas tasas de rotación. Esto puede incluir ajustes salariales, bonificaciones por desempeño y beneficios adicionales que reconozcan y recompensen el esfuerzo y la dedicación de los empleados.
+
+Estas estrategias buscan abordar las preocupaciones específicas relacionadas con las variables identificadas en el análisis bivariado, con el objetivo de reducir la rotación de empleados y promover un entorno laboral más estable y satisfactorio.</p>
+## 8. Anexos - Repositorio Código fuente
+
+<b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos">Repositorio Github</a></b>
+
+
+
+
