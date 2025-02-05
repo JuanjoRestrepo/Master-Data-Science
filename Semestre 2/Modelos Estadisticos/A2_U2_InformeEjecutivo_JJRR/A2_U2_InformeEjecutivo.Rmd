@@ -1,5 +1,5 @@
 ---
-title: "A2_U2_InformeEjecutivo"
+title: "Actividad2 Unidad 2 InformeEjecutivo"
 author: "Juan José Restrepo Rosero"
 date: "2024-03-09"
 output: 
