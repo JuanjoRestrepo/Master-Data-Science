@@ -1,0 +1,1241 @@
+---
+title: "A2_U2_InformeEjecutivo"
+author: "Juan José Restrepo Rosero"
+date: "2024-03-09"
+output: 
+  html_document:
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+# Configurar opciones
+options(repos = "https://cloud.r-project.org/")
+
+# Instalar y cargar paquetes necesarios
+required_packages <- c("paqueteMODELOS", "leaflet", "ggplot2", "effects", "plotly", "leaflet.extras", "dplyr", "lmtest", "corrplot", "tidyverse", "skimr", "vioplot")
+
+
+install_if_missing <- function(package) {
+  if (!require(package, character.only = TRUE)) {
+    install.packages(package)
+    library(package, character.only = TRUE)
+  }
+}
+
+# Instalación de paquete MODELOS desde GitHub
+if (!require(paqueteMODELOS)) {
+  devtools::install_github("dgonxalex80/paqueteMODELOS", force = TRUE)
+}
+
+# Instalar y cargar paquetes
+invisible(sapply(required_packages, install_if_missing))
+
+# Cargar conjunto de datos si es necesario
+if (!exists("vivienda")) {
+  data("vivienda")
+}
+
+```
+
+<h1>Caso C&A</h1>
+
+<h2>Enunciado</h2>
+
+
+Maria comenzó como agente de bienes raíces en Cali hace 10 años. Después de laborar dos años para una empresa nacional, se traslado a Bogotá y trabajó para otra agencia de bienes raíces. Sus amigos y familiares la convencieron de que con su experiencia y conocimientos del negocio debía abrir su propia agencia. Terminó por adquirir la licencia de intermediario y al poco tiempo fundó su propia compañía, C&A (Casas y Apartamentos) en Cali. Santiago y Lina, dos vendedores de la empresa anterior aceptaron trabajar en la nueva compaña. En la actualidad ocho agentes de bienes raíces colaboran con ella en C&A.
+
+
+Actualmente las ventas de bienes raíces en Cali se han visto disminuidas de manera significativa en lo corrido del año. Durante este periodo muchas instituciones bancarias de ahorro y vivienda están prestando grandes sumas de dinero para la industria y la construcción comercial y residencial. Cuando el efecto producto de las tensiones políticas y sociales disminuya, se espera que la actividad económica de este sector se reactive.
+
+
+Hace dos días, María recibió una carta solicitando asesoría para la compra de dos viviendas por parte de una compañía internacional que desea ubicar a dos de sus empleados con sus familias en la ciudad. Las solicitudes incluyen las siguientes condiciones:
+
+
+![Condiciones](C:\Users\Juan Jose Restrepo\Desktop\Master-Data-Science-main\Semestre 2\Modelos Estadisticos\A2_U2_InformeEjecutivo_JJRR\condiciones.png)
+
+<b>Pasos requeridos para la obtención de los resultados</b>
+
+
+<ol>
+<li>
+Realice un filtro a la base de datos e incluya solo las ofertas de : base1: casas, de la zona norte de la ciudad. Presente los primeros 3 registros de las bases y algunas tablas que comprueben la consulta. (Adicional un mapa con los puntos de las bases. Discutir si todos los puntos se ubican en la zona correspondiente o se presentan valores en otras zonas, por que?).</li>
+
+<li>Realice un análisis exploratorio de datos enfocado en la correlación entre la variable respuesta (precio de la casa) en función del área construida, estrato, numero de baños, numero de habitaciones y zona donde se ubica la vivienda. Use gráficos interactivos con el paquete plotly e interprete los resultados.</li>
+
+<li>Estime un modelo de regresión lineal múltiple con las variables del punto anterior (precio = f(área construida, estrato, número de cuartos, número de parqueaderos, número de baños ) ) e interprete los coeficientes si son estadísticamente significativos. Las interpretaciones deber están contextualizadas y discutir si los resultados son lógicos. Adicionalmente interprete el coeficiente R2
+ y discuta el ajuste del modelo e implicaciones (que podrían hacer para mejorarlo).</li>
+
+<li>Realice la validación de supuestos del modelo e interprete los resultados (no es necesario corregir en caso de presentar problemas, solo realizar sugerencias de que se podría hacer).</li>
+
+<li>Con el modelo identificado debe predecir el precio de la vivienda con las características de la primera solicitud.</li>
+
+<li>Con las predicciones del modelo sugiera potenciales ofertas que responda a la solicitud de la vivienda 1. Tenga encuentra que la empresa tiene crédito pre-aprobado de máximo 350 millones de pesos. Realice un análisis y presente en un mapa al menos 5 ofertas potenciales que debe discutir.</li>
+
+<li>Realice los pasos del 1 al 6. Para la segunda solicitud que tiene un crédito pre-aprobado por valor de $850 millones.</li>
+</ol>
+
+
+## Exploración inicial de datos
+
+<p>Basándonos en la información proporcionada por el resumen y la estructura del conjunto de datos, podemos hacer varias observaciones significativas. El conjunto de datos consta de 8322 observaciones con 13 variables. Algunas de estas variables tienen valores faltantes, como piso, estrato, preciom, areaconst, parqueaderos, banios, habitaciones, longitud y latitud, lo que sugiere la necesidad de manejar estos valores faltantes antes de realizar análisis posteriores. Las variables zona, piso, tipo y barrio son de naturaleza categórica, mientras que las variables id, estrato, preciom, areaconst, parqueaderos, banios, habitaciones, longitud y latitud son numéricas. Además, la presencia de problemas detectados en los datos sugiere la posibilidad de inconsistencias o errores que deben abordarse durante el análisis. En resumen, este conjunto de datos proporciona una variedad de información sobre propiedades inmobiliarias, incluidos detalles sobre su ubicación, características y precios, pero requerirá un procesamiento cuidadoso para garantizar su validez y utilidad en el análisis posterior.</p>
+
+```{r , warning=FALSE, echo=FALSE, message=FALSE}
+summary(vivienda)
+str(vivienda)
+
+```
+## 1. Realice un filtro a la base de datos 
+
+
+<h3>Base 1 Casas Zona Norte</h3>
+
+<p>De acuerdo a la solicitud del informe se presenta a continuación un sub conjunto de datos que permite visualizar el contenido correspondiente al tipo de inmueble casa para la zona norte, en este sentido se destaca lo siguiente:
+
+Las estadísticas descriptivas de las ofertas de casas en la zona norte revelan una amplia gama de características y variabilidad en los datos. Con un total de 722 registros, este conjunto de datos parece haber sido filtrado correctamente para incluir solo las ofertas de casas en la zona norte. Se observa la presencia de valores faltantes en algunos atributos, lo cual es consistente con la estructura original del dataset.
+
+En cuanto a los precios de las casas, se observa una gran variación, con precios que oscilan entre 58 y 1999 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 390 y 445.9 unidades monetarias, respectivamente.
+
+El análisis del área construida revela una diversidad similar, con valores que van desde 30 hasta 1745 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 240 y 264.9 metros cuadrados, respectivamente.
+
+Además de los precios y el área construida, otros atributos como el número de parqueaderos, baños y habitaciones también varían significativamente, con valores máximos de 10 en cada caso. Estos atributos son cruciales para entender las características y comodidades de las casas en la zona norte.</p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+casas_zona_norte <- subset(vivienda, tipo == "Casa" & zona == "Zona Norte")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(casas_zona_norte, 3))
+
+# Calcular estadísticas descriptivas
+cat("Estadísticas descriptivas de las ofertas de casas en la zona norte:\n")
+kable(summary(casas_zona_norte))
+
+```
+
+<p> El gráfico de dispersión indica una fuerte correlación positiva entre el precio y el área construida de las casas en la Zona Norte. El coeficiente de correlación de 0,73 evidencia esta relación directa, donde a mayor área construida, mayor es el precio de la vivienda. La línea de tendencia sugiere un incremento promedio de 1,35 millones de pesos por metro cuadrado adicional. No obstante, la dispersión de los puntos alrededor de la línea de tendencia revela variaciones en el precio influenciadas por otros factores como la ubicación, calidad de construcción, características de la casa y el mercado inmobiliario. Considerar todos estos aspectos es crucial al momento de buscar una vivienda en la Zona Norte.
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(casas_zona_norte, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Casas Zona Norte",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(casas_zona_norte$areaconst), y = max(casas_zona_norte$preciom), 
+            label = paste("Correlación:", round(cor(casas_zona_norte$areaconst, casas_zona_norte$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+
+# Mapa con los puntos de las bases y botón de reset
+mapa_norte <- leaflet(casas_zona_norte) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_norte  # Mostrar el mapa interactivo
+
+# Tabla de frecuencia de los tipos de vivienda en la zona norte
+tipo_counts_norte <- table(casas_zona_norte$tipo)
+cat("Tabla de frecuencia de tipos de vivienda en la zona norte:\n")
+kable(tipo_counts_norte)
+
+# Tabla de frecuencia de estratos en la zona norte
+estrato_counts_norte <- table(casas_zona_norte$estrato)
+cat("Tabla de frecuencia de estratos en la zona norte:\n")
+kable(estrato_counts_norte)
+  
+# Tabla de frecuencia de barrios en la zona norte (los 10 primeros)
+top_barrios_norte <- head(table(casas_zona_norte$barrio), 10)
+top_barrios_df_norte <- as.data.frame(top_barrios_norte)  # Convertir a un dataframe para usar dplyr
+
+# Ordenar la tabla por frecuencia de forma descendente
+top_barrios_df_norte <- arrange(top_barrios_df_norte, desc(Freq))
+
+# Imprimir la tabla ordenada
+cat("Tabla de frecuencia de barrios en la zona norte (ordenada por frecuencia descendente):\n")
+kable(top_barrios_df_norte)
+
+```
+
+
+<h3>Base 2 Casas Zona Sur</h3>
+
+<p>
+Las estadísticas descriptivas de las ofertas de casas en la zona sur muestran una diversidad significativa en los datos. Con un total de 1939 registros, este conjunto de datos parece haber sido filtrado adecuadamente para incluir solo las ofertas de casas en la zona sur. Se observa la presencia de valores faltantes en algunos atributos, lo cual es consistente con la estructura original del dataset.
+
+En relación a los precios de las casas, se evidencia una amplia variación, con valores que oscilan entre 77 y 1900 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 480 y 612.3 unidades monetarias, respectivamente.
+
+El análisis del área construida también revela una diversidad similar, con valores que van desde 48 hasta 1600 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 247 y 282.3 metros cuadrados, respectivamente.
+
+Además de los precios y el área construida, otros atributos como el número de parqueaderos, baños y habitaciones también varían significativamente, con valores máximos de 10 en cada caso. Estos atributos son cruciales para comprender las características y comodidades de las casas en la zona sur.</p>
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+casas_zona_sur <- subset(vivienda, tipo == "Casa" & zona == "Zona Sur")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(casas_zona_sur, 3))
+
+# Calcular estadísticas descriptivas
+cat("Estadísticas descriptivas de las ofertas de casas en la zona sur:\n")
+kable(summary(casas_zona_sur))
+
+```
+
+
+<p>
+El gráfico de dispersión para la Zona Sur presenta un coeficiente de correlación de 0.67, lo que indica una fuerte correlación positiva entre el precio y el área construida. Esto significa que existe una relación directa entre ambas variables: a mayor área construida, mayor es el precio de la vivienda.
+
+La línea de tendencia en el gráfico indica que, en promedio, el precio aumenta en 1.2 millones de pesos por cada metro cuadrado adicional de área construida.
+
+Sin embargo, la dispersión de los puntos alrededor de la línea de tendencia muestra una variación considerable en los precios.
+</p>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(casas_zona_sur, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Casas Zona Sur",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(casas_zona_sur$areaconst), y = max(casas_zona_sur$preciom), 
+            label = paste("Correlación:", round(cor(casas_zona_sur$areaconst, casas_zona_sur$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de las bases y botón de reset
+mapa_sur <- leaflet(casas_zona_sur) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_sur  # Mostrar el mapa interactivo
+
+# Tabla de frecuencia de los tipos de vivienda en la zona norte
+tipo_counts_sur <- table(casas_zona_sur$tipo)
+cat("Tabla de frecuencia de tipos de vivienda en la zona sur:\n")
+kable(tipo_counts_sur)
+
+# Tabla de frecuencia de estratos en la zona norte
+estrato_counts_sur <- table(casas_zona_sur$estrato)
+cat("Tabla de frecuencia de estratos en la zona sur:\n")
+kable(estrato_counts_sur)
+  
+# Tabla de frecuencia de barrios en la zona norte (los 10 primeros)
+top_barrios_sur <- head(table(casas_zona_sur$barrio), 10)
+top_barrios_df_sur <- as.data.frame(top_barrios_sur)  # Convertir a un dataframe para usar dplyr
+
+# Ordenar la tabla por frecuencia de forma descendente
+top_barrios_df_sur <- arrange(top_barrios_df_sur, desc(Freq))
+
+# Imprimir la tabla ordenada
+cat("Tabla de frecuencia de barrios en la zona sur (ordenada por frecuencia descendente):\n")
+kable(top_barrios_df_sur)
+
+```
+
+
+<h3>Base 3 Casas Zona Oriente</h3>
+
+
+<p>
+Las estadísticas descriptivas de las ofertas de casas en la zona oriente muestran una distribución similar en los datos. Con un total de 289 registros, se observa una variabilidad notable en los atributos considerados. Al igual que en otras zonas, se encuentran valores faltantes en algunos atributos, lo cual es coherente con la estructura original del dataset.
+
+En cuanto a los precios de las casas, se observa una variación considerable, con valores que van desde 80 hasta 750 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 235 y 244.8 unidades monetarias, respectivamente.
+
+El análisis del área construida también muestra una diversidad significativa, con valores que van desde 40 hasta 1745 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 179 y 213.4 metros cuadrados, respectivamente.
+
+Además de los precios y el área construida, otros atributos como el número de parqueaderos, baños y habitaciones también exhiben variaciones notables, con valores máximos de 10 en cada caso. </p>
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+casas_zona_oriente <- subset(vivienda, tipo == "Casa" & zona == "Zona Oriente")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(casas_zona_oriente, 3))
+
+# Calcular estadísticas descriptivas
+cat("Estadísticas descriptivas de las ofertas de casas en la zona Oriente:\n")
+kable(summary(casas_zona_oriente))
+
+```
+
+<p>
+El análisis del gráfico de dispersión para la Zona Oriente revela una correlación positiva moderada entre el precio y el área construida, con un coeficiente de correlación de 0.41. Si bien existe una relación directa entre ambas variables, la influencia del área construida sobre el precio es menor que en las zonas Norte y Sur. La línea de tendencia indica un aumento promedio de 0.7 millones de pesos por cada metro cuadrado adicional, pero la dispersión significativa de los puntos alrededor de la línea refleja una notable variabilidad en los precios.
+
+Esta variabilidad puede ser explicada por una mayor influencia de otros factores como la ubicación, la calidad de la construcción, las características de la casa y las condiciones del mercado inmobiliario en la Zona Oriente. 
+
+</p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(casas_zona_oriente, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Casas Zona Oriente",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(casas_zona_oriente$areaconst), y = max(casas_zona_oriente$preciom), 
+            label = paste("Correlación:", round(cor(casas_zona_oriente$areaconst, casas_zona_oriente$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de las bases y botón de reset
+mapa_oriente <- leaflet(casas_zona_oriente) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_oriente  # Mostrar el mapa interactivo
+
+# Tabla de frecuencia de los tipos de vivienda en la zona norte
+tipo_counts_oriente <- table(casas_zona_oriente$tipo)
+cat("Tabla de frecuencia de tipos de vivienda en la zona oriente:\n")
+kable(tipo_counts_oriente)
+
+# Tabla de frecuencia de estratos en la zona norte
+estrato_counts_oriente <- table(casas_zona_oriente$estrato)
+cat("Tabla de frecuencia de estratos en la zona oriente:\n")
+kable(estrato_counts_oriente)
+  
+# Tabla de frecuencia de barrios en la zona norte (los 10 primeros)
+top_barrios_oriente <- head(table(casas_zona_oriente$barrio), 10)
+top_barrios_df_oriente <- as.data.frame(top_barrios_oriente)  # Convertir a un dataframe para usar dplyr
+
+# Ordenar la tabla por frecuencia de forma descendente
+top_barrios_df_oriente <- arrange(top_barrios_df_oriente, desc(Freq))
+
+# Imprimir la tabla ordenada
+cat("Tabla de frecuencia de barrios en la zona oriente (ordenada por frecuencia descendente):\n")
+kable(top_barrios_df_oriente)
+
+```
+
+
+<h3> Base 4 Casas Zona Oeste</h3>
+
+
+<p>
+Las estadísticas descriptivas de las ofertas de casas en la zona oeste reflejan una distribución diversa en los datos. Con un total de 169 registros, se aprecia una variabilidad considerable en los atributos considerados. Al igual que en otras zonas, se identifican valores faltantes en algunos atributos, lo cual es coherente con la estructura original del dataset.
+
+En relación a los precios de las casas, se evidencia una variación amplia, con valores que oscilan entre 135 y 1999 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 680 y 736.4 unidades monetarias, respectivamente.
+
+El análisis del área construida también muestra una diversidad notable, con valores que van desde 55 hasta 1200 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 300 y 343.2 metros cuadrados, respectivamente.
+</p>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+casas_zona_oeste <- subset(vivienda, tipo == "Casa" & zona == "Zona Oeste")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(casas_zona_oeste, 3))
+
+# Calcular estadísticas descriptivas
+cat("Estadísticas descriptivas de las ofertas de casas en la zona Oeste:\n")
+kable(summary(casas_zona_oeste))
+
+```
+
+
+<p>
+El gráfico de dispersión para la Zona Oeste muestra una correlación positiva moderada entre el precio y el área construida, con un coeficiente de correlación de 0.59. Esto indica una relación directa, pero no determinante, entre ambas variables. La línea de tendencia sugiere un aumento promedio de 0.95 millones de pesos por cada metro cuadrado adicional, pero la considerable dispersión de los puntos alrededor de la línea refleja una variación notable en los precios.
+
+</p>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(casas_zona_oeste, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Casas Zona Oeste",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(casas_zona_oeste$areaconst), y = max(casas_zona_oeste$preciom), 
+            label = paste("Correlación:", round(cor(casas_zona_oeste$areaconst, casas_zona_oeste$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de las bases y botón de reset
+mapa_oeste <- leaflet(casas_zona_oeste) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_oeste  # Mostrar el mapa interactivo
+
+# Tabla de frecuencia de los tipos de vivienda en la zona norte
+tipo_counts_oeste <- table(casas_zona_oeste$tipo)
+cat("Tabla de frecuencia de tipos de vivienda en la zona Oeste:\n")
+kable(tipo_counts_oeste)
+
+# Tabla de frecuencia de estratos en la zona norte
+estrato_counts_oeste <- table(casas_zona_oeste$estrato)
+cat("Tabla de frecuencia de estratos en la zona Oeste:\n")
+kable(estrato_counts_oeste)
+  
+# Tabla de frecuencia de barrios en la zona norte (los 10 primeros)
+top_barrios_oeste <- head(table(casas_zona_oeste$barrio), 10)
+top_barrios_df_oeste <- as.data.frame(top_barrios_oeste)  # Convertir a un dataframe para usar dplyr
+
+# Ordenar la tabla por frecuencia de forma descendente
+top_barrios_df_oeste <- arrange(top_barrios_df_oeste, desc(Freq))
+
+# Imprimir la tabla ordenada
+cat("Tabla de frecuencia de barrios en la zona oeste (ordenada por frecuencia descendente):\n")
+kable(top_barrios_df_oeste)
+
+```
+
+<h3> Base 5 Casas Zona Centro</h3>
+
+<p>
+Las estadísticas descriptivas de las ofertas de casas en la zona centro revelan una distribución diversificada en los datos. Con un total de 100 registros, se destaca una variabilidad significativa en los atributos considerados. Al igual que en otras zonas, se encuentran valores faltantes en algunos atributos, lo cual es coherente con la estructura original del dataset.
+
+En cuanto a los precios de las casas, se observa una variación considerable, con valores que van desde 148 hasta 1100 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 310 y 339.2 unidades monetarias, respectivamente.
+
+El análisis del área construida también muestra una diversidad significativa, con valores que van desde 74 hasta 750 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 200 y 217.8 metros cuadrados, respectivamente.
+
+</p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+casas_zona_centro <- subset(vivienda, tipo == "Casa" & zona == "Zona Centro")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(casas_zona_centro, 3))
+
+# Calcular estadísticas descriptivas
+cat("Estadísticas descriptivas de las ofertas de casas en la zona Centro:\n")
+kable(summary(casas_zona_centro))
+
+```
+
+<p>
+El gráfico de dispersión para la Zona Centro revela una correlación positiva moderada entre el precio y el área construida, con un coeficiente de correlación de 0.53. Si bien existe una relación directa entre ambas variables, la influencia del área construida sobre el precio es menor que en otras zonas. La línea de tendencia indica un aumento promedio de 0.85 millones de pesos por cada metro cuadrado adicional, pero la notable dispersión de los puntos alrededor de la línea refleja una variabilidad considerable en los precios.
+</p>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(casas_zona_centro, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Casas Zona Centro",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(casas_zona_centro$areaconst), y = max(casas_zona_centro$preciom), 
+            label = paste("Correlación:", round(cor(casas_zona_centro$areaconst, casas_zona_centro$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de las bases y botón de reset
+mapa_centro <- leaflet(casas_zona_centro) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_centro  # Mostrar el mapa interactivo
+
+# Tabla de frecuencia de los tipos de vivienda en la zona norte
+tipo_counts_centro <- table(casas_zona_centro$tipo)
+cat("Tabla de frecuencia de tipos de vivienda en la zona Centro:\n")
+kable(tipo_counts_centro)
+
+# Tabla de frecuencia de estratos en la zona norte
+estrato_counts_centro <- table(casas_zona_centro$estrato)
+cat("Tabla de frecuencia de estratos en la zona Centro:\n")
+kable(estrato_counts_centro)
+  
+# Tabla de frecuencia de barrios en la zona norte (los 10 primeros)
+top_barrios_centro <- head(table(casas_zona_centro$barrio), 10)
+top_barrios_df_centro <- as.data.frame(top_barrios_centro)  # Convertir a un dataframe para usar dplyr
+
+# Ordenar la tabla por frecuencia de forma descendente
+top_barrios_df_centro <- arrange(top_barrios_df_centro, desc(Freq))
+
+# Imprimir la tabla ordenada
+cat("Tabla de frecuencia de barrios en la zona oriente (ordenada por frecuencia descendente):\n")
+kable(top_barrios_df_centro)
+
+```
+
+<h3> Momento de discusión</h3>
+<p>
+En el siguiente mapa se puede observar a una sola vista como se encuentra la distribución de casas según la zona registrada en el dataset, es importante destacar que se logra identificar que existen barrios que según sus coordenadas comparten la misma zona, esto puede deberse a errores humanos en el ingreso de longitud y latitud o en la asignación de la variable barrio en el sistema de información que se diseñó para la captura de los datos.
+</p>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Combinar datos de trinchetas de todas las zonas en un único conjunto de datos
+todas_trinchetas <- rbind(
+  transform(casas_zona_norte, zona = "norte"),
+  transform(casas_zona_sur, zona = "sur"),
+  transform(casas_zona_oriente, zona = "oriente"),
+  transform(casas_zona_oeste, zona = "oeste"),
+  transform(casas_zona_centro, zona = "centro")
+)
+
+# Convertir 'zona' en un factor para facilitar la asignación de colores
+todas_trinchetas$zona <- factor(todas_trinchetas$zona)
+
+# Crear un mapa Leaflet
+mapa <- leaflet(data = todas_trinchetas) %>%
+  addTiles()  # Añadir el fondo de mapa base
+
+# Asignar colores a las trinchetas según la zona
+mapa <- mapa %>%
+  addCircleMarkers(
+    color = ~colorFactor("Set1", levels(todas_trinchetas$zona))(zona),
+    radius = 5,  # Tamaño de los marcadores
+    fillOpacity = 0.8,  # Opacidad de relleno
+    popup = ~paste("Zona:", zona),  # Contenido del popup
+    label = ~paste("Precio:", preciom, "<br>Área Construida:", areaconst),  # Contenido de la etiqueta
+    lng = ~longitud,  # Columna que contiene la longitud
+    lat = ~latitud  # Columna que contiene la latitud
+  )
+
+# Mostrar el mapa
+mapa
+
+```
+
+## 2. EDA 
+Correlación de la variable precio de la casa en función de: área construida, estrato, numero de baños, numero de habitaciones y zona donde se ubica la vivienda
+
+
+<p>
+En este apartado teniendo en cuenta el EDA realizado como resultado del análisis de correlación entre la variable respuesta (preciom) del tipo de vivienda Casa y las variables predictoras (areaconst, estrato, banios, habitaciones y zona) se grafican a continuación 2 modelos de graficas:
+
+
+- Dispersión:  Este tipo de gráfico se utiliza para visualizar la relación entre dos variables cuantitativas, como el precio y el área construida, el precio y el estrato, el precio y el número de baños, y el precio y el número de habitaciones. Cada punto en el gráfico representa una observación en el conjunto de datos. La posición de cada punto en los ejes x e y representa los valores de las dos variables.
+
+- Caja de bigotes: Este tipo de gráfico se utiliza para visualizar la distribución de una variable numérica en diferentes niveles de una variable categórica. En este caso, se utiliza para visualizar la distribución de los precios (variable respuesta) en cada zona (variable categórica).
+
+</p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE }
+# Filtrar el dataframe para las viviendas de tipo "Casa"
+vivienda_casa <- subset(vivienda, tipo == "Casa")
+
+# Convertir la variable 'zona' a factor
+vivienda_casa$zona <- as.factor(vivienda_casa$zona)
+
+# Generar subset para correlación
+vivienda_correlacion <- vivienda_casa[, c("preciom", "areaconst", "estrato", "banios", "habitaciones", "zona")]
+
+# Calcular coeficientes de correlación
+cor_area <- cor(vivienda_correlacion$preciom, vivienda_correlacion$areaconst)
+cor_estrato <- cor(vivienda_correlacion$preciom, vivienda_correlacion$estrato)
+cor_banios <- cor(vivienda_correlacion$preciom, vivienda_correlacion$banios)
+cor_habitaciones <- cor(vivienda_correlacion$preciom, vivienda_correlacion$habitaciones)
+
+# Gráfico de correlación: Preciom vs Área construida
+plot_precio_area <- plot_ly(vivienda_correlacion, x = ~areaconst, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'blue'), 
+                            text = ~paste("Área construida: ", areaconst, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_area, 2)),
+                            hoverinfo = 'text') %>%
+  layout(title = "Correlación entre Precio y Área Construida (Casa)",
+         xaxis = list(title = "Área Construida"),
+         yaxis = list(title = "Precio"))
+
+# Gráfico de correlación: Preciom vs Estrato
+plot_precio_estrato <- plot_ly(vivienda_correlacion, x = ~estrato, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'red'), 
+                               text = ~paste("Estrato: ", estrato, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_estrato, 2)),
+                               hoverinfo = 'text') %>%
+  layout(title = "Correlación entre Precio y Estrato (Casa)",
+         xaxis = list(title = "Estrato"),
+         yaxis = list(title = "Precio"))
+
+# Gráfico de correlación: Preciom vs Baños
+plot_precio_banios <- plot_ly(vivienda_correlacion, x = ~banios, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'green'), 
+                              text = ~paste("Baños: ", banios, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_banios, 2)),
+                              hoverinfo = 'text') %>%
+  layout(title = "Correlación entre Precio y Baños (Casa)",
+         xaxis = list(title = "Baños"),
+         yaxis = list(title = "Precio"))
+
+# Gráfico de correlación: Preciom vs Habitaciones
+plot_precio_habitaciones <- plot_ly(vivienda_correlacion, x = ~habitaciones, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'orange'), 
+                                    text = ~paste("Habitaciones: ", habitaciones, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_habitaciones, 2)),
+                                    hoverinfo = 'text') %>%
+  layout(title = "Correlación entre Precio y Habitaciones (Casa)",
+         xaxis = list(title = "Habitaciones"),
+         yaxis = list(title = "Precio"))
+
+# Gráfico de correlación: Preciom vs Zona
+plot_precio_zona <- plot_ly(vivienda_correlacion, x = ~zona, y = ~preciom, type = 'box', 
+                            text = ~paste("Zona: ", zona, "<br>Precio: ", preciom),
+                            hoverinfo = 'text') %>%
+  layout(title = "Correlación entre Precio y Zona (Casa)",
+         xaxis = list(title = "Zona"),
+         yaxis = list(title = "Precio"))
+
+
+
+```
+
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Mostrar los gráficos individualmente
+subplot(plot_precio_area)
+subplot(plot_precio_estrato)
+subplot(plot_precio_banios)
+subplot(plot_precio_habitaciones)
+
+```
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+subplot(plot_precio_zona)
+
+# Matriz de correlación de las variables independientes
+cor_matrix <- cor(vivienda_casa[, c("preciom","areaconst", "estrato", "habitaciones", "parqueaderos", "banios")])
+cor_matrix
+
+
+# Graficar la matriz de correlación
+corrplot(cor_matrix, method = "color", type = "upper", addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+<p>La correlación más alta con "preciom" es con la variable "estrato" (0.6658), seguida por "areaconst" (0.6529) y "banios" (0.5581). Esto indica que hay una correlación positiva moderada a fuerte entre el precio de la vivienda y estas características.</p>
+
+
+## 3. Estimación de un modelo de regresión lineal múltiple 
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Estimación de un modelo de regresión lineal múltiple
+modelo_rlm_casa <- lm(preciom ~ areaconst + estrato + habitaciones + parqueaderos + banios, data = vivienda_casa)
+
+# Interpretación de los coeficientes
+summary(modelo_rlm_casa)
+
+# Interpretación del coeficiente R^2
+R2 <- summary(modelo_rlm_casa)$r.squared
+print(R2)
+
+
+```
+
+<p>
+<b>Los resultados de la estimación del modelo de regresión lineal múltiple son los siguientes:</b>
+
+<h3><b>Interpretación de los coeficientes</b></h3>:
+
+<ul>
+    <li><b>Intercepto</b>: El coeficiente del intercepto es -413.87536. Esto significa que, cuando todas las demás variables son cero, el precio estimado de una vivienda es de -413.87536 unidades monetarias. Sin embargo, dado que este valor no tiene una interpretación realista en este contexto, no se le da mucha importancia en la interpretación.</li>
+    <li><b>Área Construida</b>: El coeficiente para el área construida es 0.74227. Esto indica que, manteniendo constantes todas las demás variables, por cada unidad adicional de área construida, el precio estimado de la vivienda aumenta en 0.74227 unidades monetarias.</li>
+    <li><b>Estrato</b>:  El coeficiente para el estrato es 116.07109. Esto sugiere que, manteniendo constantes todas las demás variables, el precio estimado de la vivienda aumenta en 116.07109 unidades monetarias por cada incremento de una unidad en el estrato. </li>
+    <li><b>Número de Cuartos</b>: El coeficiente para el número de habitaciones es -14.74995. Esto indica que, manteniendo constantes todas las demás variables, por cada incremento de una unidad en el número de habitaciones, el precio estimado de la vivienda disminuye en 14.74995 unidades monetarias. </li>
+    <li><b>Número de Parqueaderos</b>:  El coeficiente para el número de parqueaderos es 64.29943. Esto sugiere que, manteniendo constantes todas las demás variables, por cada unidad adicional de parqueaderos, el precio estimado de la vivienda aumenta en 64.29943 unidades monetarias.</li>
+    <li><b>Número de Baños</b>: El coeficiente para el número de baños es 39.03498. Esto indica que, manteniendo constantes todas las demás variables, por cada unidad adicional de baños, el precio estimado de la vivienda aumenta en 39.03498 unidades monetarias.</li>
+</ul>
+
+
+
+<h3>Gráfico de residuos vs. valores ajustados </h3>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Residuos del modelo
+residuos <- resid(modelo_rlm_casa)
+
+# Valores ajustados del modelo
+valores_ajustados <- fitted(modelo_rlm_casa)
+
+# Gráfico de residuos vs. valores ajustados
+plot(valores_ajustados, residuos, main = "Gráfico de Residuos vs. Valores Ajustados",
+     xlab = "Valores Ajustados", ylab = "Residuos")
+abline(h = 0, col = "red")  # Línea horizontal en y = 0
+
+
+```
+
+
+<h3>Gráfico de distribución de los residuos </h3>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Histograma de los residuos
+hist(residuos, breaks = 20, main = "Histograma de Residuos", xlab = "Residuos")
+
+# Gráfico de probabilidad normal de los residuos
+qqnorm(residuos, main = "Gráfico Q-Q de los Residuos")
+qqline(residuos)  # Línea de referencia para la distribución normal
+
+```
+
+
+<h3> Gráfico de efectos parciales  </h3>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Gráfico de efectos parciales para el área construida
+plot(effect("areaconst", modelo_rlm_casa), main = "Efecto Parcial del Área Construida en el Precio")
+
+```
+
+
+<h3>  Gráficos de dispersión con línea de regresión</h3>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# Gráfico de dispersión del área construida vs. precio con línea de regresión
+plot(vivienda_casa$areaconst, vivienda_casa$preciom, main = "Área Construida vs. Precio",
+     xlab = "Área Construida", ylab = "Precio")
+abline(coef(modelo_rlm_casa)[1], coef(modelo_rlm_casa)[2], col = "red")  # Línea de regresión
+
+```
+
+
+<h3><b>Interpretación del coeficiente R^2</b>:</h3>
+El coeficiente de determinación (R^2) es aproximadamente 0.6834. Esto significa que alrededor del 68.34% de la variabilidad en el precio de la vivienda puede ser explicada por las variables independientes incluidas en el modelo. Esto indica un buen ajuste del modelo a los datos observados.
+
+<b>Discusión sobre el ajuste del modelo e implicaciones</b>:
+Dado que el coeficiente de determinación es relativamente alto, sugiere que el modelo de regresión lineal múltiple es capaz de explicar una proporción significativa de la variabilidad en el precio de la vivienda utilizando las variables incluidas. Sin embargo, siempre hay margen para mejorar el modelo. Para ello, podríamos considerar la inclusión de variables adicionales relevantes, como la ubicación geográfica, la antigüedad de la propiedad o características específicas del vecindario, que podrían mejorar la capacidad predictiva del modelo y explicar aún más la variabilidad en los precios de las propiedades. Además, podríamos explorar posibles transformaciones en las variables existentes o técnicas de modelado más avanzadas para mejorar aún más la precisión del modelo.
+</p>
+
+## 4. Validación de supuestos 
+
+
+<p>
+Esta sección tiene como objetivo realizar pruebas para validar dos supuestos importantes en el análisis de regresión lineal:
+
+Normalidad de los residuos: En donde la prueba de Shapiro-Wilk pretende evaluar si los residuos del modelo siguen una distribución normal. Esto es importante porque el análisis de regresión lineal asume que los errores (residuos) siguen una distribución normal. Si los residuos no se distribuyen normalmente, podría indicar que el modelo no está capturando completamente la estructura de los datos o que hay otros factores que no se han tenido en cuenta.
+
+Homocedasticidad de los residuos: En donde la prueba de Breusch-Pagan pretende evaluar si los residuos tienen una varianza constante en relación con las variables independientes. La homocedasticidad significa que la varianza de los residuos es constante en todos los niveles de las variables independientes. Si hay heterocedasticidad, es decir, la varianza de los residuos no es constante, puede haber un problema de modelado que afecte la precisión de las estimaciones y las pruebas de hipótesis.
+
+. </p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Gráfico Q-Q de los residuos
+qqnorm(residuos, main = "Gráfico Q-Q de los Residuos")
+qqline(residuos)  # Línea de referencia para la distribución normal
+
+# Histograma de los residuos
+hist(residuos, breaks = 20, main = "Histograma de Residuos", xlab = "Residuos")
+
+# Realizar prueba de Shapiro-Wilk solo si el tamaño de la muestra es adecuado (entre 3 y 5000)
+if (length(residuos) >= 3 & length(residuos) <= 5000) {
+  # Prueba de Shapiro-Wilk para normalidad de los residuos
+  shapiro.test(residuos)
+} else {
+  cat("El tamaño de la muestra de residuos no es adecuado para realizar la prueba de Shapiro-Wilk.\n")
+}
+
+# Prueba de Breusch-Pagan para homocedasticidad de los residuos
+bptest(modelo_rlm_casa)
+
+```
+
+<p>En conclusión, el análisis de los residuos del modelo de regresión lineal sugiere que no se ajustan completamente a la normalidad, aunque la desviación no es grave y el tamaño de la muestra parece ser grande. La prueba de Shapiro-Wilk rechaza la normalidad de los residuos, mientras que la prueba de Breusch-Pagan no encuentra evidencia de heterocedasticidad. </p>
+
+
+## 5. Predección del precio de la vivienda
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Definir las características de la vivienda
+vivienda_nueva <- data.frame(
+  tipo = "Casa",
+  areaconst = 200,
+  parqueaderos = 1,
+  banios = 2,
+  habitaciones = 4,
+  estrato = c(4, 5),  # Se permiten dos opciones de estrato
+  zona = "Norte",
+  credito_preaprobado = 350
+)
+
+# Crear combinaciones de características para viviendas potenciales
+combinaciones <- expand.grid(
+  areaconst = c(180, 200),  # Área construida
+  parqueaderos = c(1, 2),          # Número de parqueaderos
+  banios = c(2, 3),                # Número de baños
+  habitaciones = c(3, 4),       # Número de habitaciones
+  estrato = c(4, 5),               # Estrato
+  zona = "Zona Norte"                   # Zona
+)
+
+# Predecir el precio de las viviendas potenciales
+precios_predichos <- predict(modelo_rlm_casa, newdata = combinaciones)
+
+# Filtrar las predicciones por encima de 350 millones
+precios_predichos_filtrados <- precios_predichos[precios_predichos <= 350]
+
+# Calcular el precio predicho promedio
+precio_predicho_promedio <- mean(precios_predichos_filtrados)
+
+# Crear un dataframe con los precios predichos filtrados y su índice
+resultados_filtrados <- data.frame(index = which(precios_predichos <= 350), precio_predicho = precios_predichos_filtrados)
+
+resultados_filtrados
+
+# Crear un gráfico de dispersión interactivo con plotly
+plot_ly(resultados_filtrados, x = ~index, y = ~precio_predicho, type = "scatter", mode = "markers", marker = list(color = ~precio_predicho, colorscale = "Viridis")) %>%
+  add_trace(y = ~precio_predicho_promedio, type = "scatter", mode = "lines", line = list(color = "red"), name = "Precio predicho promedio") %>%
+  layout(title = "Precios predichos de las viviendas potenciales",
+         xaxis = list(title = "Índice de la vivienda potencial"),
+         yaxis = list(title = "Precio predicho"),
+         hovermode = "closest")
+
+
+```
+
+## 6. Ofertas potenciales
+
+<p>Los resultados muestran las características de las primeras cinco viviendas potenciales que cumplen con las condiciones establecidas y cuyo precio estimado no supera el límite del crédito preaprobado para la nueva vivienda. 
+
+Área Construida:Las áreas construidas de estas viviendas varían entre 180 y 200 metros cuadrados.
+Parqueaderos: Todas las viviendas tienen al menos un parqueadero, con una de ellas teniendo dos.
+Baños: La cantidad de baños oscila entre 2 y 3.
+Habitaciones:** Todas las viviendas tienen entre 3 y 4 habitaciones.
+Estrato: Las viviendas pertenecen a estratos 4.
+Zona: Todas las viviendas se encuentran en la Zona Norte.
+Precio Estimado: Los precios estimados de estas viviendas varían entre 282.1364 y 346.4359 millones de pesos.
+
+Estos resultados son útiles para presentar a Maria las primeras opciones de viviendas potenciales que se ajustan a los criterios establecidos y están dentro del presupuesto disponible para su compra.</p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Agregar los precios estimados al dataframe de combinaciones
+combinaciones$precio_estimado <- precios_predichos
+
+# Seleccionar las primeras 5 viviendas potenciales dentro del crédito preaprobado
+ofertas_potenciales <- combinaciones[combinaciones$precio_estimado <= vivienda_nueva$credito_preaprobado, ]
+
+# Mostrar las 5 ofertas potenciales
+print(head(ofertas_potenciales, 5))
+
+```
+
+## 7. Escenario de crédito pre-aprobado para tipo de vivienda Apartamento
+
+<h2>Segmentación por zonas</h2>
+
+<h3><p>Base 1 Apartamentos Zona Norte</p></h3>
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+apartamentos_zona_norte <- subset(vivienda, tipo == "Apartamento" & zona == "Zona Norte")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(apartamentos_zona_norte, 3))
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(apartamentos_zona_norte, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Apartamento Zona Norte",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(apartamentos_zona_norte$areaconst), y = max(apartamentos_zona_norte$preciom), 
+            label = paste("Correlación:", round(cor(apartamentos_zona_norte$areaconst, apartamentos_zona_norte$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de la base y botón de reset
+mapa_ap_norte <- leaflet(apartamentos_zona_norte) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_ap_norte  # Mostrar el mapa interactivo
+
+```
+
+
+<h3><p>Base 2 Apartamentos Zona Sur</p></h3>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+apartamentos_zona_sur <- subset(vivienda, tipo == "Apartamento" & zona == "Zona Sur")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(apartamentos_zona_sur, 3))
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(apartamentos_zona_sur, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Apartamento Zona Sur",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(apartamentos_zona_sur$areaconst), y = max(apartamentos_zona_sur$preciom), 
+            label = paste("Correlación:", round(cor(apartamentos_zona_sur$areaconst, apartamentos_zona_sur$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+
+# Mapa con los puntos de la base y botón de reset
+mapa_ap_sur <- leaflet(apartamentos_zona_sur) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_ap_sur  # Mostrar el mapa interactivo
+
+```
+
+
+<h3><p>Base 2 Apartamentos Zona Oeste</p></h3>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+apartamentos_zona_oeste <- subset(vivienda, tipo == "Apartamento" & zona == "Zona Oeste")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(apartamentos_zona_oeste, 3))
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(apartamentos_zona_oeste, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Apartamento Zona Oeste",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(apartamentos_zona_oeste$areaconst), y = max(apartamentos_zona_oeste$preciom), 
+            label = paste("Correlación:", round(cor(apartamentos_zona_oeste$areaconst, apartamentos_zona_oeste$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de la base y botón de reset
+mapa_ap_oeste <- leaflet(apartamentos_zona_oeste) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_ap_oeste  # Mostrar el mapa interactivo
+
+```
+
+
+<h3><p>Base 2 Apartamentos Zona Oriente</p></h3>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+apartamentos_zona_oriente <- subset(vivienda, tipo == "Apartamento" & zona == "Zona Oriente")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(apartamentos_zona_oriente, 3))
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(apartamentos_zona_oriente, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Apartamento Zona Oriente",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(apartamentos_zona_oriente$areaconst), y = max(apartamentos_zona_oriente$preciom), 
+            label = paste("Correlación:", round(cor(apartamentos_zona_oriente$areaconst, apartamentos_zona_oriente$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+# Mapa con los puntos de la base y botón de reset
+mapa_ap_oriente <- leaflet(apartamentos_zona_oriente) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_ap_oriente  # Mostrar el mapa interactivo
+
+```
+
+
+<h3><p>Base 2 Apartamentos Zona Centro</p></h3>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
+apartamentos_zona_centro <- subset(vivienda, tipo == "Apartamento" & zona == "Zona Centro")
+
+# Mostrar los primeros 3 registros de la base de datos filtrada
+cat("Primeros 3 registros de la base de datos filtrada:\n")
+kable(head(apartamentos_zona_centro, 3))
+
+# Gráfico de dispersión de precios versus área construida con ggplot2
+ggplot(apartamentos_zona_centro, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +  # Colores vivos y tamaño de puntos
+  geom_smooth(method = "lm", se = FALSE, color = "red") +  # Línea de tendencia
+  labs(title = "Precio vs Área Construida - Apartamento Zona Centro",
+       x = "Área Construida", y = "Precio") +
+  geom_text(x = max(apartamentos_zona_centro$areaconst), y = max(apartamentos_zona_centro$preciom), 
+            label = paste("Correlación:", round(cor(apartamentos_zona_centro$areaconst, apartamentos_zona_centro$preciom), 2)), 
+            color = "black", hjust = 1, vjust = 1)
+
+
+# Mapa con los puntos de la base y botón de reset
+mapa_ap_centro <- leaflet(apartamentos_zona_centro) %>%
+  addTiles() %>%
+  addMarkers(lng = ~longitud, lat = ~latitud, popup = ~barrio) %>%
+  addResetMapButton()
+
+mapa_ap_centro  # Mostrar el mapa interactivo
+
+
+```
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Combinar datos de trinchetas de todas las zonas en un único conjunto de datos
+todas_trinchetas <- rbind(
+  transform(apartamentos_zona_norte, zona = "norte"),
+  transform(apartamentos_zona_sur, zona = "sur"),
+  transform(apartamentos_zona_oriente, zona = "oriente"),
+  transform(apartamentos_zona_oeste, zona = "oeste"),
+  transform(apartamentos_zona_centro, zona = "centro")
+)
+
+# Convertir 'zona' en un factor para facilitar la asignación de colores
+todas_trinchetas$zona <- factor(todas_trinchetas$zona)
+
+# Crear un mapa Leaflet
+mapa <- leaflet(data = todas_trinchetas) %>%
+  addTiles()  # Añadir el fondo de mapa base
+
+# Asignar colores a las trinchetas según la zona
+mapa <- mapa %>%
+  addCircleMarkers(
+    color = ~colorFactor("Set1", levels(todas_trinchetas$zona))(zona),
+    radius = 5,  # Tamaño de los marcadores
+    fillOpacity = 0.8,  # Opacidad de relleno
+    popup = ~paste("Zona:", zona),  # Contenido del popup
+    label = ~paste("Precio:", preciom, "<br>Área Construida:", areaconst),  # Contenido de la etiqueta
+    lng = ~longitud,  # Columna que contiene la longitud
+    lat = ~latitud  # Columna que contiene la latitud
+  )
+
+# Mostrar el mapa
+mapa
+
+```
+
+
+<p> Basado en la información generada se identifica que según el gráfico de dispersión: La zona oeste presenta la mayor concentración de puntos en la zona superior derecha, lo que indica una mayor cantidad de propiedades con precios elevados y áreas construidas amplias. de otra parte el rango de precios para la zona oeste es el más alto, por tanto, la zona oeste tiene el coeficiente de correlación más fuerte (0.82), lo que indica una relación más estrecha entre precio y área construida.
+
+Ahora hablando de la comparación con otras zonas, se observa que la Zona Sur aunque tiene un coeficiente de correlación similar a la zona norte (0.76), el rango de precios es ligeramente inferior. La Zona Norte: Si bien presenta un rango de precios similar a la zona sur, la concentración de puntos en la zona superior derecha del gráfico de dispersión es menor. Por su parte la Zona Oriente es la que presenta los precios más bajos, aunque presenta un dato atípico en la gráfica este no altera la tendencia general de precios más bajos. Por ultimo  la Zona Centro Ofrece precios intermedios, con una poca oferta inmoboliaria respecto a Apartamento, esto puede deberse a la dinamica comercial propia del sector reduciendo la vivienda residencial.
+
+Tambien es valido destacar que al igual con los datos registrados en el tipo de vivienda "Casa" se evidencia un error humano en la asignación del tipo de zona o en los datos de longitud y latitud dado que en el ultimo grafico se observa que existen traslapos en los colores, esto sucede con mayor incidencia en la parte superior del mapa.</p>
+
+<h2>Analisis exploratorio </h2>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+vivienda_apartamento <- subset(vivienda, tipo == "Apartamento") #Creacuón del subset filtrado por tipo vivienda apartamento
+```
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Resumen estadístico descriptivo
+summary(vivienda_apartamento)
+
+# Revisar la estructura de los datos
+str(vivienda_apartamento)
+
+# Estadísticas descriptivas para variables numéricas
+summary(vivienda_apartamento[, sapply(vivienda_apartamento, is.numeric)])
+
+# Estadísticas descriptivas para variables categóricas
+summary(vivienda_apartamento[, sapply(vivienda_apartamento, is.factor)])
+
+
+# Gráfico de violín para la distribución del precio de los apartamentos
+ggplot(vivienda_apartamento, aes(x = "", y = preciom, fill = "Precio")) +
+  geom_violin(trim = FALSE, draw_quantiles = c(0.25, 0.5, 0.75), scale = "width", width = 0.8) +
+  geom_boxplot(width = 0.1, fill = "white", color = "black") +
+  scale_fill_manual(values = c("Precio" = "blue")) +
+  labs(title = "Distribución del Precio de los Apartamentos",
+       x = "",
+       y = "Precio",
+       fill = "") +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+
+# Gráfico de dispersión de precio vs. área construida
+ggplot(vivienda_apartamento, aes(x = areaconst, y = preciom)) +
+  geom_point(color = "blue", size = 3) +
+  labs(title = "Precio vs Área Construida de los Apartamentos",
+       x= "Área Construida",
+       y = "Precio") +
+  theme_minimal()
+
+
+# Seleccionar las variables de interés para el ANOVA
+variables_interes <- c("preciom", "areaconst", "estrato", "banios", "habitaciones", "zona")
+vivienda_apartamento_seleccion <- vivienda_apartamento[, variables_interes]
+
+# Convertir la variable categórica 'zona' en factor
+vivienda_apartamento_seleccion$zona <- as.factor(vivienda_apartamento_seleccion$zona)
+
+# Realizar ANOVA para cada variable numérica en función de la variable categórica 'zona'
+anova_results <- lapply(vivienda_apartamento_seleccion[, -6], function(x) {
+  aov_result <- aov(x ~ zona, data = vivienda_apartamento_seleccion)
+  return(summary(aov_result))
+})
+
+# Imprimir los resultados del ANOVA
+names(anova_results) <- variables_interes[-6]  # Eliminar 'zona' del nombre de las variables
+print(anova_results)
+
+
+# Resumen estadístico para variables numéricas usando skimr
+skim(vivienda_apartamento)
+
+```
+
+
+
+<p> Interpretación del Modelo
+El modelo de regresión lineal múltiple ajustado es:
+
+Precio = β0 + β1 * Área Construida + β2 * Estrato + β3 * Parqueaderos + β4 * Baños + β5 * Habitaciones + ε
+
+Donde:
+
+β0 es el intercepto, que representa el precio esperado cuando todas las demás variables son cero.
+β1, β2, β3, β4 y β5 son los coeficientes de regresión que representan el cambio esperado en el precio para un aumento unitario en cada variable, manteniendo todas las demás variables constantes.
+ε es el término de error.</p>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Seleccionar variables de interés
+variables_interes <- c("preciom", "areaconst", "estrato", "banios", "habitaciones", "zona")
+vivienda_apartamento_seleccion <- vivienda_apartamento[, variables_interes]
+
+# Convertir la variable categórica 'zona' en factor
+vivienda_apartamento_seleccion$zona <- as.factor(vivienda_apartamento_seleccion$zona)
+
+# Modelo de regresión lineal múltiple
+modelo_regresion <- lm(preciom ~ areaconst + estrato + banios + habitaciones + zona, 
+                      data = vivienda_apartamento_seleccion)
+
+# Resumen del modelo
+summary(modelo_regresion)
+
+# Coeficientes de regresión
+coeficientes <- coef(modelo_regresion)
+
+# Interpretar coeficientes
+# Área construida
+area_construida_coef <- coeficientes["areaconst"]
+cat("El coeficiente para el área construida es:", area_construida_coef, "\n")
+
+# Estrato
+estrato_coef <- coeficientes["estrato"]
+cat("Los coeficientes para los estratos son:", estrato_coef, "\n")
+
+# Baños
+banios_coef <- coeficientes["banios"]
+cat("El coeficiente para los baños es:", banios_coef, "\n")
+
+# Habitaciones
+habitaciones_coef <- coeficientes["habitaciones"]
+cat("El coeficiente para las habitaciones es:", habitaciones_coef, "\n")
+
+# Zona
+zona_coef <- coeficientes[grep("zona", names(coeficientes))]
+cat("Los coeficientes para las zonas son:", zona_coef, "\n")
+
+# R^2
+R_cuadrado <- summary(modelo_regresion)$r.squared
+cat("El R^2 del modelo es:", R_cuadrado, "\n")
+
+```
+<p> 
+El análisis del modelo de regresión aplicado revela que el precio de la vivienda está influenciado significativamente por diversas características. Por cada metro cuadrado adicional en el área construida, el precio aumenta en aproximadamente $2.22 millones. Respecto a los estratos, se observa un aumento significativo en el precio con valores cercanos a $56.92 millones para estrato 6, mientras que para los baños y habitaciones, se registra un incremento de aproximadamente $61.11 millones y una disminución de alrededor de $32.93 millones, respectivamente, por cada unidad adicional. En cuanto a las zonas, se identifican variaciones de precios significativas, siendo la Zona Sur la de mayor impacto con un incremento de $118.86 millones, seguida por la Zona Norte con $31.09 millones, la Zona Oeste con $20.09 millones y la Zona Centro con $19.32 millones. El modelo tiene un coeficiente de determinación (R^2) de aproximadamente 0.78, lo que indica que alrededor del 78.39% de la variabilidad en el precio de la vivienda puede ser explicada por las variables incluidas en el modelo, demostrando un buen ajuste.</p>
+<h2>Validacion de supuestos</h2>
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+# 1. Normalidad de los residuos
+qqnorm(modelo_regresion$resid)
+qqline(modelo_regresion$resid)
+
+# 2. Homocedasticidad de los residuos
+plot(modelo_regresion$resid, fitted(modelo_regresion))
+
+# 3. Heterocedasticidad de los residuos (Breusch-Pagan test)
+bp_test <- bptest(modelo_regresion)
+bp_test
+
+# 4. Autocorrelación de los residuos (Ljung-Box test)
+ljung_box_test <- Box.test(modelo_regresion$resid, type = "Ljung-Box")
+ljung_box_test
+
+
+```
+
+<p>Test de Breusch-Pagan para homocedasticidad:
+El valor de estadístico de prueba (BP) es 1465.5 con 8 grados de libertad, y el p-valor es menor que 2.2e-16. Esto indica que hay evidencia significativa para rechazar la hipótesis nula de homocedasticidad, lo que sugiere que los residuos no tienen varianza constante.
+
+Test de Ljung-Box para autocorrelación de los residuos:
+El valor de estadístico de prueba (X-squared) es 127.18 con 1 grado de libertad, y el p-valor es menor que 2.2e-16. Esto indica que hay evidencia significativa para rechazar la hipótesis nula de independencia de los residuos, lo que sugiere que los residuos están autocorrelacionados.
+
+Estos resultados pueden indicar que el modelo de regresión lineal múltiple puede no cumplir completamente con los supuestos de homocedasticidad e independencia de los residuos.</p>
+
+<h2> Predicción del precio</h2>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+# Definir las características de la vivienda
+vivienda_nueva <- data.frame(
+  tipo = "Apartamento",
+  areaconst = 300,
+  banios = 3,
+  habitaciones = 5,
+  estrato = c(5, 6),  # Se permiten dos opciones de estrato
+  zona = "Zona Sur",
+  credito_preaprobado = 850
+)
+
+
+
+# Predecir el precio de la vivienda con las características especificadas
+prediccion_precio <- predict(modelo_regresion, newdata = vivienda_nueva)
+prediccion_precio
+
+```
+
+<p>La predicción del precio para la vivienda especificada es de $732.8381 millones (para el estrato 5) y $789.7567 millones (para el estrato 6).</p>
+
+<h2> Potenciales ofertas</h2>
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+
+# Crear combinaciones de características para viviendas potenciales
+combinaciones <- expand.grid(
+  areaconst = c(280, 300),  # Área construida
+  banios = c(3, 4),                # Número de baños
+  habitaciones = c(4, 5),       # Número de habitaciones
+  estrato = c(5, 6),               # Estrato
+  zona = "Zona Sur"                   # Zona
+)
+
+# Predecir el precio de las viviendas potenciales
+precios_predichos <- predict(modelo_regresion, newdata = combinaciones)
+
+# Agregar los precios estimados al dataframe de combinaciones
+combinaciones$precio_estimado <- precios_predichos
+
+# Seleccionar las primeras 5 viviendas potenciales dentro del crédito preaprobado
+ofertas_potenciales <- combinaciones[combinaciones$precio_estimado <= vivienda_nueva$credito_preaprobado, ]
+
+# Mostrar las 5 ofertas potenciales
+print(head(ofertas_potenciales, 5))
+
+
+
+```
+<p>
+Las ofertas potenciales presentan una variedad de opciones en términos de tamaño, distribución de espacios y precios estimados. La primera oferta, con un área construida de 280 metros cuadrados, ofrece 3 baños y 4 habitaciones, con un precio estimado de alrededor de $721.31 millones. La segunda opción, también con 300 metros cuadrados, cuenta con características similares pero un precio ligeramente superior, aproximadamente $765.77 millones. La tercera y cuarta oferta, con áreas construidas de 280 y 300 metros cuadrados respectivamente, presentan 4 baños y 4 habitaciones, con precios estimados de $782.42 y $826.88 millones respectivamente. Finalmente, la quinta oferta, con 280 metros cuadrados, ofrece 3 baños y 5 habitaciones, con el precio estimado más bajo de todas, alrededor de $688.38 millones. Estas opciones brindan a los potenciales compradores una gama de alternativas para seleccionar la vivienda que mejor se ajuste a sus necesidades y presupuesto.
+
+
+
+
+ </p>
+
+
+## 8. Anexos - Repositorio Código fuente
+
+Si deseas consultar como fue construido y desarrollado mi informe, ingresa al siguiente enlace: <b><a href="https://github.com/Jartpuro/A2_U2_InformeEjecutivo">Repositorio Github</a></b>
+
+
+```{r , warning=FALSE, message=FALSE, echo=FALSE}
+
+```
