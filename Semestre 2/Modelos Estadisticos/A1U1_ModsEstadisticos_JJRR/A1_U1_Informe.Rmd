@@ -1,7 +1,7 @@
 ---
 title: "A1_U1"
 author: "Juan José Restrepo Rosero"
-date: "2025-01-26"
+date: "2025-02-09"
 output: 
   html_document:
     toc: yes
