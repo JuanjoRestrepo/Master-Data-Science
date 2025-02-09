@@ -120,7 +120,7 @@ missing_data <- data.frame(Columna = names(total_missing), Valores_Faltantes = t
 # Graficar los valores faltantes
 ggplot(missing_data, aes(x = Columna, y = Valores_Faltantes)) +
   geom_bar(stat = "identity", fill = "skyblue", color = "black") +
-  geom_text(aes(label = Valores_Faltantes), vjust = -0.5, size = 3) +  # Agregar etiquetas
+  geom_text(aes(label = Valores_Faltantes), vjust = -0.5, linewidth = 3) +  # Agregar etiquetas
   labs(title = "Valores Faltantes por Columna", x = "Columna", y = "Cantidad de Valores Faltantes") +
   theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))
 ```
@@ -272,15 +272,19 @@ En este orden de ideas, se puede apreciar que el análisis de componentes princi
 ```{r , include=TRUE,  , echo=FALSE}
 # Crear un dataframe con la información del PCA
 pca_info <- data.frame(
-  Component = paste("PC", 1:6, sep = ""),
+  Component = factor(1:length(pca$sdev)), # Usamos números en lugar de PC1, PC2...
   Standard_Deviation = pca$sdev,
-  Proportion_of_Variance = pca$sdev^2 / sum(pca$sdev^2),
-  Cumulative_Proportion = cumsum(pca$sdev^2 / sum(pca$sdev^2))
+  Proportion_of_Variance = (pca$sdev^2) / sum(pca$sdev^2),
+  Cumulative_Proportion = cumsum((pca$sdev^2) / sum(pca$sdev^2))
 )
 
-# Graficar la proporción de varianza explicada por cada componente principal
+# Graficar la proporción de varianza explicada con barras y una línea superpuesta
 ggplot(pca_info, aes(x = Component, y = Proportion_of_Variance)) +
-  geom_bar(stat = "identity", fill = "blue", color = "black") +
+  geom_bar(stat = "identity", fill = "blue", color = "black", alpha = 0.7) +
+  geom_line(aes(group = 1), color = "red", linetype = "solid", size = 1) +
+  geom_point(color = "red", size = 2) +
+  geom_text(aes(label = round(Proportion_of_Variance, 3)), 
+            vjust = -0.5, color = "black", size = 4) +
   labs(title = "Proporción de Varianza Explicada por Componente Principal",
        x = "Componente Principal",
        y = "Proporción de Varianza") +
@@ -298,6 +302,29 @@ ggplot(pca_info, aes(x = Component, y = Cumulative_Proportion)) +
 # Graficar un biplot del PCA
 biplot(pca, scale = 0)
 
+
+```
+
+```{r , include=TRUE,  , echo=FALSE}
+# Crear un dataframe con la información del PCA
+pca_info <- data.frame(
+  Component = factor(1:length(pca$sdev)), # Usamos números en lugar de PC1, PC2...
+  Standard_Deviation = pca$sdev,
+  Proportion_of_Variance = (pca$sdev^2) / sum(pca$sdev^2) * 100,  # Convertir a porcentaje
+  Cumulative_Proportion = cumsum((pca$sdev^2) / sum(pca$sdev^2)) * 100 # Convertir a porcentaje
+)
+
+# Graficar la proporción de varianza explicada con porcentajes
+ggplot(pca_info, aes(x = Component, y = Proportion_of_Variance)) +
+  geom_bar(stat = "identity", fill = "blue", color = "black", alpha = 0.7) +
+  geom_line(aes(group = 1), color = "red", linetype = "solid", size = 1) +
+  geom_point(color = "red", linewidth = 2) +  # Para marcar los puntos sobre la línea
+  geom_text(aes(label = paste0(round(Proportion_of_Variance, 1), "%")), 
+            vjust = -0.5, color = "black", linewidth = 4) +  # Agregar etiquetas con porcentaje
+  labs(title = "Proporción de Varianza Explicada por Componente Principal",
+       x = "Componente Principal",
+       y = "Proporción de Varianza (%)") +  # Actualizar etiqueta del eje Y
+  theme_minimal()
 
 ```
 
