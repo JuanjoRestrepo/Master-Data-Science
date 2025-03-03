@@ -4,7 +4,7 @@ author: "Juan José Restrepo Rosero"
 date: "2025-03-03"
 output: 
   pdf_document:
-    toc: yes
+    latex_engine: xelatex
   html_document:
     toc: yes
     toc_float: yes
