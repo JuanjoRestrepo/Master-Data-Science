@@ -1088,6 +1088,7 @@ Finalmente, es importante destacar que, al igual que se ha observado en los dato
 
 
 ## **Analisis exploratorio**
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 vivienda_apartamento <- subset(vivienda, tipo == "Apartamento") #Creacuón del subset filtrado por tipo vivienda apartamento
@@ -1156,16 +1157,22 @@ skim(vivienda_apartamento)
 
 
 
-<p> Interpretación del Modelo
-El modelo de regresión lineal múltiple ajustado es:
+#### **Interpretación del Modelo**
 
-Precio = β0 + β1 * Área Construida + β2 * Estrato + β3 * Parqueaderos + β4 * Baños + β5 * Habitaciones + ε
+El modelo de regresión lineal múltiple ajustado se expresa de la siguiente manera:
+
+$$
+\text{Precio} = \beta_0 + \beta_1 \times \text{Área Construida} + \beta_2 \times \text{Estrato} + \beta_3 \times \text{Parqueaderos} + \beta_4 \times \text{Baños} + \beta_5 \times \text{Habitaciones} + \varepsilon
+$$
 
 Donde:
 
-β0 es el intercepto, que representa el precio esperado cuando todas las demás variables son cero.
-β1, β2, β3, β4 y β5 son los coeficientes de regresión que representan el cambio esperado en el precio para un aumento unitario en cada variable, manteniendo todas las demás variables constantes.
-ε es el término de error.</p>
+- **\(\beta_0\) (Intercepto):** Representa el precio estimado cuando todas las variables independientes son cero.
+- **\(\beta_1, \beta_2, \beta_3, \beta_4, \beta_5\) (Coeficientes de Regresión):** Cada uno de estos coeficientes indica el cambio esperado en el precio ante un incremento unitario en la variable correspondiente, manteniendo constantes las demás variables.
+- **\(\varepsilon\) (Término de Error):** Captura la variabilidad en el precio que no es explicada por el modelo.
+
+Este modelo permite estimar el precio de una vivienda basándose en sus características, tales como el área construida, el estrato, el número de parqueaderos, baños y habitaciones.
+
 
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
@@ -1215,10 +1222,29 @@ cat("El R^2 del modelo es:", R_cuadrado, "\n")
 ```
 
 
-<p> 
-El análisis del modelo de regresión aplicado revela que el precio de la vivienda está influenciado significativamente por diversas características. Por cada metro cuadrado adicional en el área construida, el precio aumenta en aproximadamente $2.22 millones. Respecto a los estratos, se observa un aumento significativo en el precio con valores cercanos a $56.92 millones para estrato 6, mientras que para los baños y habitaciones, se registra un incremento de aproximadamente $61.11 millones y una disminución de alrededor de $32.93 millones, respectivamente, por cada unidad adicional. En cuanto a las zonas, se identifican variaciones de precios significativas, siendo la Zona Sur la de mayor impacto con un incremento de $118.86 millones, seguida por la Zona Norte con $31.09 millones, la Zona Oeste con $20.09 millones y la Zona Centro con $19.32 millones. El modelo tiene un coeficiente de determinación (R^2) de aproximadamente 0.78, lo que indica que alrededor del 78.39% de la variabilidad en el precio de la vivienda puede ser explicada por las variables incluidas en el modelo, demostrando un buen ajuste.</p>
-<h2>Validacion de supuestos</h2>
+El análisis del modelo de regresión aplicado revela que el precio de la vivienda está fuertemente influenciado por diversas características. A continuación se presentan los hallazgos principales:
 
+- **Área Construida:**  
+  Cada metro cuadrado adicional en el área construida se asocia con un incremento aproximado de **$2.22 millones** en el precio de la vivienda.
+
+- **Estrato:**  
+  Los estratos tienen un impacto significativo en el precio. En particular, para el estrato 6 se observa un aumento de aproximadamente **$56.92 millones** por unidad, lo que sugiere que las viviendas en este nivel socioeconómico tienden a tener precios más elevados.
+
+- **Baños y Habitaciones:**  
+  - Cada baño adicional se asocia con un aumento de alrededor de **$61.11 millones** en el precio.  
+  - Por el contrario, cada habitación adicional se relaciona con una disminución de cerca de **$32.93 millones**, lo cual podría reflejar efectos complejos en la distribución de espacios o en la valoración del inmueble.
+
+- **Zonas:**  
+  Las variaciones de precios según la zona son notables:
+  - **Zona Sur:** Presenta el mayor impacto, incrementando el precio en aproximadamente **$118.86 millones**.
+  - **Zona Norte:** Contribuye con un aumento de alrededor de **$31.09 millones**.
+  - **Zona Oeste:** Se asocia con un incremento de cerca de **$20.09 millones**.
+  - **Zona Centro:** Aporta un aumento aproximado de **$19.32 millones**.
+
+Finalmente, el modelo cuenta con un coeficiente de determinación (**R²**) de aproximadamente **0.78**, lo que significa que cerca del **78.39%** de la variabilidad en el precio de la vivienda es explicada por las variables incluidas en el modelo, lo que demuestra un buen ajuste.
+
+
+## **Validacion de supuestos**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # 1. Normalidad de los residuos
@@ -1239,15 +1265,24 @@ ljung_box_test
 
 ```
 
-<p>Test de Breusch-Pagan para homocedasticidad:
-El valor de estadístico de prueba (BP) es 1465.5 con 8 grados de libertad, y el p-valor es menor que 2.2e-16. Esto indica que hay evidencia significativa para rechazar la hipótesis nula de homocedasticidad, lo que sugiere que los residuos no tienen varianza constante.
+**Test de Breusch-Pagan para Homocedasticidad:**
 
-Test de Ljung-Box para autocorrelación de los residuos:
-El valor de estadístico de prueba (X-squared) es 127.18 con 1 grado de libertad, y el p-valor es menor que 2.2e-16. Esto indica que hay evidencia significativa para rechazar la hipótesis nula de independencia de los residuos, lo que sugiere que los residuos están autocorrelacionados.
+- **Estadístico de prueba (BP):** 1465.5 con 8 grados de libertad.
+- **p-valor:** < 2.2e-16.
 
-Estos resultados pueden indicar que el modelo de regresión lineal múltiple puede no cumplir completamente con los supuestos de homocedasticidad e independencia de los residuos.</p>
+El resultado significativo (p < 2.2e-16) indica que se rechaza la hipótesis nula de homocedasticidad, sugiriendo que los residuos del modelo no tienen una varianza constante.
 
-<h2> Predicción del precio</h2>
+**Test de Ljung-Box para Autocorrelación de los Residuos:**
+
+- **Estadístico de prueba (X-squared):** 127.18 con 1 grado de libertad.
+- **p-valor:** < 2.2e-16.
+
+El bajo **p-valor** respalda el rechazo de la hipótesis nula de independencia de los residuos, indicando que éstos presentan autocorrelación. Ambos tests evidencian que el modelo de regresión lineal múltiple no cumple completamente con los supuestos de homocedasticidad e independencia de los residuos, lo que podría afectar la precisión de las estimaciones y las pruebas de hipótesis derivadas del modelo.
+
+
+
+## **Predicción del precio**
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Definir las características de la vivienda
@@ -1261,17 +1296,16 @@ vivienda_nueva <- data.frame(
   credito_preaprobado = 850
 )
 
-
-
 # Predecir el precio de la vivienda con las características especificadas
 prediccion_precio <- predict(modelo_regresion, newdata = vivienda_nueva)
 prediccion_precio
 
 ```
 
-<p>La predicción del precio para la vivienda especificada es de $732.8381 millones (para el estrato 5) y $789.7567 millones (para el estrato 6).</p>
+La predicción del precio para la vivienda varía según el estrato considerado. Es decir, para una vivienda ubicada en estrato 5, se estima un precio aproximado de **$732.84 millones**, mientras que para una en estrato 6, el precio predicho asciende a alrededor de **$789.76 millones**.
 
-<h2> Potenciales ofertas</h2>
+
+## **Potenciales ofertas**
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 
@@ -1299,16 +1333,27 @@ print(head(ofertas_potenciales, 5))
 
 
 ```
-<p>
-Las ofertas potenciales presentan una variedad de opciones en términos de tamaño, distribución de espacios y precios estimados. La primera oferta, con un área construida de 280 metros cuadrados, ofrece 3 baños y 4 habitaciones, con un precio estimado de alrededor de $721.31 millones. La segunda opción, también con 300 metros cuadrados, cuenta con características similares pero un precio ligeramente superior, aproximadamente $765.77 millones. La tercera y cuarta oferta, con áreas construidas de 280 y 300 metros cuadrados respectivamente, presentan 4 baños y 4 habitaciones, con precios estimados de $782.42 y $826.88 millones respectivamente. Finalmente, la quinta oferta, con 280 metros cuadrados, ofrece 3 baños y 5 habitaciones, con el precio estimado más bajo de todas, alrededor de $688.38 millones. Estas opciones brindan a los potenciales compradores una gama de alternativas para seleccionar la vivienda que mejor se ajuste a sus necesidades y presupuesto.
 
 
+Las ofertas potenciales brindan una diversidad de opciones en cuanto a tamaño, distribución de espacios y precios. A continuación se describen detalladamente las características de cada una de las cinco ofertas identificadas:
+
+1. **Primera Oferta:**  
+Esta opción ofrece una vivienda con un área construida de 280 m², que incluye 3 baños y 4 habitaciones. Con un precio estimado de aproximadamente $721.31 millones, representa un equilibrio atractivo entre dimensiones y costo.
+
+2. **Segunda Oferta:**  
+Con un área de 300 m², esta opción mantiene 3 baños y 4 habitaciones, pero su precio es ligeramente superior, alrededor de $765.77 millones. La diferencia en precio podría reflejar mejoras en el diseño o acabados que aporten mayor valor.
+
+3. **Tercera Oferta:**  
+Esta alternativa cuenta con 280 m² de área construida y una configuración que incluye 4 baños y 4 habitaciones, situándose en un rango de precio de aproximadamente $782.42 millones. La adición de un baño extra puede ser un factor diferenciador para quienes buscan mayor funcionalidad.
+
+4. **Cuarta Oferta:**  
+Con un área de 300 m², 4 baños y 4 habitaciones, esta opción se posiciona en el rango de precio más alto, estimado en cerca de $826.88 millones. Es ideal para compradores que priorizan espacios amplios y mayores comodidades.
+
+5. **Quinta Oferta:**  
+Esta oferta, con 280 m² de área construida, se distingue por contar con 3 baños y 5 habitaciones, ofreciendo el precio más competitivo, alrededor de $688.38 millones. La mayor cantidad de habitaciones a un costo inferior la convierte en una alternativa especialmente atractiva para optimizar el uso del espacio sin exceder el presupuesto.
 
 
- </p>
-
-
-## 8. Anexos - Repositorio Código fuente
+## **8. Anexos - Repositorio Código fuente**
 
 <b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos/A2_U2_InformeEjecutivo_JJRR">Repositorio Github</a></b>
 
