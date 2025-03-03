@@ -647,23 +647,28 @@ print(R2)
 
 ```
 
-<p>
-<b>Los resultados de la estimación del modelo de regresión lineal múltiple son los siguientes:</b>
+A continuación se presenta la interpretación detallada de los coeficientes estimados:
 
-<h3><b>Interpretación de los coeficientes</b></h3>:
+1. **Intercepto**:  
+   El coeficiente del intercepto es **-413.87536**. Esto indica que, en el hipotético caso en que todas las variables predictoras fueran iguales a cero, el precio estimado de la vivienda sería de -413.87536 unidades monetarias. Dado que esta situación no resulta realista en la práctica, este valor no posee un significado práctico y se le presta poca atención en la interpretación del modelo.
 
-<ul>
-    <li><b>Intercepto</b>: El coeficiente del intercepto es -413.87536. Esto significa que, cuando todas las demás variables son cero, el precio estimado de una vivienda es de -413.87536 unidades monetarias. Sin embargo, dado que este valor no tiene una interpretación realista en este contexto, no se le da mucha importancia en la interpretación.</li>
-    <li><b>Área Construida</b>: El coeficiente para el área construida es 0.74227. Esto indica que, manteniendo constantes todas las demás variables, por cada unidad adicional de área construida, el precio estimado de la vivienda aumenta en 0.74227 unidades monetarias.</li>
-    <li><b>Estrato</b>:  El coeficiente para el estrato es 116.07109. Esto sugiere que, manteniendo constantes todas las demás variables, el precio estimado de la vivienda aumenta en 116.07109 unidades monetarias por cada incremento de una unidad en el estrato. </li>
-    <li><b>Número de Cuartos</b>: El coeficiente para el número de habitaciones es -14.74995. Esto indica que, manteniendo constantes todas las demás variables, por cada incremento de una unidad en el número de habitaciones, el precio estimado de la vivienda disminuye en 14.74995 unidades monetarias. </li>
-    <li><b>Número de Parqueaderos</b>:  El coeficiente para el número de parqueaderos es 64.29943. Esto sugiere que, manteniendo constantes todas las demás variables, por cada unidad adicional de parqueaderos, el precio estimado de la vivienda aumenta en 64.29943 unidades monetarias.</li>
-    <li><b>Número de Baños</b>: El coeficiente para el número de baños es 39.03498. Esto indica que, manteniendo constantes todas las demás variables, por cada unidad adicional de baños, el precio estimado de la vivienda aumenta en 39.03498 unidades monetarias.</li>
-</ul>
+2. **Área Construida**:  
+   Con un coeficiente de **0.74227**, se interpreta que, manteniendo constantes las demás variables, cada unidad adicional en el área construida se asocia con un incremento de 0.74227 unidades monetarias en el precio de la vivienda.
+
+3. **Estrato**:  
+   El coeficiente para el estrato es **116.07109**. Esto sugiere que, al aumentar en una unidad el estrato (con las demás variables fijas), el precio estimado de la vivienda incrementa en 116.07109 unidades monetarias.
+
+4. **Número de Cuartos (Habitaciones)**:  
+   El coeficiente de **-14.74995** para el número de cuartos indica que, manteniendo constantes las otras variables, cada habitación adicional se asocia con una disminución de 14.74995 unidades monetarias en el precio estimado. Este resultado sugiere que, en este contexto, agregar cuartos podría estar correlacionado con ciertos aspectos que reducen el precio, o puede reflejar la presencia de otras variables no consideradas.
+
+5. **Número de Parqueaderos**:  
+   Con un coeficiente de **64.29943**, se deduce que cada parqueadero adicional incrementa el precio de la vivienda en 64.29943 unidades monetarias, al mantener constantes las demás características.
+
+6. **Número de Baños**:  
+   Finalmente, el coeficiente de **39.03498** para el número de baños implica que, controlando por las demás variables, cada baño adicional se asocia con un aumento de 39.03498 unidades monetarias en el precio de la vivienda.
 
 
-
-<h3>Gráfico de residuos vs. valores ajustados </h3>
+### **Gráfico de residuos vs. valores ajustados**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
@@ -682,7 +687,7 @@ abline(h = 0, col = "red")  # Línea horizontal en y = 0
 ```
 
 
-<h3>Gráfico de distribución de los residuos </h3>
+### **Gráfico de distribución de los residuos**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
@@ -696,7 +701,7 @@ qqline(residuos)  # Línea de referencia para la distribución normal
 ```
 
 
-<h3> Gráfico de efectos parciales  </h3>
+### **Gráfico de efectos parciales**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Gráfico de efectos parciales para el área construida
@@ -705,7 +710,7 @@ plot(effect("areaconst", modelo_rlm_casa), main = "Efecto Parcial del Área Cons
 ```
 
 
-<h3>  Gráficos de dispersión con línea de regresión</h3>
+### **Gráficos de dispersión con línea de regresión**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Gráfico de dispersión del área construida vs. precio con línea de regresión
@@ -716,24 +721,32 @@ abline(coef(modelo_rlm_casa)[1], coef(modelo_rlm_casa)[2], col = "red")  # Líne
 ```
 
 
-<h3><b>Interpretación del coeficiente R^2</b>:</h3>
-El coeficiente de determinación (R^2) es aproximadamente 0.6834. Esto significa que alrededor del 68.34% de la variabilidad en el precio de la vivienda puede ser explicada por las variables independientes incluidas en el modelo. Esto indica un buen ajuste del modelo a los datos observados.
+### **Interpretación del coeficiente R²**
 
-<b>Discusión sobre el ajuste del modelo e implicaciones</b>:
-Dado que el coeficiente de determinación es relativamente alto, sugiere que el modelo de regresión lineal múltiple es capaz de explicar una proporción significativa de la variabilidad en el precio de la vivienda utilizando las variables incluidas. Sin embargo, siempre hay margen para mejorar el modelo. Para ello, podríamos considerar la inclusión de variables adicionales relevantes, como la ubicación geográfica, la antigüedad de la propiedad o características específicas del vecindario, que podrían mejorar la capacidad predictiva del modelo y explicar aún más la variabilidad en los precios de las propiedades. Además, podríamos explorar posibles transformaciones en las variables existentes o técnicas de modelado más avanzadas para mejorar aún más la precisión del modelo.
-</p>
+El coeficiente de determinación (**R²**) es de aproximadamente 0.6834, lo que significa que cerca del 68.34% de la variabilidad en el precio de la vivienda se puede explicar mediante las variables independientes incluidas en el modelo. Este valor indica que el ajuste del modelo a los datos es bueno.
 
-## 4. Validación de supuestos 
+**Discusión sobre el ajuste del modelo e implicaciones:**
+
+- Un **R²** relativamente alto sugiere que el modelo de regresión lineal múltiple captura una parte significativa de la variabilidad en el precio de las propiedades utilizando las variables seleccionadas. Sin embargo, siempre existe la posibilidad de mejorar el modelo. 
+
+- Se podría considerar la inclusión de variables adicionales relevantes, como la ubicación geográfica precisa, la antigüedad de la propiedad o características específicas del vecindario, lo que podría aumentar la capacidad predictiva del modelo y explicar aún más la variación en los precios. Además, explorar transformaciones de las variables existentes o utilizar técnicas de modelado más avanzadas puede ayudar a perfeccionar la precisión del modelo.
 
 
-<p>
-Esta sección tiene como objetivo realizar pruebas para validar dos supuestos importantes en el análisis de regresión lineal:
 
-Normalidad de los residuos: En donde la prueba de Shapiro-Wilk pretende evaluar si los residuos del modelo siguen una distribución normal. Esto es importante porque el análisis de regresión lineal asume que los errores (residuos) siguen una distribución normal. Si los residuos no se distribuyen normalmente, podría indicar que el modelo no está capturando completamente la estructura de los datos o que hay otros factores que no se han tenido en cuenta.
 
-Homocedasticidad de los residuos: En donde la prueba de Breusch-Pagan pretende evaluar si los residuos tienen una varianza constante en relación con las variables independientes. La homocedasticidad significa que la varianza de los residuos es constante en todos los niveles de las variables independientes. Si hay heterocedasticidad, es decir, la varianza de los residuos no es constante, puede haber un problema de modelado que afecte la precisión de las estimaciones y las pruebas de hipótesis.
 
-. </p>
+## **4. Validación de supuestos**
+
+Esta sección se enfoca en evaluar dos supuestos fundamentales del análisis de regresión lineal mediante pruebas estadísticas específicas:
+
+1. **Normalidad de los Residuos:**  
+Se utiliza la prueba de Shapiro-Wilk para determinar si los residuos del modelo se ajustan a una distribución normal. Este supuesto es esencial porque el análisis de regresión asume que los errores se distribuyen normalmente. Si los residuos se desvían de la normalidad, podría ser un indicio de que el modelo no está capturando adecuadamente la estructura subyacente de los datos o que existen factores adicionales no considerados.
+
+2. **Homocedasticidad de los Residuos:**  
+La prueba de Breusch-Pagan evalúa si la varianza de los residuos se mantiene constante a lo largo de los niveles de las variables independientes. La homocedasticidad implica que la dispersión de los errores es uniforme en todas las condiciones del modelo. En cambio, si se detecta heterocedasticidad, es decir, variaciones en la varianza de los residuos, esto podría afectar la precisión de las estimaciones y la validez de las pruebas de hipótesis, sugiriendo la necesidad de revisar o ajustar el modelo.
+
+
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Gráfico Q-Q de los residuos
@@ -756,10 +769,10 @@ bptest(modelo_rlm_casa)
 
 ```
 
-<p>En conclusión, el análisis de los residuos del modelo de regresión lineal sugiere que no se ajustan completamente a la normalidad, aunque la desviación no es grave y el tamaño de la muestra parece ser grande. La prueba de Shapiro-Wilk rechaza la normalidad de los residuos, mientras que la prueba de Breusch-Pagan no encuentra evidencia de heterocedasticidad. </p>
+Basado en el análisis de los residuos del modelo de regresión lineal, se concluye que, aunque los residuos no siguen una distribución normal perfecta —como lo indica la prueba de Shapiro-Wilk— la desviación no es severa, posiblemente debido al gran tamaño de la muestra. Asimismo, la prueba de Breusch-Pagan no encontró evidencia de heterocedasticidad, lo que sugiere que la varianza de los errores se mantiene constante a lo largo de los niveles de las variables independientes.
 
 
-## 5. Predección del precio de la vivienda
+## **5. Predección del precio de la vivienda**
 
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
@@ -811,19 +824,34 @@ plot_ly(resultados_filtrados, x = ~index, y = ~precio_predicho, type = "scatter"
 
 ```
 
-## 6. Ofertas potenciales
+## **6. Ofertas Potenciales**
 
-<p>Los resultados muestran las características de las primeras cinco viviendas potenciales que cumplen con las condiciones establecidas y cuyo precio estimado no supera el límite del crédito preaprobado para la nueva vivienda. 
+Los resultados muestran las características de las primeras cinco viviendas potenciales que cumplen con las condiciones establecidas, asegurando que su precio estimado no exceda el límite del crédito preaprobado para la nueva vivienda. A continuación, se describen las principales características de estas opciones:
 
-Área Construida:Las áreas construidas de estas viviendas varían entre 180 y 200 metros cuadrados.
-Parqueaderos: Todas las viviendas tienen al menos un parqueadero, con una de ellas teniendo dos.
-Baños: La cantidad de baños oscila entre 2 y 3.
-Habitaciones:** Todas las viviendas tienen entre 3 y 4 habitaciones.
-Estrato: Las viviendas pertenecen a estratos 4.
-Zona: Todas las viviendas se encuentran en la Zona Norte.
-Precio Estimado: Los precios estimados de estas viviendas varían entre 282.1364 y 346.4359 millones de pesos.
+- **Área Construida:**  
+  Las viviendas cuentan con áreas que varían entre 180 y 200 metros cuadrados.
 
-Estos resultados son útiles para presentar a Maria las primeras opciones de viviendas potenciales que se ajustan a los criterios establecidos y están dentro del presupuesto disponible para su compra.</p>
+- **Parqueaderos:**  
+  Todas las viviendas disponen de al menos un parqueadero, siendo que una de ellas ofrece dos.
+
+- **Baños:**  
+  La cantidad de baños oscila entre 2 y 3.
+
+- **Habitaciones:**  
+  Se presentan viviendas con 3 o 4 habitaciones.
+
+- **Estrato:**  
+  Todas las opciones se ubican en el estrato 4.
+
+- **Zona:**  
+  Las viviendas están localizadas en la Zona Norte.
+
+- **Precio Estimado:**  
+  Los precios estimados se sitúan entre 282.1364 y 346.4359 millones de pesos.
+
+Estos resultados son de gran utilidad para presentar a María las primeras alternativas de viviendas que cumplen con los criterios establecidos y se ajustan al presupuesto disponible.
+
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Agregar los precios estimados al dataframe de combinaciones
@@ -837,11 +865,11 @@ print(head(ofertas_potenciales, 5))
 
 ```
 
-## 7. Escenario de crédito pre-aprobado para tipo de vivienda Apartamento
+## **7. Escenario de crédito pre-aprobado para tipo de vivienda Apartamento**
 
-<h2>Segmentación por zonas</h2>
+### **Segmentación por zonas**
 
-<h3><p>Base 1 Apartamentos Zona Norte</p></h3>
+#### **Base 1 Apartamentos Zona Norte**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
@@ -873,7 +901,7 @@ mapa_ap_norte  # Mostrar el mapa interactivo
 ```
 
 
-<h3><p>Base 2 Apartamentos Zona Sur</p></h3>
+#### **Base 2 Apartamentos Zona Sur**
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
@@ -905,7 +933,7 @@ mapa_ap_sur  # Mostrar el mapa interactivo
 ```
 
 
-<h3><p>Base 2 Apartamentos Zona Oeste</p></h3>
+#### **Base 2 Apartamentos Zona Oeste**
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
@@ -936,7 +964,7 @@ mapa_ap_oeste  # Mostrar el mapa interactivo
 ```
 
 
-<h3><p>Base 2 Apartamentos Zona Oriente</p></h3>
+#### **Base 2 Apartamentos Zona Oriente**
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
@@ -967,7 +995,7 @@ mapa_ap_oriente  # Mostrar el mapa interactivo
 ```
 
 
-<h3><p>Base 2 Apartamentos Zona Centro</p></h3>
+#### **Base 2 Apartamentos Zona Centro**
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
@@ -1036,13 +1064,30 @@ mapa
 ```
 
 
-<p> Basado en la información generada se identifica que según el gráfico de dispersión: La zona oeste presenta la mayor concentración de puntos en la zona superior derecha, lo que indica una mayor cantidad de propiedades con precios elevados y áreas construidas amplias. de otra parte el rango de precios para la zona oeste es el más alto, por tanto, la zona oeste tiene el coeficiente de correlación más fuerte (0.82), lo que indica una relación más estrecha entre precio y área construida.
+##### **Análisis Comparativo por Zonas**
 
-Ahora hablando de la comparación con otras zonas, se observa que la Zona Sur aunque tiene un coeficiente de correlación similar a la zona norte (0.76), el rango de precios es ligeramente inferior. La Zona Norte: Si bien presenta un rango de precios similar a la zona sur, la concentración de puntos en la zona superior derecha del gráfico de dispersión es menor. Por su parte la Zona Oriente es la que presenta los precios más bajos, aunque presenta un dato atípico en la gráfica este no altera la tendencia general de precios más bajos. Por ultimo  la Zona Centro Ofrece precios intermedios, con una poca oferta inmoboliaria respecto a Apartamento, esto puede deberse a la dinamica comercial propia del sector reduciendo la vivienda residencial.
+Basado en la información generada y el análisis del gráfico de dispersión, se observan las siguientes tendencias:
 
-Tambien es valido destacar que al igual con los datos registrados en el tipo de vivienda "Casa" se evidencia un error humano en la asignación del tipo de zona o en los datos de longitud y latitud dado que en el ultimo grafico se observa que existen traslapos en los colores, esto sucede con mayor incidencia en la parte superior del mapa.</p>
+- **Zona Oeste:**  
+  - Se aprecia la mayor concentración de puntos en la parte superior derecha del gráfico, lo que indica que esta zona tiene una elevada cantidad de propiedades con precios altos y amplias áreas construidas.  
+  - Además, el rango de precios en la zona oeste es el más alto, y cuenta con el coeficiente de correlación más fuerte (0.82), sugiriendo una relación estrecha entre el precio y el área construida.
 
-<h2>Analisis exploratorio </h2>
+- **Zona Sur y Zona Norte:**  
+  - La Zona Sur presenta un coeficiente de correlación de 0.76, similar al de la Zona Norte, sin embargo, el rango de precios en la Zona Sur es ligeramente inferior.  
+  - Aunque la Zona Norte tiene un rango de precios comparable al de la Zona Sur, se observa una menor concentración de puntos en la parte superior derecha del gráfico, lo que podría implicar una menor cantidad de propiedades con precios muy altos y áreas muy amplias.
+
+- **Zona Oriente:**  
+  - Es la que muestra los precios más bajos en general.  
+  - Aunque se detecta la presencia de un dato atípico en el gráfico, este no altera la tendencia general de precios bajos.
+
+- **Zona Centro:**  
+  - Ofrece precios intermedios en comparación con las otras zonas.  
+  - Se observa una menor oferta inmobiliaria de tipo apartamento, lo que podría estar relacionado con la dinámica comercial particular de esta área, favoreciendo un perfil de vivienda residencial diferente.
+
+Finalmente, es importante destacar que, al igual que se ha observado en los datos del tipo de vivienda ***"Casa"***, se evidencia un posible error humano en la asignación de la zona o en el registro de las coordenadas (longitud y latitud). Esto se aprecia en el último gráfico, donde se observan traslapos en los colores, especialmente en la parte superior del mapa, lo que indic
+
+
+## **Analisis exploratorio**
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 vivienda_apartamento <- subset(vivienda, tipo == "Apartamento") #Creacuón del subset filtrado por tipo vivienda apartamento
@@ -1121,6 +1166,8 @@ Donde:
 β0 es el intercepto, que representa el precio esperado cuando todas las demás variables son cero.
 β1, β2, β3, β4 y β5 son los coeficientes de regresión que representan el cambio esperado en el precio para un aumento unitario en cada variable, manteniendo todas las demás variables constantes.
 ε es el término de error.</p>
+
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Seleccionar variables de interés
@@ -1166,6 +1213,8 @@ R_cuadrado <- summary(modelo_regresion)$r.squared
 cat("El R^2 del modelo es:", R_cuadrado, "\n")
 
 ```
+
+
 <p> 
 El análisis del modelo de regresión aplicado revela que el precio de la vivienda está influenciado significativamente por diversas características. Por cada metro cuadrado adicional en el área construida, el precio aumenta en aproximadamente $2.22 millones. Respecto a los estratos, se observa un aumento significativo en el precio con valores cercanos a $56.92 millones para estrato 6, mientras que para los baños y habitaciones, se registra un incremento de aproximadamente $61.11 millones y una disminución de alrededor de $32.93 millones, respectivamente, por cada unidad adicional. En cuanto a las zonas, se identifican variaciones de precios significativas, siendo la Zona Sur la de mayor impacto con un incremento de $118.86 millones, seguida por la Zona Norte con $31.09 millones, la Zona Oeste con $20.09 millones y la Zona Centro con $19.32 millones. El modelo tiene un coeficiente de determinación (R^2) de aproximadamente 0.78, lo que indica que alrededor del 78.39% de la variabilidad en el precio de la vivienda puede ser explicada por las variables incluidas en el modelo, demostrando un buen ajuste.</p>
 <h2>Validacion de supuestos</h2>
