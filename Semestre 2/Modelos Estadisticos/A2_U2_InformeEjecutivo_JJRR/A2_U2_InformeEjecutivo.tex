@@ -87,9 +87,9 @@
 \setcounter{tocdepth}{2}
 \tableofcontents
 }
-\textbf{Caso C\&A}
+\section{\texorpdfstring{\textbf{Caso C\&A}}{Caso C\&A}}\label{caso-ca}
 
-Enunciado
+\subsection{\texorpdfstring{\textbf{Enunciado}}{Enunciado}}\label{enunciado}
 
 Maria comenzó como agente de bienes raíces en Cali hace 10 años. Después
 de laborar dos años para una empresa nacional, se traslado a Bogotá y
@@ -117,68 +117,78 @@ solicitudes incluyen las siguientes condiciones:
 \begin{figure}
 \centering
 \includegraphics{C:/Users/Juan Jose Restrepo/Desktop/Master-Data-Science-main/Semestre 2/Modelos Estadisticos/A2_U2_InformeEjecutivo_JJRR/condiciones.png}
-\caption{Condiciones}
+\caption{Condiciones de las solicitudes}
 \end{figure}
 
-Pasos requeridos para la obtención de los resultados
+\subsection{\texorpdfstring{\textbf{Pasos requeridos para la obtención
+de los
+resultados}}{Pasos requeridos para la obtención de los resultados}}\label{pasos-requeridos-para-la-obtenciuxf3n-de-los-resultados}
 
-Realice un filtro a la base de datos e incluya solo las ofertas de :
-base1: casas, de la zona norte de la ciudad. Presente los primeros 3
-registros de las bases y algunas tablas que comprueben la consulta.
-(Adicional un mapa con los puntos de las bases. Discutir si todos los
-puntos se ubican en la zona correspondiente o se presentan valores en
-otras zonas, por que?).
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  Realice un filtro a la base de datos e incluya solo las ofertas de:
+  base1: casas, de la zona norte de la ciudad. Presente los primeros 3
+  registros de las bases y algunas tablas que comprueben la consulta.
+  (Adicional un mapa con los puntos de las bases. Discutir si todos los
+  puntos se ubican en la zona correspondiente o se presentan valores en
+  otras zonas, por qué?).
+\item
+  Realice un análisis exploratorio de datos enfocado en la correlación
+  entre la variable respuesta (precio de la casa) en función del área
+  construida, estrato, número de baños, número de habitaciones y zona
+  donde se ubica la vivienda. Use gráficos interactivos con el paquete
+  plotly e interprete los resultados.
+\item
+  Estime un modelo de regresión lineal múltiple con las variables del
+  punto anterior (precio = f(área construida, estrato, número de
+  cuartos, número de parqueaderos, número de baños)) e interprete los
+  coeficientes si son estadísticamente significativos. Las
+  interpretaciones deben estar contextualizadas y discutir si los
+  resultados son lógicos. Adicionalmente interprete el coeficiente
+  \(R^2\) y discuta el ajuste del modelo e implicaciones (qué podrían
+  hacer para mejorarlo).
+\item
+  Realice la validación de supuestos del modelo e interprete los
+  resultados (no es necesario corregir en caso de presentar problemas,
+  solo realizar sugerencias de qué se podría hacer).
+\item
+  Con el modelo identificado debe predecir el precio de la vivienda con
+  las características de la primera solicitud.
+\item
+  Con las predicciones del modelo sugiera potenciales ofertas que
+  respondan a la solicitud de la vivienda 1. Tenga en cuenta que la
+  empresa tiene crédito pre-aprobado de máximo 350 millones de pesos.
+  Realice un análisis y presente en un mapa al menos 5 ofertas
+  potenciales que debe discutir.
+\item
+  Realice los pasos del \textbf{1} al \textbf{6} para la segunda
+  solicitud que tiene un crédito pre-aprobado por valor de \$850
+  millones.
+\end{enumerate}
 
-Realice un análisis exploratorio de datos enfocado en la correlación
-entre la variable respuesta (precio de la casa) en función del área
-construida, estrato, numero de baños, numero de habitaciones y zona
-donde se ubica la vivienda. Use gráficos interactivos con el paquete
-plotly e interprete los resultados.
+\subsection{\texorpdfstring{\textbf{Exploración inicial de
+datos}}{Exploración inicial de datos}}\label{exploraciuxf3n-inicial-de-datos}
 
-Estime un modelo de regresión lineal múltiple con las variables del
-punto anterior (precio = f(área construida, estrato, número de cuartos,
-número de parqueaderos, número de baños ) ) e interprete los
-coeficientes si son estadísticamente significativos. Las
-interpretaciones deber están contextualizadas y discutir si los
-resultados son lógicos. Adicionalmente interprete el coeficiente R2 y
-discuta el ajuste del modelo e implicaciones (que podrían hacer para
-mejorarlo).
+En base al resumen y la estructura del conjunto de datos, se pueden
+destacar varios puntos importantes. El dataset contiene
+\textbf{\emph{8322}} registros distribuidos en 13 variables. Se observa
+que algunas variables, como piso, estrato, preciom, areaconst,
+parqueaderos, banios, habitaciones, longitud y latitud, presentan
+valores ausentes, lo cual indica la necesidad de tratar dichos vacíos
+antes de realizar análisis posteriores.
 
-Realice la validación de supuestos del modelo e interprete los
-resultados (no es necesario corregir en caso de presentar problemas,
-solo realizar sugerencias de que se podría hacer).
+Mientras que las variables \textbf{\emph{zona, piso, tipo y barrio}} son
+de carácter categórico, las variables \textbf{\emph{id, estrato,
+preciom, areaconst, parqueaderos, banios, habitaciones, longitud y
+latitud}} son numéricas. Además, se han detectado posibles
+inconsistencias o errores en los datos que requieren atención durante el
+proceso de análisis.
 
-Con el modelo identificado debe predecir el precio de la vivienda con
-las características de la primera solicitud.
-
-Con las predicciones del modelo sugiera potenciales ofertas que responda
-a la solicitud de la vivienda 1. Tenga encuentra que la empresa tiene
-crédito pre-aprobado de máximo 350 millones de pesos. Realice un
-análisis y presente en un mapa al menos 5 ofertas potenciales que debe
-discutir.
-
-Realice los pasos del 1 al 6. Para la segunda solicitud que tiene un
-crédito pre-aprobado por valor de \$850 millones.
-
-\subsection{Exploración inicial de
-datos}\label{exploraciuxf3n-inicial-de-datos}
-
-Basándonos en la información proporcionada por el resumen y la
-estructura del conjunto de datos, podemos hacer varias observaciones
-significativas. El conjunto de datos consta de 8322 observaciones con 13
-variables. Algunas de estas variables tienen valores faltantes, como
-piso, estrato, preciom, areaconst, parqueaderos, banios, habitaciones,
-longitud y latitud, lo que sugiere la necesidad de manejar estos valores
-faltantes antes de realizar análisis posteriores. Las variables zona,
-piso, tipo y barrio son de naturaleza categórica, mientras que las
-variables id, estrato, preciom, areaconst, parqueaderos, banios,
-habitaciones, longitud y latitud son numéricas. Además, la presencia de
-problemas detectados en los datos sugiere la posibilidad de
-inconsistencias o errores que deben abordarse durante el análisis. En
-resumen, este conjunto de datos proporciona una variedad de información
-sobre propiedades inmobiliarias, incluidos detalles sobre su ubicación,
-características y precios, pero requerirá un procesamiento cuidadoso
-para garantizar su validez y utilidad en el análisis posterior.
+En resumen, este conjunto de datos ofrece información diversa sobre
+propiedades inmobiliarias, incluyendo aspectos de ubicación,
+características y precios, pero necesitará un procesamiento cuidadoso
+para asegurar su validez y utilidad en estudios futuros.
 
 \begin{verbatim}
 ##        id           zona               piso              estrato     
@@ -249,39 +259,49 @@ para garantizar su validez y utilidad en el análisis posterior.
 ##  - attr(*, "problems")=<externalptr>
 \end{verbatim}
 
-\subsection{1. Realice un filtro a la base de
-datos}\label{realice-un-filtro-a-la-base-de-datos}
+\subsection{\texorpdfstring{\textbf{1. Realice un filtro a la base de
+datos
+}}{1. Realice un filtro a la base de datos }}\label{realice-un-filtro-a-la-base-de-datos}
 
-Base 1 Casas Zona Norte
+\subsubsection{\texorpdfstring{\textbf{Base 1: Casas en Zona
+Norte}}{Base 1: Casas en Zona Norte}}\label{base-1-casas-en-zona-norte}
 
-De acuerdo a la solicitud del informe se presenta a continuación un sub
-conjunto de datos que permite visualizar el contenido correspondiente al
-tipo de inmueble casa para la zona norte, en este sentido se destaca lo
-siguiente:
+De acuerdo con los requerimientos del informe, se ha generado un
+subconjunto de datos enfocado exclusivamente en las ofertas de casas
+ubicadas en la zona norte. Este subconjunto presenta las siguientes
+características relevantes:
 
-Las estadísticas descriptivas de las ofertas de casas en la zona norte
-revelan una amplia gama de características y variabilidad en los datos.
-Con un total de 722 registros, este conjunto de datos parece haber sido
-filtrado correctamente para incluir solo las ofertas de casas en la zona
-norte. Se observa la presencia de valores faltantes en algunos
-atributos, lo cual es consistente con la estructura original del
-dataset.
-
-En cuanto a los precios de las casas, se observa una gran variación, con
-precios que oscilan entre 58 y 1999 unidades monetarias. Tanto la
-mediana como la media sugieren que la mayoría de las casas tienen
-precios alrededor de 390 y 445.9 unidades monetarias, respectivamente.
-
-El análisis del área construida revela una diversidad similar, con
-valores que van desde 30 hasta 1745 metros cuadrados. La mediana y la
-media indican que la mayoría de las casas tienen un área construida de
-alrededor de 240 y 264.9 metros cuadrados, respectivamente.
-
-Además de los precios y el área construida, otros atributos como el
-número de parqueaderos, baños y habitaciones también varían
-significativamente, con valores máximos de 10 en cada caso. Estos
-atributos son cruciales para entender las características y comodidades
-de las casas en la zona norte.
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Diversidad y Completitud de Registros:}\\
+  Se han extraído 722 registros, lo que evidencia una alta diversidad en
+  las propiedades listadas. El proceso de filtrado ha sido eficaz para
+  capturar únicamente aquellas casas situadas en la zona norte. Cabe
+  señalar que se detectan algunos valores faltantes, lo cual es
+  coherente con la estructura del dataset original.
+\item
+  \textbf{Amplio Rango en los Precios:}\\
+  Los precios de las propiedades varían considerablemente, abarcando
+  desde 58 hasta 1999 unidades monetarias. La mediana se sitúa cerca de
+  390, mientras que la media es de aproximadamente 445.9, lo que sugiere
+  que la mayoría de las ofertas se agrupan en torno a estos valores,
+  reflejando la heterogeneidad del mercado.
+\item
+  \textbf{Variabilidad en el Área Construida:}\\
+  El área construida de las viviendas oscila entre 30 y 1745 metros
+  cuadrados. Los valores centrales, con una mediana alrededor de 240 y
+  una media de cerca de 264.9, indican que la mayoría de las casas
+  tienen dimensiones que se agrupan en este rango, ofreciendo una idea
+  clara de la distribución de tamaños.
+\item
+  \textbf{Diversidad en Otros Atributos:}\\
+  Otros indicadores importantes, como el número de parqueaderos, baños y
+  habitaciones, también muestran una dispersión significativa,
+  alcanzando en ocasiones un máximo de 10. Estos atributos son
+  esenciales para comprender en detalle las características y el nivel
+  de confort de las casas en la zona norte.
+\end{enumerate}
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -417,19 +437,12 @@ Max. :3.496 \\
 NA \\
 \end{longtable}
 
-El gráfico de dispersión indica una fuerte correlación positiva entre el
-precio y el área construida de las casas en la Zona Norte. El
-coeficiente de correlación de 0,73 evidencia esta relación directa,
-donde a mayor área construida, mayor es el precio de la vivienda. La
-línea de tendencia sugiere un incremento promedio de 1,35 millones de
-pesos por metro cuadrado adicional. No obstante, la dispersión de los
-puntos alrededor de la línea de tendencia revela variaciones en el
-precio influenciadas por otros factores como la ubicación, calidad de
-construcción, características de la casa y el mercado inmobiliario.
-Considerar todos estos aspectos es crucial al momento de buscar una
-vivienda en la Zona Norte.
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-4-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-4-2.pdf}
+\paragraph{\texorpdfstring{\textbf{Gráfico de Dispersión: Precio
+vs.~Área
+Construida}}{Gráfico de Dispersión: Precio vs.~Área Construida}}\label{gruxe1fico-de-dispersiuxf3n-precio-vs.-uxe1rea-construida}
+
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-3-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-3-2.pdf}
 
 \begin{verbatim}
 ## Tabla de frecuencia de tipos de vivienda en la zona norte:
@@ -485,31 +498,60 @@ berlin & 1 \\
 brisas del guabito & 1 \\
 \end{longtable}
 
-Base 2 Casas Zona Sur
+El gráfico de dispersión evidencia una correlación positiva y robusta
+entre el precio de las casas y su área construida en la Zona Norte. Con
+un coeficiente de correlación de \textbf{0,73}, se confirma que, en
+términos generales, un mayor espacio construido se asocia con un
+incremento en el precio de la vivienda.
 
-Las estadísticas descriptivas de las ofertas de casas en la zona sur
-muestran una diversidad significativa en los datos. Con un total de 1939
-registros, este conjunto de datos parece haber sido filtrado
-adecuadamente para incluir solo las ofertas de casas en la zona sur. Se
-observa la presencia de valores faltantes en algunos atributos, lo cual
-es consistente con la estructura original del dataset.
+Por otro lado, la línea de tendencia del gráfico indica que, en
+promedio, cada metro cuadrado adicional se traduce en un aumento de
+\textbf{1,35 millones} de pesos en el precio, resaltando la influencia
+directa del área construida en el valor de la vivienda.
 
-En relación a los precios de las casas, se evidencia una amplia
-variación, con valores que oscilan entre 77 y 1900 unidades monetarias.
-Tanto la mediana como la media sugieren que la mayoría de las casas
-tienen precios alrededor de 480 y 612.3 unidades monetarias,
-respectivamente.
+No obstante, la variabilidad observada en torno a esta línea demuestra
+que otros factores también tienen un impacto significativo. Aspectos
+como la ubicación precisa, la calidad de la construcción, las
+características específicas de cada casa y las condiciones generales del
+mercado inmobiliario juegan roles determinantes en la fijación del
+precio.
 
-El análisis del área construida también revela una diversidad similar,
-con valores que van desde 48 hasta 1600 metros cuadrados. La mediana y
-la media indican que la mayoría de las casas tienen un área construida
-de alrededor de 247 y 282.3 metros cuadrados, respectivamente.
+Por ello, para realizar una evaluación completa y acertada al momento de
+adquirir una vivienda en la Zona Norte, es imprescindible considerar en
+conjunto todos estos elementos.
 
-Además de los precios y el área construida, otros atributos como el
-número de parqueaderos, baños y habitaciones también varían
-significativamente, con valores máximos de 10 en cada caso. Estos
-atributos son cruciales para comprender las características y
-comodidades de las casas en la zona sur.
+\subsubsection{\texorpdfstring{\textbf{Base 2 Casas Zona
+Sur}}{Base 2 Casas Zona Sur}}\label{base-2-casas-zona-sur}
+
+\paragraph{\texorpdfstring{\textbf{Estadísticas Descriptivas de Casas en
+la Zona
+Sur}}{Estadísticas Descriptivas de Casas en la Zona Sur}}\label{estaduxedsticas-descriptivas-de-casas-en-la-zona-sur}
+
+El análisis descriptivo de las ofertas de casas en la zona sur evidencia
+una amplia diversidad en la información recopilada. Con un total de
+\textbf{1939} registros, se ha logrado filtrar correctamente el dataset
+para incluir únicamente aquellas viviendas ubicadas en esta zona, aunque
+se han detectado algunos valores faltantes, lo cual es coherente con la
+estructura original del conjunto de datos.
+
+En cuanto a los precios, se observa una gran dispersión: los valores
+oscilan entre \textbf{77} y \textbf{1900} unidades monetarias. Tanto la
+mediana, que se sitúa en torno a \textbf{480}, como la media, cercana a
+\textbf{612.3}, sugieren que la mayoría de las casas se encuentran en
+ese rango de precios.
+
+El análisis del área construida también refleja una notable
+variabilidad, con dimensiones que van desde \textbf{48} hasta
+\textbf{1600} metros cuadrados. Los valores centrales (mediana de
+aproximadamente \textbf{247} y media de \textbf{282.3}) indican que la
+mayoría de las viviendas presentan áreas construidas en esos rangos.
+
+Además de los precios y el área, otros atributos importantes, como el
+número de parqueaderos, baños y habitaciones, muestran una variación
+considerable, alcanzando en ocasiones un máximo de 10 unidades. Estos
+indicadores son esenciales para comprender las características
+específicas y el nivel de comodidad que ofrecen las casas en la zona
+sur.
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -645,21 +687,25 @@ Max. :3.485 \\
 NA \\
 \end{longtable}
 
-El gráfico de dispersión para la Zona Sur presenta un coeficiente de
-correlación de 0.67, lo que indica una fuerte correlación positiva entre
-el precio y el área construida. Esto significa que existe una relación
-directa entre ambas variables: a mayor área construida, mayor es el
-precio de la vivienda.
+\paragraph{\texorpdfstring{\textbf{Gráfico de Dispersión en la Zona
+Sur}}{Gráfico de Dispersión en la Zona Sur}}\label{gruxe1fico-de-dispersiuxf3n-en-la-zona-sur}
 
-La línea de tendencia en el gráfico indica que, en promedio, el precio
-aumenta en 1.2 millones de pesos por cada metro cuadrado adicional de
-área construida.
+El gráfico de dispersión correspondiente a la Zona Sur revela un
+coeficiente de correlación de \textbf{0.67}, lo que evidencia una
+relación positiva y relativamente fuerte entre el precio y el área
+construida. Esto indica que, en general, un mayor espacio construido se
+asocia con un aumento en el precio de la vivienda.
 
-Sin embargo, la dispersión de los puntos alrededor de la línea de
-tendencia muestra una variación considerable en los precios.
+La línea de tendencia sugiere que, en promedio, cada metro cuadrado
+adicional incrementa el precio en aproximadamente \textbf{1.2} millones
+de pesos.
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-6-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-6-2.pdf}
+No obstante, la amplia dispersión de los puntos alrededor de la línea de
+tendencia pone de manifiesto una considerable variabilidad en los
+precios, lo que implica la influencia de otros factores adicionales.
+
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-5-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-5-2.pdf}
 
 \begin{verbatim}
 ## Tabla de frecuencia de tipos de vivienda en la zona sur:
@@ -715,30 +761,34 @@ barrio eucarístico & 1 \\
 belalcazar & 1 \\
 \end{longtable}
 
-Base 3 Casas Zona Oriente
+\subsubsection{\texorpdfstring{\textbf{Base 3: Casas en Zona
+Oriente}}{Base 3: Casas en Zona Oriente}}\label{base-3-casas-en-zona-oriente}
 
-Las estadísticas descriptivas de las ofertas de casas en la zona oriente
-muestran una distribución similar en los datos. Con un total de 289
-registros, se observa una variabilidad notable en los atributos
-considerados. Al igual que en otras zonas, se encuentran valores
-faltantes en algunos atributos, lo cual es coherente con la estructura
-original del dataset.
+El análisis descriptivo de las ofertas en la zona oriente evidencia una
+distribución de datos similar a la de otras zonas. Este subconjunto,
+conformado por \textbf{289} registros, muestra una considerable
+variabilidad en los atributos evaluados. Al igual que en otros
+conjuntos, se han detectado algunos valores faltantes, lo cual es
+consistente con la estructura original del dataset.
 
-En cuanto a los precios de las casas, se observa una variación
-considerable, con valores que van desde 80 hasta 750 unidades
-monetarias. Tanto la mediana como la media sugieren que la mayoría de
-las casas tienen precios alrededor de 235 y 244.8 unidades monetarias,
-respectivamente.
+En cuanto a los precios, se observa una amplia dispersión: los valores
+fluctúan entre \textbf{80} y \textbf{750} unidades monetarias. Tanto la
+mediana, situada en \textbf{235}, como la media, en \textbf{244.8},
+indican que la mayoría de las propiedades se concentran en este rango de
+precios.
 
-El análisis del área construida también muestra una diversidad
-significativa, con valores que van desde 40 hasta 1745 metros cuadrados.
-La mediana y la media indican que la mayoría de las casas tienen un área
-construida de alrededor de 179 y 213.4 metros cuadrados,
-respectivamente.
+El análisis del área construida revela también una diversidad
+significativa, con valores que varían desde \textbf{40} hasta
+\textbf{1745} metros cuadrados. Los valores centrales ---una mediana de
+\textbf{179} y una media de \textbf{213.4} metros cuadrados--- sugieren
+que la mayoría de las viviendas presentan áreas construidas en torno a
+estos parámetros.
 
-Además de los precios y el área construida, otros atributos como el
-número de parqueaderos, baños y habitaciones también exhiben variaciones
-notables, con valores máximos de 10 en cada caso.
+Adicionalmente, otros atributos relevantes, como el \textbf{número de
+parqueaderos, baños y habitaciones}, muestran variaciones notables,
+alcanzando en algunos casos un máximo de 10 unidades, lo que nos ayuda
+para comprender las características y el nivel de equipamiento de las
+casas en la zona oriente.
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -874,22 +924,8 @@ Qu.:-76.50 & 3rd Qu.:3.449 \\
 NA \\
 \end{longtable}
 
-El análisis del gráfico de dispersión para la Zona Oriente revela una
-correlación positiva moderada entre el precio y el área construida, con
-un coeficiente de correlación de 0.41. Si bien existe una relación
-directa entre ambas variables, la influencia del área construida sobre
-el precio es menor que en las zonas Norte y Sur. La línea de tendencia
-indica un aumento promedio de 0.7 millones de pesos por cada metro
-cuadrado adicional, pero la dispersión significativa de los puntos
-alrededor de la línea refleja una notable variabilidad en los precios.
-
-Esta variabilidad puede ser explicada por una mayor influencia de otros
-factores como la ubicación, la calidad de la construcción, las
-características de la casa y las condiciones del mercado inmobiliario en
-la Zona Oriente.
-
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-8-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-8-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-7-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-7-2.pdf}
 
 \begin{verbatim}
 ## Tabla de frecuencia de tipos de vivienda en la zona oriente:
@@ -944,25 +980,53 @@ arboleda campestre candelaria & 1 \\
 autopista sur & 1 \\
 \end{longtable}
 
-Base 4 Casas Zona Oeste
+\paragraph{\texorpdfstring{\textbf{Análisis del Gráfico de Dispersión en
+la Zona
+Oriente}}{Análisis del Gráfico de Dispersión en la Zona Oriente}}\label{anuxe1lisis-del-gruxe1fico-de-dispersiuxf3n-en-la-zona-oriente}
 
-Las estadísticas descriptivas de las ofertas de casas en la zona oeste
-reflejan una distribución diversa en los datos. Con un total de 169
-registros, se aprecia una variabilidad considerable en los atributos
-considerados. Al igual que en otras zonas, se identifican valores
-faltantes en algunos atributos, lo cual es coherente con la estructura
+El análisis del gráfico de dispersión en la Zona Oriente muestra una
+correlación positiva moderada entre el \textbf{precio y el área
+construida}, con un coeficiente de \textbf{0.41}. Esto indica que,
+aunque existe una relación directa en la que a mayor área corresponde un
+mayor precio, el impacto del área construida sobre el valor de la
+vivienda es menos pronunciado que en las zonas Norte y Sur.
+
+Por otro lado, la línea de tendencia revela que, en promedio, cada metro
+cuadrado adicional se traduce en un aumento de aproximadamente
+\textbf{0.7 millones} de pesos en el precio. Sin embargo, la notable
+dispersión de los puntos en torno a esta línea evidencia una
+variabilidad considerable en los precios, lo que sugiere que otros
+factores también están influyendo en la determinación del valor.
+
+Esta variabilidad en los precios puede explicarse por la influencia de
+otros elementos críticos, tales como la ubicación precisa de la
+propiedad, la calidad de la construcción, las características
+particulares de cada vivienda y las condiciones específicas del mercado
+inmobiliario en la Zona Oriente.
+
+\subsubsection{\texorpdfstring{\textbf{Base 4: Casas en Zona
+Oeste}}{Base 4: Casas en Zona Oeste}}\label{base-4-casas-en-zona-oeste}
+
+El análisis descriptivo de las ofertas de casas en la zona oeste muestra
+una notable diversidad en la información. Este subconjunto consta de
+\textbf{169} registros, lo que evidencia una amplia variabilidad en los
+atributos analizados. Al igual que en otras zonas, se han identificado
+algunos valores faltantes, lo cual es coherente con la estructura
 original del dataset.
 
-En relación a los precios de las casas, se evidencia una variación
-amplia, con valores que oscilan entre 135 y 1999 unidades monetarias.
-Tanto la mediana como la media sugieren que la mayoría de las casas
-tienen precios alrededor de 680 y 736.4 unidades monetarias,
-respectivamente.
+En cuanto a los precios, se observa un rango amplio que varía desde
+\textbf{135 hasta 1999} unidades monetarias. Tanto la mediana
+(aproximadamente \textbf{680}) como la media (alrededor de
+\textbf{736.4}) indican que la mayoría de las viviendas se encuentran en
+ese rango de precios, reflejando la heterogeneidad del mercado en esta
+zona.
 
-El análisis del área construida también muestra una diversidad notable,
-con valores que van desde 55 hasta 1200 metros cuadrados. La mediana y
-la media indican que la mayoría de las casas tienen un área construida
-de alrededor de 300 y 343.2 metros cuadrados, respectivamente.
+El estudio del área construida también resalta una considerable
+diversidad, con valores que oscilan entre \textbf{55 y 1200 metros
+cuadrados}. Los valores centrales, con una mediana de cerca de
+\textbf{300} y una media de aproximadamente \textbf{343.2} metros
+cuadrados, sugieren que la mayoría de las casas presentan áreas
+construidas en torno a estos parámetros.
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1098,16 +1162,8 @@ Max. :7.000 & Max. :9.00 & Max. :10.000 & NA & NA & Max. :-76.46 & Max.
 NA \\
 \end{longtable}
 
-El gráfico de dispersión para la Zona Oeste muestra una correlación
-positiva moderada entre el precio y el área construida, con un
-coeficiente de correlación de 0.59. Esto indica una relación directa,
-pero no determinante, entre ambas variables. La línea de tendencia
-sugiere un aumento promedio de 0.95 millones de pesos por cada metro
-cuadrado adicional, pero la considerable dispersión de los puntos
-alrededor de la línea refleja una variación notable en los precios.
-
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-10-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-10-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-9-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-9-2.pdf}
 
 \begin{verbatim}
 ## Tabla de frecuencia de tipos de vivienda en la zona Oeste:
@@ -1163,26 +1219,42 @@ juanamb√∫ & 1 \\
 la cascada & 1 \\
 \end{longtable}
 
-Base 5 Casas Zona Centro
+\paragraph{\texorpdfstring{\textbf{Análisis del Gráfico de Dispersión en
+la Zona
+Oeste}}{Análisis del Gráfico de Dispersión en la Zona Oeste}}\label{anuxe1lisis-del-gruxe1fico-de-dispersiuxf3n-en-la-zona-oeste}
 
-Las estadísticas descriptivas de las ofertas de casas en la zona centro
-revelan una distribución diversificada en los datos. Con un total de 100
-registros, se destaca una variabilidad significativa en los atributos
-considerados. Al igual que en otras zonas, se encuentran valores
-faltantes en algunos atributos, lo cual es coherente con la estructura
-original del dataset.
+El gráfico de dispersión para la Zona Oeste evidencia una correlación
+moderadamente positiva entre el precio y el área construida, con un
+coeficiente de \textbf{0.59}. Esto implica que, si bien existe una
+relación directa entre estas variables, el área construida no determina
+de manera exclusiva el precio de las viviendas.
 
-En cuanto a los precios de las casas, se observa una variación
-considerable, con valores que van desde 148 hasta 1100 unidades
-monetarias. Tanto la mediana como la media sugieren que la mayoría de
-las casas tienen precios alrededor de 310 y 339.2 unidades monetarias,
-respectivamente.
+Por otro lado, la línea de tendencia indica que, en promedio, cada metro
+cuadrado adicional se asocia con un incremento de \textbf{0.95 millones
+de pesos} en el precio. No obstante, la marcada dispersión de los puntos
+alrededor de esta línea revela una variabilidad considerable en los
+precios, lo que sugiere la influencia de otros factores adicionales.
 
-El análisis del área construida también muestra una diversidad
-significativa, con valores que van desde 74 hasta 750 metros cuadrados.
-La mediana y la media indican que la mayoría de las casas tienen un área
-construida de alrededor de 200 y 217.8 metros cuadrados,
-respectivamente.
+\subsubsection{\texorpdfstring{\textbf{Base 5 Casas Zona
+Centro}}{Base 5 Casas Zona Centro}}\label{base-5-casas-zona-centro}
+
+El análisis descriptivo de las ofertas de casas en la zona centro revela
+una gran diversidad en los datos, en donde, con un total de 100
+registros, se observa una variabilidad significativa en los atributos
+evaluados, y, al igual que en otras zonas, se identifican algunos
+valores faltantes, lo cual es consistente con la estructura original del
+dataset.
+
+Respecto a los precios, se destaca una amplia dispersión: los valores
+oscilan entre \textbf{148 y 1100} unidades monetarias. Tanto la mediana,
+en torno a \textbf{310}, como la media, aproximadamente \textbf{339.2},
+indican que la mayoría de las casas se agrupan en este rango de precios.
+
+Asimismo, el análisis del área construida muestra una notable
+diversidad, con dimensiones que varían desde \textbf{74 hasta 750}
+\(m^2\). Los valores centrales---una mediana cercana a \textbf{200} y
+una media de aproximadamente \textbf{217.8} \(m^2\), sugieren que la
+mayoría de las viviendas tienen áreas construidas en esos intervalos.
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1318,17 +1390,8 @@ Qu.:-76.52 & 3rd Qu.:3.444 \\
 NA \\
 \end{longtable}
 
-El gráfico de dispersión para la Zona Centro revela una correlación
-positiva moderada entre el precio y el área construida, con un
-coeficiente de correlación de 0.53. Si bien existe una relación directa
-entre ambas variables, la influencia del área construida sobre el precio
-es menor que en otras zonas. La línea de tendencia indica un aumento
-promedio de 0.85 millones de pesos por cada metro cuadrado adicional,
-pero la notable dispersión de los puntos alrededor de la línea refleja
-una variabilidad considerable en los precios.
-
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-12-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-12-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-11-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-11-2.pdf}
 
 \begin{verbatim}
 ## Tabla de frecuencia de tipos de vivienda en la zona Centro:
@@ -1384,53 +1447,83 @@ colseguros & 1 \\
 el troncal & 1 \\
 \end{longtable}
 
-Momento de discusión
+\paragraph{\texorpdfstring{\textbf{Gráfico de Dispersión: Zona
+Centro}}{Gráfico de Dispersión: Zona Centro}}\label{gruxe1fico-de-dispersiuxf3n-zona-centro}
 
-En el siguiente mapa se puede observar a una sola vista como se
-encuentra la distribución de casas según la zona registrada en el
-dataset, es importante destacar que se logra identificar que existen
-barrios que según sus coordenadas comparten la misma zona, esto puede
-deberse a errores humanos en el ingreso de longitud y latitud o en la
-asignación de la variable barrio en el sistema de información que se
-diseñó para la captura de los datos.
+El gráfico de dispersión correspondiente a la Zona Centro muestra una
+correlación moderada y positiva entre el precio y el área construida,
+evidenciada por un coeficiente de \textbf{0.53}. Aunque se observa que,
+en general, a mayor área corresponde un mayor precio, la influencia del
+área construida en el valor de las viviendas es menos determinante que
+en otras zonas. La línea de tendencia sugiere que, en promedio, cada
+metro cuadrado adicional incrementa el precio en 0.85 millones de pesos.
+Sin embargo, la amplia dispersión de los puntos alrededor de esta línea
+destaca una variabilidad significativa en los precios, lo que indica la
+posible intervención de otros factores en la determinación de los
+valores.
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-13-1.pdf}
+\subsubsection{\texorpdfstring{\textbf{Momento de
+discusión}}{Momento de discusión}}\label{momento-de-discusiuxf3n}
 
-\subsection{2. EDA}\label{eda}
+\paragraph{\texorpdfstring{\textbf{Visualización de la Distribución
+Geográfica por
+Zona}}{Visualización de la Distribución Geográfica por Zona}}\label{visualizaciuxf3n-de-la-distribuciuxf3n-geogruxe1fica-por-zona}
 
-Correlación de la variable precio de la casa en función de: área
-construida, estrato, numero de baños, numero de habitaciones y zona
-donde se ubica la vivienda
+A continuación, el siguiente mapa ofrece una visión global de cómo se
+distribuyen las casas según la zona registrada en el dataset. En este,
+se puede observar que ciertos barrios, basándose en sus coordenadas, se
+agrupan en la misma zona. Esta coincidencia podría ser atribuida a
+errores en el registro de las coordenadas (\textbf{\emph{longitud y
+latitud}}) o a equivocaciones en la asignación de la variable
+\textbf{\emph{``barrio''}} durante el proceso de captura de datos en el
+sistema de información.
 
-En este apartado teniendo en cuenta el EDA realizado como resultado del
-análisis de correlación entre la variable respuesta (preciom) del tipo
-de vivienda Casa y las variables predictoras (areaconst, estrato,
-banios, habitaciones y zona) se grafican a continuación 2 modelos de
-graficas:
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-12-1.pdf}
+
+\subsection{\texorpdfstring{\textbf{2. EDA}}{2. EDA}}\label{eda}
+
+\subsubsection{Correlación del Precio de la Casa con Otras
+Variables}\label{correlaciuxf3n-del-precio-de-la-casa-con-otras-variables}
+
+En este apartado se presenta un análisis exploratorio de datos (EDA)
+enfocado en estudiar la relación entre el precio de las viviendas
+(variable respuesta: \emph{preciom}) y diversas variables predictoras:
+área construida (\emph{areaconst}), estrato, número de baños
+(\emph{banios}), número de habitaciones y la zona en la que se ubica la
+vivienda.
+
+Como resultado del análisis de correlación realizado para el tipo de
+vivienda ``Casa'', se han generado dos tipos de gráficos que ayudan a
+visualizar estas relaciones:
 
 \begin{itemize}
 \item
-  Dispersión: Este tipo de gráfico se utiliza para visualizar la
-  relación entre dos variables cuantitativas, como el precio y el área
-  construida, el precio y el estrato, el precio y el número de baños, y
-  el precio y el número de habitaciones. Cada punto en el gráfico
-  representa una observación en el conjunto de datos. La posición de
-  cada punto en los ejes x e y representa los valores de las dos
-  variables.
+  \textbf{Gráfico de Dispersión:}\\
+  Este gráfico se utiliza para examinar la relación entre dos variables
+  cuantitativas. En este contexto, se han trazado gráficos que muestran
+  la relación entre el precio y cada una de las siguientes variables:
+  área construida, estrato, número de baños y número de habitaciones.
+  Cada punto en el gráfico representa una observación del conjunto de
+  datos, donde la posición en los ejes \textbf{\emph{x}} e
+  \textbf{\emph{y}} indica los valores correspondientes de las dos
+  variables analizadas.
 \item
-  Caja de bigotes: Este tipo de gráfico se utiliza para visualizar la
-  distribución de una variable numérica en diferentes niveles de una
-  variable categórica. En este caso, se utiliza para visualizar la
-  distribución de los precios (variable respuesta) en cada zona
-  (variable categórica).
+  \textbf{Diagrama de Caja y Bigotes (Boxplot):}\\
+  Este gráfico permite visualizar la distribución de una variable
+  numérica en función de los distintos niveles de una variable
+  categórica. En este caso, se ha utilizado para representar la
+  distribución de los precios de las viviendas (\textbf{\emph{preciom}})
+  en cada una de las zonas. Este tipo de visualización facilita la
+  identificación de la mediana, los cuartiles y posibles valores
+  atípicos en cada categoría de zona.
 \end{itemize}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-15-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-15-2.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-15-3.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-15-4.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-14-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-14-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-14-3.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-14-4.pdf}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-16-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-15-1.pdf}
 
 \begin{verbatim}
 ##                 preciom areaconst    estrato habitaciones parqueaderos
@@ -1449,15 +1542,20 @@ graficas:
 ## banios       1.0000000
 \end{verbatim}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-16-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-15-2.pdf}
 
-La correlación más alta con ``preciom'' es con la variable ``estrato''
-(0.6658), seguida por ``areaconst'' (0.6529) y ``banios'' (0.5581). Esto
-indica que hay una correlación positiva moderada a fuerte entre el
-precio de la vivienda y estas características.
+En base a lo anterior, se puede apreciar que la variable
+\textbf{estrato} presenta la correlación más alta con \textbf{preciom}
+(\emph{0.6658}), seguida de cerca por \textbf{areaconst} (\emph{0.6529})
+y \textbf{banios} (\emph{0.5581}). Estos coeficientes indican que existe
+una relación positiva, de moderada a fuerte, entre el precio de la
+vivienda y estas características, lo que sugiere que a mayor estrato,
+mayor área construida o mayor número de baños, se tiende a observar un
+incremento en el precio.
 
-\subsection{3. Estimación de un modelo de regresión lineal
-múltiple}\label{estimaciuxf3n-de-un-modelo-de-regresiuxf3n-lineal-muxfaltiple}
+\subsection{\texorpdfstring{\textbf{3. Estimación de un modelo de
+regresión lineal
+múltiple}}{3. Estimación de un modelo de regresión lineal múltiple}}\label{estimaciuxf3n-de-un-modelo-de-regresiuxf3n-lineal-muxfaltiple}
 
 \begin{verbatim}
 ## 
@@ -1490,111 +1588,133 @@ múltiple}\label{estimaciuxf3n-de-un-modelo-de-regresiuxf3n-lineal-muxfaltiple}
 ## [1] 0.6833953
 \end{verbatim}
 
-Los resultados de la estimación del modelo de regresión lineal múltiple
-son los siguientes:
+A continuación se presenta la interpretación detallada de los
+coeficientes estimados:
 
-Interpretación de los coeficientes
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Intercepto}:\\
+  El coeficiente del intercepto es \textbf{-413.87536}. Esto indica que,
+  en el hipotético caso en que todas las variables predictoras fueran
+  iguales a cero, el precio estimado de la vivienda sería de -413.87536
+  unidades monetarias. Dado que esta situación no resulta realista en la
+  práctica, este valor no posee un significado práctico y se le presta
+  poca atención en la interpretación del modelo.
+\item
+  \textbf{Área Construida}:\\
+  Con un coeficiente de \textbf{0.74227}, se interpreta que, manteniendo
+  constantes las demás variables, cada unidad adicional en el área
+  construida se asocia con un incremento de 0.74227 unidades monetarias
+  en el precio de la vivienda.
+\item
+  \textbf{Estrato}:\\
+  El coeficiente para el estrato es \textbf{116.07109}. Esto sugiere
+  que, al aumentar en una unidad el estrato (con las demás variables
+  fijas), el precio estimado de la vivienda incrementa en 116.07109
+  unidades monetarias.
+\item
+  \textbf{Número de Cuartos (Habitaciones)}:\\
+  El coeficiente de \textbf{-14.74995} para el número de cuartos indica
+  que, manteniendo constantes las otras variables, cada habitación
+  adicional se asocia con una disminución de 14.74995 unidades
+  monetarias en el precio estimado. Este resultado sugiere que, en este
+  contexto, agregar cuartos podría estar correlacionado con ciertos
+  aspectos que reducen el precio, o puede reflejar la presencia de otras
+  variables no consideradas.
+\item
+  \textbf{Número de Parqueaderos}:\\
+  Con un coeficiente de \textbf{64.29943}, se deduce que cada
+  parqueadero adicional incrementa el precio de la vivienda en 64.29943
+  unidades monetarias, al mantener constantes las demás características.
+\item
+  \textbf{Número de Baños}:\\
+  Finalmente, el coeficiente de \textbf{39.03498} para el número de
+  baños implica que, controlando por las demás variables, cada baño
+  adicional se asocia con un aumento de 39.03498 unidades monetarias en
+  el precio de la vivienda.
+\end{enumerate}
 
-:
+\subsubsection{\texorpdfstring{\textbf{Gráfico de residuos vs.~valores
+ajustados}}{Gráfico de residuos vs.~valores ajustados}}\label{gruxe1fico-de-residuos-vs.-valores-ajustados}
 
-Intercepto: El coeficiente del intercepto es -413.87536. Esto significa
-que, cuando todas las demás variables son cero, el precio estimado de
-una vivienda es de -413.87536 unidades monetarias. Sin embargo, dado que
-este valor no tiene una interpretación realista en este contexto, no se
-le da mucha importancia en la interpretación.
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-17-1.pdf}
 
-Área Construida: El coeficiente para el área construida es 0.74227. Esto
-indica que, manteniendo constantes todas las demás variables, por cada
-unidad adicional de área construida, el precio estimado de la vivienda
-aumenta en 0.74227 unidades monetarias.
-
-Estrato: El coeficiente para el estrato es 116.07109. Esto sugiere que,
-manteniendo constantes todas las demás variables, el precio estimado de
-la vivienda aumenta en 116.07109 unidades monetarias por cada incremento
-de una unidad en el estrato.
-
-Número de Cuartos: El coeficiente para el número de habitaciones es
--14.74995. Esto indica que, manteniendo constantes todas las demás
-variables, por cada incremento de una unidad en el número de
-habitaciones, el precio estimado de la vivienda disminuye en 14.74995
-unidades monetarias.
-
-Número de Parqueaderos: El coeficiente para el número de parqueaderos es
-64.29943. Esto sugiere que, manteniendo constantes todas las demás
-variables, por cada unidad adicional de parqueaderos, el precio estimado
-de la vivienda aumenta en 64.29943 unidades monetarias.
-
-Número de Baños: El coeficiente para el número de baños es 39.03498.
-Esto indica que, manteniendo constantes todas las demás variables, por
-cada unidad adicional de baños, el precio estimado de la vivienda
-aumenta en 39.03498 unidades monetarias.
-
-Gráfico de residuos vs.~valores ajustados
+\subsubsection{\texorpdfstring{\textbf{Gráfico de distribución de los
+residuos}}{Gráfico de distribución de los residuos}}\label{gruxe1fico-de-distribuciuxf3n-de-los-residuos}
 
 \includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-18-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-18-2.pdf}
 
-Gráfico de distribución de los residuos
+\subsubsection{\texorpdfstring{\textbf{Gráfico de efectos
+parciales}}{Gráfico de efectos parciales}}\label{gruxe1fico-de-efectos-parciales}
 
 \includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-19-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-19-2.pdf}
 
-Gráfico de efectos parciales
+\subsubsection{\texorpdfstring{\textbf{Gráficos de dispersión con línea
+de
+regresión}}{Gráficos de dispersión con línea de regresión}}\label{gruxe1ficos-de-dispersiuxf3n-con-luxednea-de-regresiuxf3n}
 
 \includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-20-1.pdf}
 
-Gráficos de dispersión con línea de regresión
+\subsubsection{\texorpdfstring{\textbf{Interpretación del coeficiente
+R²}}{Interpretación del coeficiente R²}}\label{interpretaciuxf3n-del-coeficiente-ruxb2}
+
+El coeficiente de determinación (\textbf{R²}) es de aproximadamente
+0.6834, lo que significa que cerca del 68.34\% de la variabilidad en el
+precio de la vivienda se puede explicar mediante las variables
+independientes incluidas en el modelo. Este valor indica que el ajuste
+del modelo a los datos es bueno.
+
+\textbf{Discusión sobre el ajuste del modelo e implicaciones:}
+
+\begin{itemize}
+\item
+  Un \textbf{R²} relativamente alto sugiere que el modelo de regresión
+  lineal múltiple captura una parte significativa de la variabilidad en
+  el precio de las propiedades utilizando las variables seleccionadas.
+  Sin embargo, siempre existe la posibilidad de mejorar el modelo.
+\item
+  Se podría considerar la inclusión de variables adicionales relevantes,
+  como la ubicación geográfica precisa, la antigüedad de la propiedad o
+  características específicas del vecindario, lo que podría aumentar la
+  capacidad predictiva del modelo y explicar aún más la variación en los
+  precios. Además, explorar transformaciones de las variables existentes
+  o utilizar técnicas de modelado más avanzadas puede ayudar a
+  perfeccionar la precisión del modelo.
+\end{itemize}
+
+\subsection{\texorpdfstring{\textbf{4. Validación de
+supuestos}}{4. Validación de supuestos}}\label{validaciuxf3n-de-supuestos}
+
+Esta sección se enfoca en evaluar dos supuestos fundamentales del
+análisis de regresión lineal mediante pruebas estadísticas específicas:
+
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Normalidad de los Residuos:}\\
+  Se utiliza la prueba de Shapiro-Wilk para determinar si los residuos
+  del modelo se ajustan a una distribución normal. Este supuesto es
+  esencial porque el análisis de regresión asume que los errores se
+  distribuyen normalmente. Si los residuos se desvían de la normalidad,
+  podría ser un indicio de que el modelo no está capturando
+  adecuadamente la estructura subyacente de los datos o que existen
+  factores adicionales no considerados.
+\item
+  \textbf{Homocedasticidad de los Residuos:}\\
+  La prueba de Breusch-Pagan evalúa si la varianza de los residuos se
+  mantiene constante a lo largo de los niveles de las variables
+  independientes. La homocedasticidad implica que la dispersión de los
+  errores es uniforme en todas las condiciones del modelo. En cambio, si
+  se detecta heterocedasticidad, es decir, variaciones en la varianza de
+  los residuos, esto podría afectar la precisión de las estimaciones y
+  la validez de las pruebas de hipótesis, sugiriendo la necesidad de
+  revisar o ajustar el modelo.
+\end{enumerate}
 
 \includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-21-1.pdf}
-
-Interpretación del coeficiente R\^{}2:
-
-El coeficiente de determinación (R\^{}2) es aproximadamente 0.6834. Esto
-significa que alrededor del 68.34\% de la variabilidad en el precio de
-la vivienda puede ser explicada por las variables independientes
-incluidas en el modelo. Esto indica un buen ajuste del modelo a los
-datos observados.
-
-Discusión sobre el ajuste del modelo e implicaciones: Dado que el
-coeficiente de determinación es relativamente alto, sugiere que el
-modelo de regresión lineal múltiple es capaz de explicar una proporción
-significativa de la variabilidad en el precio de la vivienda utilizando
-las variables incluidas. Sin embargo, siempre hay margen para mejorar el
-modelo. Para ello, podríamos considerar la inclusión de variables
-adicionales relevantes, como la ubicación geográfica, la antigüedad de
-la propiedad o características específicas del vecindario, que podrían
-mejorar la capacidad predictiva del modelo y explicar aún más la
-variabilidad en los precios de las propiedades. Además, podríamos
-explorar posibles transformaciones en las variables existentes o
-técnicas de modelado más avanzadas para mejorar aún más la precisión del
-modelo.
-
-\subsection{4. Validación de
-supuestos}\label{validaciuxf3n-de-supuestos}
-
-Esta sección tiene como objetivo realizar pruebas para validar dos
-supuestos importantes en el análisis de regresión lineal:
-
-Normalidad de los residuos: En donde la prueba de Shapiro-Wilk pretende
-evaluar si los residuos del modelo siguen una distribución normal. Esto
-es importante porque el análisis de regresión lineal asume que los
-errores (residuos) siguen una distribución normal. Si los residuos no se
-distribuyen normalmente, podría indicar que el modelo no está capturando
-completamente la estructura de los datos o que hay otros factores que no
-se han tenido en cuenta.
-
-Homocedasticidad de los residuos: En donde la prueba de Breusch-Pagan
-pretende evaluar si los residuos tienen una varianza constante en
-relación con las variables independientes. La homocedasticidad significa
-que la varianza de los residuos es constante en todos los niveles de las
-variables independientes. Si hay heterocedasticidad, es decir, la
-varianza de los residuos no es constante, puede haber un problema de
-modelado que afecte la precisión de las estimaciones y las pruebas de
-hipótesis.
-
-.
-
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-22-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-22-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-21-2.pdf}
 
 \begin{verbatim}
 ## 
@@ -1612,15 +1732,16 @@ hipótesis.
 ## BP = 321.2, df = 5, p-value < 2.2e-16
 \end{verbatim}
 
-En conclusión, el análisis de los residuos del modelo de regresión
-lineal sugiere que no se ajustan completamente a la normalidad, aunque
-la desviación no es grave y el tamaño de la muestra parece ser grande.
-La prueba de Shapiro-Wilk rechaza la normalidad de los residuos,
-mientras que la prueba de Breusch-Pagan no encuentra evidencia de
-heterocedasticidad.
+Basado en el análisis de los residuos del modelo de regresión lineal, se
+concluye que, aunque los residuos no siguen una distribución normal
+perfecta ---como lo indica la prueba de Shapiro-Wilk--- la desviación no
+es severa, posiblemente debido al gran tamaño de la muestra. Asimismo,
+la prueba de Breusch-Pagan no encontró evidencia de heterocedasticidad,
+lo que sugiere que la varianza de los errores se mantiene constante a lo
+largo de los niveles de las variables independientes.
 
-\subsection{5. Predección del precio de la
-vivienda}\label{predecciuxf3n-del-precio-de-la-vivienda}
+\subsection{\texorpdfstring{\textbf{5. Predección del precio de la
+vivienda}}{5. Predección del precio de la vivienda}}\label{predecciuxf3n-del-precio-de-la-vivienda}
 
 \begin{verbatim}
 ##    index precio_predicho
@@ -1637,27 +1758,47 @@ vivienda}\label{predecciuxf3n-del-precio-de-la-vivienda}
 ## 14    14        321.2668
 \end{verbatim}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-23-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-22-1.pdf}
 
-\subsection{6. Ofertas potenciales}\label{ofertas-potenciales}
+\subsection{\texorpdfstring{\textbf{6. Ofertas
+Potenciales}}{6. Ofertas Potenciales}}\label{ofertas-potenciales}
 
 Los resultados muestran las características de las primeras cinco
-viviendas potenciales que cumplen con las condiciones establecidas y
-cuyo precio estimado no supera el límite del crédito preaprobado para la
-nueva vivienda.
+viviendas potenciales que cumplen con las condiciones establecidas,
+asegurando que su precio estimado no exceda el límite del crédito
+preaprobado para la nueva vivienda. A continuación, se describen las
+principales características de estas opciones:
 
-Área Construida:Las áreas construidas de estas viviendas varían entre
-180 y 200 metros cuadrados. Parqueaderos: Todas las viviendas tienen al
-menos un parqueadero, con una de ellas teniendo dos. Baños: La cantidad
-de baños oscila entre 2 y 3. Habitaciones:** Todas las viviendas tienen
-entre 3 y 4 habitaciones. Estrato: Las viviendas pertenecen a estratos
-4. Zona: Todas las viviendas se encuentran en la Zona Norte. Precio
-Estimado: Los precios estimados de estas viviendas varían entre 282.1364
-y 346.4359 millones de pesos.
+\begin{itemize}
+\item
+  \textbf{Área Construida:}\\
+  Las viviendas cuentan con áreas que varían entre 180 y 200 metros
+  cuadrados.
+\item
+  \textbf{Parqueaderos:}\\
+  Todas las viviendas disponen de al menos un parqueadero, siendo que
+  una de ellas ofrece dos.
+\item
+  \textbf{Baños:}\\
+  La cantidad de baños oscila entre 2 y 3.
+\item
+  \textbf{Habitaciones:}\\
+  Se presentan viviendas con 3 o 4 habitaciones.
+\item
+  \textbf{Estrato:}\\
+  Todas las opciones se ubican en el estrato 4.
+\item
+  \textbf{Zona:}\\
+  Las viviendas están localizadas en la Zona Norte.
+\item
+  \textbf{Precio Estimado:}\\
+  Los precios estimados se sitúan entre 282.1364 y 346.4359 millones de
+  pesos.
+\end{itemize}
 
-Estos resultados son útiles para presentar a Maria las primeras opciones
-de viviendas potenciales que se ajustan a los criterios establecidos y
-están dentro del presupuesto disponible para su compra.
+Estos resultados son de gran utilidad para presentar a María las
+primeras alternativas de viviendas que cumplen con los criterios
+establecidos y se ajustan al presupuesto disponible.
 
 \begin{verbatim}
 ##   areaconst parqueaderos banios habitaciones estrato       zona precio_estimado
@@ -1668,12 +1809,15 @@ están dentro del presupuesto disponible para su compra.
 ## 6       200            1      3            3       4 Zona Norte        336.0168
 \end{verbatim}
 
-\subsection{7. Escenario de crédito pre-aprobado para tipo de vivienda
-Apartamento}\label{escenario-de-cruxe9dito-pre-aprobado-para-tipo-de-vivienda-apartamento}
+\subsection{\texorpdfstring{\textbf{7. Escenario de crédito pre-aprobado
+para tipo de vivienda
+Apartamento}}{7. Escenario de crédito pre-aprobado para tipo de vivienda Apartamento}}\label{escenario-de-cruxe9dito-pre-aprobado-para-tipo-de-vivienda-apartamento}
 
-Segmentación por zonas
+\subsubsection{\texorpdfstring{\textbf{Segmentación por
+zonas}}{Segmentación por zonas}}\label{segmentaciuxf3n-por-zonas}
 
-Base 1 Apartamentos Zona Norte
+\paragraph{\texorpdfstring{\textbf{Base 1 Apartamentos Zona
+Norte}}{Base 1 Apartamentos Zona Norte}}\label{base-1-apartamentos-zona-norte}
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1733,10 +1877,11 @@ latitud
 & -76.51974 & 3.42627 \\
 \end{longtable}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-25-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-25-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-24-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-24-2.pdf}
 
-Base 2 Apartamentos Zona Sur
+\paragraph{\texorpdfstring{\textbf{Base 2 Apartamentos Zona
+Sur}}{Base 2 Apartamentos Zona Sur}}\label{base-2-apartamentos-zona-sur}
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1796,10 +1941,11 @@ latitud
 aguacatal & -76.55700 & 3.45900 \\
 \end{longtable}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-26-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-26-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-25-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-25-2.pdf}
 
-Base 2 Apartamentos Zona Oeste
+\paragraph{\texorpdfstring{\textbf{Base 2 Apartamentos Zona
+Oeste}}{Base 2 Apartamentos Zona Oeste}}\label{base-2-apartamentos-zona-oeste}
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1859,10 +2005,11 @@ aguacatal & -76.55409 & 3.44338 \\
 aguacatal & -76.55447 & 3.45783 \\
 \end{longtable}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-27-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-27-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-26-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-26-2.pdf}
 
-Base 2 Apartamentos Zona Oriente
+\paragraph{\texorpdfstring{\textbf{Base 2 Apartamentos Zona
+Oriente}}{Base 2 Apartamentos Zona Oriente}}\label{base-2-apartamentos-zona-oriente}
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1922,10 +2069,11 @@ lópez & -76.47978 & 3.45131 \\
 atanasio girardot & -76.50737 & 3.44454 \\
 \end{longtable}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-28-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-28-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-27-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-27-2.pdf}
 
-Base 2 Apartamentos Zona Centro
+\paragraph{\texorpdfstring{\textbf{Base 2 Apartamentos Zona
+Centro}}{Base 2 Apartamentos Zona Centro}}\label{base-2-apartamentos-zona-centro}
 
 \begin{verbatim}
 ## Primeros 3 registros de la base de datos filtrada:
@@ -1985,38 +2133,84 @@ alameda & -76.53123 & 3.44011 \\
 bretaña & -76.53111 & 3.44034 \\
 \end{longtable}
 
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-28-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-28-2.pdf}
+
 \includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-29-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-29-2.pdf}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-30-1.pdf}
+\subparagraph{\texorpdfstring{\textbf{Análisis Comparativo por
+Zonas}}{Análisis Comparativo por Zonas}}\label{anuxe1lisis-comparativo-por-zonas}
 
-Basado en la información generada se identifica que según el gráfico de
-dispersión: La zona oeste presenta la mayor concentración de puntos en
-la zona superior derecha, lo que indica una mayor cantidad de
-propiedades con precios elevados y áreas construidas amplias. de otra
-parte el rango de precios para la zona oeste es el más alto, por tanto,
-la zona oeste tiene el coeficiente de correlación más fuerte (0.82), lo
-que indica una relación más estrecha entre precio y área construida.
+Basado en la información generada y el análisis del gráfico de
+dispersión, se observan las siguientes tendencias:
 
-Ahora hablando de la comparación con otras zonas, se observa que la Zona
-Sur aunque tiene un coeficiente de correlación similar a la zona norte
-(0.76), el rango de precios es ligeramente inferior. La Zona Norte: Si
-bien presenta un rango de precios similar a la zona sur, la
-concentración de puntos en la zona superior derecha del gráfico de
-dispersión es menor. Por su parte la Zona Oriente es la que presenta los
-precios más bajos, aunque presenta un dato atípico en la gráfica este no
-altera la tendencia general de precios más bajos. Por ultimo la Zona
-Centro Ofrece precios intermedios, con una poca oferta inmoboliaria
-respecto a Apartamento, esto puede deberse a la dinamica comercial
-propia del sector reduciendo la vivienda residencial.
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Zona Oeste:}
 
-Tambien es valido destacar que al igual con los datos registrados en el
-tipo de vivienda ``Casa'' se evidencia un error humano en la asignación
-del tipo de zona o en los datos de longitud y latitud dado que en el
-ultimo grafico se observa que existen traslapos en los colores, esto
-sucede con mayor incidencia en la parte superior del mapa.
+  \begin{itemize}
+  \tightlist
+  \item
+    Se aprecia la mayor concentración de puntos en la parte superior
+    derecha del gráfico, lo que indica que esta zona tiene una elevada
+    cantidad de propiedades con precios altos y amplias áreas
+    construidas.\\
+  \item
+    Además, el rango de precios en la zona oeste es el más alto, y
+    cuenta con el coeficiente de correlación más fuerte (0.82),
+    sugiriendo una relación estrecha entre el precio y el área
+    construida.
+  \end{itemize}
+\item
+  \textbf{Zona Sur y Zona Norte:}
 
-Analisis exploratorio
+  \begin{itemize}
+  \tightlist
+  \item
+    La Zona Sur presenta un coeficiente de correlación de 0.76, similar
+    al de la Zona Norte, sin embargo, el rango de precios en la Zona Sur
+    es ligeramente inferior.\\
+  \item
+    Aunque la Zona Norte tiene un rango de precios comparable al de la
+    Zona Sur, se observa una menor concentración de puntos en la parte
+    superior derecha del gráfico, lo que podría implicar una menor
+    cantidad de propiedades con precios muy altos y áreas muy amplias.
+  \end{itemize}
+\item
+  \textbf{Zona Oriente:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Es la que muestra los precios más bajos en general.\\
+  \item
+    Aunque se detecta la presencia de un dato atípico en el gráfico,
+    este no altera la tendencia general de precios bajos.
+  \end{itemize}
+\item
+  \textbf{Zona Centro:}
+
+  \begin{itemize}
+  \tightlist
+  \item
+    Ofrece precios intermedios en comparación con las otras zonas.\\
+  \item
+    Se observa una menor oferta inmobiliaria de tipo apartamento, lo que
+    podría estar relacionado con la dinámica comercial particular de
+    esta área, favoreciendo un perfil de vivienda residencial diferente.
+  \end{itemize}
+\end{itemize}
+
+Finalmente, es importante destacar que, al igual que se ha observado en
+los datos del tipo de vivienda \textbf{\emph{``Casa''}}, se evidencia un
+posible error humano en la asignación de la zona o en el registro de las
+coordenadas (longitud y latitud). Esto se aprecia en el último gráfico,
+donde se observan traslapos en los colores, especialmente en la parte
+superior del mapa, lo que indic
+
+\subsection{\texorpdfstring{\textbf{Analisis
+exploratorio}}{Analisis exploratorio}}\label{analisis-exploratorio}
 
 \begin{verbatim}
 ##        id           zona               piso              estrato     
@@ -2101,8 +2295,8 @@ Analisis exploratorio
 ## < table of extent 0 x 0 >
 \end{verbatim}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-32-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-32-2.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-31-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-31-2.pdf}
 
 \begin{verbatim}
 ## $preciom
@@ -2260,19 +2454,36 @@ latitud & 0 & 1.00 & 3.42 & 0.04 & 3.33 & 3.38 & 3.42 & 3.45 & 3.50 &
 ▂▇▅▇▅ \\
 \end{longtable}
 
-Interpretación del Modelo El modelo de regresión lineal múltiple
-ajustado es:
+\paragraph{\texorpdfstring{\textbf{Interpretación del
+Modelo}}{Interpretación del Modelo}}\label{interpretaciuxf3n-del-modelo}
 
-Precio = β0 + β1 * Área Construida + β2 * Estrato + β3 * Parqueaderos +
-β4 * Baños + β5 * Habitaciones + ε
+El modelo de regresión lineal múltiple ajustado se expresa de la
+siguiente manera:
+
+\[
+\text{Precio} = \beta_0 + \beta_1 \times \text{Área Construida} + \beta_2 \times \text{Estrato} + \beta_3 \times \text{Parqueaderos} + \beta_4 \times \text{Baños} + \beta_5 \times \text{Habitaciones} + \varepsilon
+\]
 
 Donde:
 
-β0 es el intercepto, que representa el precio esperado cuando todas las
-demás variables son cero. β1, β2, β3, β4 y β5 son los coeficientes de
-regresión que representan el cambio esperado en el precio para un
-aumento unitario en cada variable, manteniendo todas las demás variables
-constantes. ε es el término de error.
+\begin{itemize}
+\tightlist
+\item
+  \textbf{\(\beta_0\) (Intercepto):} Representa el precio estimado
+  cuando todas las variables independientes son cero.
+\item
+  \textbf{\(\beta_1, \beta_2, \beta_3, \beta_4, \beta_5\) (Coeficientes
+  de Regresión):} Cada uno de estos coeficientes indica el cambio
+  esperado en el precio ante un incremento unitario en la variable
+  correspondiente, manteniendo constantes las demás variables.
+\item
+  \textbf{\(\varepsilon\) (Término de Error):} Captura la variabilidad
+  en el precio que no es explicada por el modelo.
+\end{itemize}
+
+Este modelo permite estimar el precio de una vivienda basándose en sus
+características, tales como el área construida, el estrato, el número de
+parqueaderos, baños y habitaciones.
 
 \begin{verbatim}
 ## 
@@ -2328,27 +2539,67 @@ constantes. ε es el término de error.
 \end{verbatim}
 
 El análisis del modelo de regresión aplicado revela que el precio de la
-vivienda está influenciado significativamente por diversas
-características. Por cada metro cuadrado adicional en el área
-construida, el precio aumenta en aproximadamente \$2.22 millones.
-Respecto a los estratos, se observa un aumento significativo en el
-precio con valores cercanos a \$56.92 millones para estrato 6, mientras
-que para los baños y habitaciones, se registra un incremento de
-aproximadamente \$61.11 millones y una disminución de alrededor de
-\$32.93 millones, respectivamente, por cada unidad adicional. En cuanto
-a las zonas, se identifican variaciones de precios significativas,
-siendo la Zona Sur la de mayor impacto con un incremento de \$118.86
-millones, seguida por la Zona Norte con \$31.09 millones, la Zona Oeste
-con \$20.09 millones y la Zona Centro con \$19.32 millones. El modelo
-tiene un coeficiente de determinación (R\^{}2) de aproximadamente 0.78,
-lo que indica que alrededor del 78.39\% de la variabilidad en el precio
-de la vivienda puede ser explicada por las variables incluidas en el
-modelo, demostrando un buen ajuste.
+vivienda está fuertemente influenciado por diversas características. A
+continuación se presentan los hallazgos principales:
 
-Validacion de supuestos
+\begin{itemize}
+\item
+  \textbf{Área Construida:}\\
+  Cada metro cuadrado adicional en el área construida se asocia con un
+  incremento aproximado de \textbf{\$2.22 millones} en el precio de la
+  vivienda.
+\item
+  \textbf{Estrato:}\\
+  Los estratos tienen un impacto significativo en el precio. En
+  particular, para el estrato 6 se observa un aumento de aproximadamente
+  \textbf{\$56.92 millones} por unidad, lo que sugiere que las viviendas
+  en este nivel socioeconómico tienden a tener precios más elevados.
+\item
+  \textbf{Baños y Habitaciones:}
 
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-34-1.pdf}
-\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-34-2.pdf}
+  \begin{itemize}
+  \tightlist
+  \item
+    Cada baño adicional se asocia con un aumento de alrededor de
+    \textbf{\$61.11 millones} en el precio.\\
+  \item
+    Por el contrario, cada habitación adicional se relaciona con una
+    disminución de cerca de \textbf{\$32.93 millones}, lo cual podría
+    reflejar efectos complejos en la distribución de espacios o en la
+    valoración del inmueble.
+  \end{itemize}
+\item
+  \textbf{Zonas:}\\
+  Las variaciones de precios según la zona son notables:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Zona Sur:} Presenta el mayor impacto, incrementando el
+    precio en aproximadamente \textbf{\$118.86 millones}.
+  \item
+    \textbf{Zona Norte:} Contribuye con un aumento de alrededor de
+    \textbf{\$31.09 millones}.
+  \item
+    \textbf{Zona Oeste:} Se asocia con un incremento de cerca de
+    \textbf{\$20.09 millones}.
+  \item
+    \textbf{Zona Centro:} Aporta un aumento aproximado de
+    \textbf{\$19.32 millones}.
+  \end{itemize}
+\end{itemize}
+
+Finalmente, el modelo cuenta con un coeficiente de determinación
+(\textbf{R²}) de aproximadamente \textbf{0.78}, lo que significa que
+cerca del \textbf{78.39\%} de la variabilidad en el precio de la
+vivienda es explicada por las variables incluidas en el modelo, lo que
+demuestra un buen ajuste.
+
+\subsection{\texorpdfstring{\textbf{Validacion de
+supuestos}}{Validacion de supuestos}}\label{validacion-de-supuestos}
+
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-33-1.pdf}
+\includegraphics{A2_U2_InformeEjecutivo_files/figure-latex/unnamed-chunk-33-2.pdf}
 
 \begin{verbatim}
 ## 
@@ -2366,33 +2617,55 @@ Validacion de supuestos
 ## X-squared = 127.18, df = 1, p-value < 2.2e-16
 \end{verbatim}
 
-Test de Breusch-Pagan para homocedasticidad: El valor de estadístico de
-prueba (BP) es 1465.5 con 8 grados de libertad, y el p-valor es menor
-que 2.2e-16. Esto indica que hay evidencia significativa para rechazar
-la hipótesis nula de homocedasticidad, lo que sugiere que los residuos
-no tienen varianza constante.
+\textbf{Test de Breusch-Pagan para Homocedasticidad:}
 
-Test de Ljung-Box para autocorrelación de los residuos: El valor de
-estadístico de prueba (X-squared) es 127.18 con 1 grado de libertad, y
-el p-valor es menor que 2.2e-16. Esto indica que hay evidencia
-significativa para rechazar la hipótesis nula de independencia de los
-residuos, lo que sugiere que los residuos están autocorrelacionados.
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Estadístico de prueba (BP):} 1465.5 con 8 grados de libertad.
+\item
+  \textbf{p-valor:} \textless{} 2.2e-16.
+\end{itemize}
 
-Estos resultados pueden indicar que el modelo de regresión lineal
-múltiple puede no cumplir completamente con los supuestos de
-homocedasticidad e independencia de los residuos.
+El resultado significativo (p \textless{} 2.2e-16) indica que se rechaza
+la hipótesis nula de homocedasticidad, sugiriendo que los residuos del
+modelo no tienen una varianza constante.
 
-Predicción del precio
+\textbf{Test de Ljung-Box para Autocorrelación de los Residuos:}
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Estadístico de prueba (X-squared):} 127.18 con 1 grado de
+  libertad.
+\item
+  \textbf{p-valor:} \textless{} 2.2e-16.
+\end{itemize}
+
+El bajo \textbf{p-valor} respalda el rechazo de la hipótesis nula de
+independencia de los residuos, indicando que éstos presentan
+autocorrelación. Ambos tests evidencian que el modelo de regresión
+lineal múltiple no cumple completamente con los supuestos de
+homocedasticidad e independencia de los residuos, lo que podría afectar
+la precisión de las estimaciones y las pruebas de hipótesis derivadas
+del modelo.
+
+\subsection{\texorpdfstring{\textbf{Predicción del
+precio}}{Predicción del precio}}\label{predicciuxf3n-del-precio}
 
 \begin{verbatim}
 ##        1        2 
 ## 732.8381 789.7567
 \end{verbatim}
 
-La predicción del precio para la vivienda especificada es de \$732.8381
-millones (para el estrato 5) y \$789.7567 millones (para el estrato 6).
+La predicción del precio para la vivienda varía según el estrato
+considerado. Es decir, para una vivienda ubicada en estrato 5, se estima
+un precio aproximado de \textbf{\$732.84 millones}, mientras que para
+una en estrato 6, el precio predicho asciende a alrededor de
+\textbf{\$789.76 millones}.
 
-Potenciales ofertas
+\subsection{\texorpdfstring{\textbf{Potenciales
+ofertas}}{Potenciales ofertas}}\label{potenciales-ofertas}
 
 \begin{verbatim}
 ##   areaconst banios habitaciones estrato     zona precio_estimado
@@ -2403,23 +2676,49 @@ Potenciales ofertas
 ## 5       280      3            5       5 Zona Sur        688.3789
 \end{verbatim}
 
-Las ofertas potenciales presentan una variedad de opciones en términos
-de tamaño, distribución de espacios y precios estimados. La primera
-oferta, con un área construida de 280 metros cuadrados, ofrece 3 baños y
-4 habitaciones, con un precio estimado de alrededor de \$721.31
-millones. La segunda opción, también con 300 metros cuadrados, cuenta
-con características similares pero un precio ligeramente superior,
-aproximadamente \$765.77 millones. La tercera y cuarta oferta, con áreas
-construidas de 280 y 300 metros cuadrados respectivamente, presentan 4
-baños y 4 habitaciones, con precios estimados de \$782.42 y \$826.88
-millones respectivamente. Finalmente, la quinta oferta, con 280 metros
-cuadrados, ofrece 3 baños y 5 habitaciones, con el precio estimado más
-bajo de todas, alrededor de \$688.38 millones. Estas opciones brindan a
-los potenciales compradores una gama de alternativas para seleccionar la
-vivienda que mejor se ajuste a sus necesidades y presupuesto.
+Las ofertas potenciales brindan una diversidad de opciones en cuanto a
+tamaño, distribución de espacios y precios. A continuación se describen
+detalladamente las características de cada una de las cinco ofertas
+identificadas:
 
-\subsection{8. Anexos - Repositorio Código
-fuente}\label{anexos---repositorio-cuxf3digo-fuente}
+\begin{enumerate}
+\def\labelenumi{\arabic{enumi}.}
+\item
+  \textbf{Primera Oferta:}\\
+  Esta opción ofrece una vivienda con un área construida de 280 m², que
+  incluye 3 baños y 4 habitaciones. Con un precio estimado de
+  aproximadamente \$721.31 millones, representa un equilibrio atractivo
+  entre dimensiones y costo.
+\item
+  \textbf{Segunda Oferta:}\\
+  Con un área de 300 m², esta opción mantiene 3 baños y 4 habitaciones,
+  pero su precio es ligeramente superior, alrededor de \$765.77
+  millones. La diferencia en precio podría reflejar mejoras en el diseño
+  o acabados que aporten mayor valor.
+\item
+  \textbf{Tercera Oferta:}\\
+  Esta alternativa cuenta con 280 m² de área construida y una
+  configuración que incluye 4 baños y 4 habitaciones, situándose en un
+  rango de precio de aproximadamente \$782.42 millones. La adición de un
+  baño extra puede ser un factor diferenciador para quienes buscan mayor
+  funcionalidad.
+\item
+  \textbf{Cuarta Oferta:}\\
+  Con un área de 300 m², 4 baños y 4 habitaciones, esta opción se
+  posiciona en el rango de precio más alto, estimado en cerca de
+  \$826.88 millones. Es ideal para compradores que priorizan espacios
+  amplios y mayores comodidades.
+\item
+  \textbf{Quinta Oferta:}\\
+  Esta oferta, con 280 m² de área construida, se distingue por contar
+  con 3 baños y 5 habitaciones, ofreciendo el precio más competitivo,
+  alrededor de \$688.38 millones. La mayor cantidad de habitaciones a un
+  costo inferior la convierte en una alternativa especialmente atractiva
+  para optimizar el uso del espacio sin exceder el presupuesto.
+\end{enumerate}
+
+\subsection{\texorpdfstring{\textbf{8. Anexos - Repositorio Código
+fuente}}{8. Anexos - Repositorio Código fuente}}\label{anexos---repositorio-cuxf3digo-fuente}
 
 Repositorio Github
 
