@@ -42,9 +42,9 @@ if (!exists("vivienda")) {
 
 ```
 
-<h1>Caso C&A</h1>
+# **Caso C&A**
 
-<h2>Enunciado</h2>
+## **Enunciado**
 
 
 Maria comenzó como agente de bienes raíces en Cali hace 10 años. Después de laborar dos años para una empresa nacional, se traslado a Bogotá y trabajó para otra agencia de bienes raíces. Sus amigos y familiares la convencieron de que con su experiencia y conocimientos del negocio debía abrir su propia agencia. Terminó por adquirir la licencia de intermediario y al poco tiempo fundó su propia compañía, C&A (Casas y Apartamentos) en Cali. Santiago y Lina, dos vendedores de la empresa anterior aceptaron trabajar en la nueva compaña. En la actualidad ocho agentes de bienes raíces colaboran con ella en C&A.
@@ -56,53 +56,62 @@ Actualmente las ventas de bienes raíces en Cali se han visto disminuidas de man
 Hace dos días, María recibió una carta solicitando asesoría para la compra de dos viviendas por parte de una compañía internacional que desea ubicar a dos de sus empleados con sus familias en la ciudad. Las solicitudes incluyen las siguientes condiciones:
 
 
-![Condiciones](C:\Users\Juan Jose Restrepo\Desktop\Master-Data-Science-main\Semestre 2\Modelos Estadisticos\A2_U2_InformeEjecutivo_JJRR\condiciones.png)
+![Condiciones de las solicitudes](C:\Users\Juan Jose Restrepo\Desktop\Master-Data-Science-main\Semestre 2\Modelos Estadisticos\A2_U2_InformeEjecutivo_JJRR\condiciones.png)
 
-<b>Pasos requeridos para la obtención de los resultados</b>
+## **Pasos requeridos para la obtención de los resultados**
 
+1. Realice un filtro a la base de datos e incluya solo las ofertas de: base1: casas, de la zona norte de la ciudad. Presente los primeros 3 registros de las bases y algunas tablas que comprueben la consulta. (Adicional un mapa con los puntos de las bases. Discutir si todos los puntos se ubican en la zona correspondiente o se presentan valores en otras zonas, por qué?).
 
-<ol>
-<li>
-Realice un filtro a la base de datos e incluya solo las ofertas de : base1: casas, de la zona norte de la ciudad. Presente los primeros 3 registros de las bases y algunas tablas que comprueben la consulta. (Adicional un mapa con los puntos de las bases. Discutir si todos los puntos se ubican en la zona correspondiente o se presentan valores en otras zonas, por que?).</li>
+2. Realice un análisis exploratorio de datos enfocado en la correlación entre la variable respuesta (precio de la casa) en función del área construida, estrato, número de baños, número de habitaciones y zona donde se ubica la vivienda. Use gráficos interactivos con el paquete plotly e interprete los resultados.
 
-<li>Realice un análisis exploratorio de datos enfocado en la correlación entre la variable respuesta (precio de la casa) en función del área construida, estrato, numero de baños, numero de habitaciones y zona donde se ubica la vivienda. Use gráficos interactivos con el paquete plotly e interprete los resultados.</li>
+3. Estime un modelo de regresión lineal múltiple con las variables del punto anterior (precio = f(área construida, estrato, número de cuartos, número de parqueaderos, número de baños)) e interprete los coeficientes si son estadísticamente significativos. Las interpretaciones deben estar contextualizadas y discutir si los resultados son lógicos. Adicionalmente interprete el coeficiente \(R^2\) y discuta el ajuste del modelo e implicaciones (qué podrían hacer para mejorarlo).
 
-<li>Estime un modelo de regresión lineal múltiple con las variables del punto anterior (precio = f(área construida, estrato, número de cuartos, número de parqueaderos, número de baños ) ) e interprete los coeficientes si son estadísticamente significativos. Las interpretaciones deber están contextualizadas y discutir si los resultados son lógicos. Adicionalmente interprete el coeficiente R2
- y discuta el ajuste del modelo e implicaciones (que podrían hacer para mejorarlo).</li>
+4. Realice la validación de supuestos del modelo e interprete los resultados (no es necesario corregir en caso de presentar problemas, solo realizar sugerencias de qué se podría hacer).
 
-<li>Realice la validación de supuestos del modelo e interprete los resultados (no es necesario corregir en caso de presentar problemas, solo realizar sugerencias de que se podría hacer).</li>
+5. Con el modelo identificado debe predecir el precio de la vivienda con las características de la primera solicitud.
 
-<li>Con el modelo identificado debe predecir el precio de la vivienda con las características de la primera solicitud.</li>
+6. Con las predicciones del modelo sugiera potenciales ofertas que respondan a la solicitud de la vivienda 1. Tenga en cuenta que la empresa tiene crédito pre-aprobado de máximo 350 millones de pesos. Realice un análisis y presente en un mapa al menos 5 ofertas potenciales que debe discutir.
 
-<li>Con las predicciones del modelo sugiera potenciales ofertas que responda a la solicitud de la vivienda 1. Tenga encuentra que la empresa tiene crédito pre-aprobado de máximo 350 millones de pesos. Realice un análisis y presente en un mapa al menos 5 ofertas potenciales que debe discutir.</li>
-
-<li>Realice los pasos del 1 al 6. Para la segunda solicitud que tiene un crédito pre-aprobado por valor de $850 millones.</li>
-</ol>
+7. Realice los pasos del **1** al **6** para la segunda solicitud que tiene un crédito pre-aprobado por valor de $850 millones.
 
 
-## Exploración inicial de datos
 
-<p>Basándonos en la información proporcionada por el resumen y la estructura del conjunto de datos, podemos hacer varias observaciones significativas. El conjunto de datos consta de 8322 observaciones con 13 variables. Algunas de estas variables tienen valores faltantes, como piso, estrato, preciom, areaconst, parqueaderos, banios, habitaciones, longitud y latitud, lo que sugiere la necesidad de manejar estos valores faltantes antes de realizar análisis posteriores. Las variables zona, piso, tipo y barrio son de naturaleza categórica, mientras que las variables id, estrato, preciom, areaconst, parqueaderos, banios, habitaciones, longitud y latitud son numéricas. Además, la presencia de problemas detectados en los datos sugiere la posibilidad de inconsistencias o errores que deben abordarse durante el análisis. En resumen, este conjunto de datos proporciona una variedad de información sobre propiedades inmobiliarias, incluidos detalles sobre su ubicación, características y precios, pero requerirá un procesamiento cuidadoso para garantizar su validez y utilidad en el análisis posterior.</p>
+## **Exploración inicial de datos**
+
+En base al resumen y la estructura del conjunto de datos, se pueden destacar varios puntos importantes. El dataset contiene ***8322*** registros distribuidos en 13 variables. Se observa que algunas variables, como piso, estrato, preciom, areaconst, parqueaderos, banios, habitaciones, longitud y latitud, presentan valores ausentes, lo cual indica la necesidad de tratar dichos vacíos antes de realizar análisis posteriores. 
+
+Mientras que las variables ***zona, piso, tipo y barrio*** son de carácter categórico, las variables ***id, estrato, preciom, areaconst, parqueaderos, banios, habitaciones, longitud y latitud*** son numéricas. Además, se han detectado posibles inconsistencias o errores en los datos que requieren atención durante el proceso de análisis. 
+
+En resumen, este conjunto de datos ofrece información diversa sobre propiedades inmobiliarias, incluyendo aspectos de ubicación, características y precios, pero necesitará un procesamiento cuidadoso para asegurar su validez y utilidad en estudios futuros.
+
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 summary(vivienda)
 str(vivienda)
 
 ```
-## 1. Realice un filtro a la base de datos 
+
+## **1. Realice un filtro a la base de datos **
+
+### **Base 1: Casas en Zona Norte**
+
+De acuerdo con los requerimientos del informe, se ha generado un subconjunto de datos enfocado exclusivamente en las ofertas de casas ubicadas en la zona norte. Este subconjunto presenta las siguientes características relevantes:
 
 
-<h3>Base 1 Casas Zona Norte</h3>
+1. **Diversidad y Completitud de Registros:**  
+Se han extraído 722 registros, lo que evidencia una alta diversidad en las propiedades listadas. El proceso de filtrado ha sido eficaz para capturar únicamente aquellas casas situadas en la zona norte. Cabe señalar que se detectan algunos valores faltantes, lo cual es coherente con la estructura del dataset original.
 
-<p>De acuerdo a la solicitud del informe se presenta a continuación un sub conjunto de datos que permite visualizar el contenido correspondiente al tipo de inmueble casa para la zona norte, en este sentido se destaca lo siguiente:
+2. **Amplio Rango en los Precios:**  
+Los precios de las propiedades varían considerablemente, abarcando desde 58 hasta 1999 unidades monetarias. La mediana se sitúa cerca de 390, mientras que la media es de aproximadamente 445.9, lo que sugiere que la mayoría de las ofertas se agrupan en torno a estos valores, reflejando la heterogeneidad del mercado.
 
-Las estadísticas descriptivas de las ofertas de casas en la zona norte revelan una amplia gama de características y variabilidad en los datos. Con un total de 722 registros, este conjunto de datos parece haber sido filtrado correctamente para incluir solo las ofertas de casas en la zona norte. Se observa la presencia de valores faltantes en algunos atributos, lo cual es consistente con la estructura original del dataset.
+3. **Variabilidad en el Área Construida:**  
+El área construida de las viviendas oscila entre 30 y 1745 metros cuadrados. Los valores centrales, con una mediana alrededor de 240 y una media de cerca de 264.9, indican que la mayoría de las casas tienen dimensiones que se agrupan en este rango, ofreciendo una idea clara de la distribución de tamaños.
 
-En cuanto a los precios de las casas, se observa una gran variación, con precios que oscilan entre 58 y 1999 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 390 y 445.9 unidades monetarias, respectivamente.
+4. **Diversidad en Otros Atributos:**  
+Otros indicadores importantes, como el número de parqueaderos, baños y habitaciones, también muestran una dispersión significativa, alcanzando en ocasiones un máximo de 10. Estos atributos son esenciales para comprender en detalle las características y el nivel de confort de las casas en la zona norte.
 
-El análisis del área construida revela una diversidad similar, con valores que van desde 30 hasta 1745 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 240 y 264.9 metros cuadrados, respectivamente.
 
-Además de los precios y el área construida, otros atributos como el número de parqueaderos, baños y habitaciones también varían significativamente, con valores máximos de 10 en cada caso. Estos atributos son cruciales para entender las características y comodidades de las casas en la zona norte.</p>
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
@@ -118,7 +127,8 @@ kable(summary(casas_zona_norte))
 
 ```
 
-<p> El gráfico de dispersión indica una fuerte correlación positiva entre el precio y el área construida de las casas en la Zona Norte. El coeficiente de correlación de 0,73 evidencia esta relación directa, donde a mayor área construida, mayor es el precio de la vivienda. La línea de tendencia sugiere un incremento promedio de 1,35 millones de pesos por metro cuadrado adicional. No obstante, la dispersión de los puntos alrededor de la línea de tendencia revela variaciones en el precio influenciadas por otros factores como la ubicación, calidad de construcción, características de la casa y el mercado inmobiliario. Considerar todos estos aspectos es crucial al momento de buscar una vivienda en la Zona Norte.
+#### **Gráfico de Dispersión: Precio vs. Área Construida**
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
 # Gráfico de dispersión de precios versus área construida con ggplot2
@@ -163,17 +173,26 @@ kable(top_barrios_df_norte)
 
 ```
 
+El gráfico de dispersión evidencia una correlación positiva y robusta entre el precio de las casas y su área construida en la Zona Norte. Con un coeficiente de correlación de **0,73**, se confirma que, en términos generales, un mayor espacio construido se asocia con un incremento en el precio de la vivienda.
 
-<h3>Base 2 Casas Zona Sur</h3>
+Por otro lado, la línea de tendencia del gráfico indica que, en promedio, cada metro cuadrado adicional se traduce en un aumento de **1,35 millones** de pesos en el precio, resaltando la influencia directa del área construida en el valor de la vivienda.
 
-<p>
-Las estadísticas descriptivas de las ofertas de casas en la zona sur muestran una diversidad significativa en los datos. Con un total de 1939 registros, este conjunto de datos parece haber sido filtrado adecuadamente para incluir solo las ofertas de casas en la zona sur. Se observa la presencia de valores faltantes en algunos atributos, lo cual es consistente con la estructura original del dataset.
+No obstante, la variabilidad observada en torno a esta línea demuestra que otros factores también tienen un impacto significativo. Aspectos como la ubicación precisa, la calidad de la construcción, las características específicas de cada casa y las condiciones generales del mercado inmobiliario juegan roles determinantes en la fijación del precio.
 
-En relación a los precios de las casas, se evidencia una amplia variación, con valores que oscilan entre 77 y 1900 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 480 y 612.3 unidades monetarias, respectivamente.
+Por ello, para realizar una evaluación completa y acertada al momento de adquirir una vivienda en la Zona Norte, es imprescindible considerar en conjunto todos estos elementos.
 
-El análisis del área construida también revela una diversidad similar, con valores que van desde 48 hasta 1600 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 247 y 282.3 metros cuadrados, respectivamente.
 
-Además de los precios y el área construida, otros atributos como el número de parqueaderos, baños y habitaciones también varían significativamente, con valores máximos de 10 en cada caso. Estos atributos son cruciales para comprender las características y comodidades de las casas en la zona sur.</p>
+### **Base 2 Casas Zona Sur**
+
+#### **Estadísticas Descriptivas de Casas en la Zona Sur**
+
+El análisis descriptivo de las ofertas de casas en la zona sur evidencia una amplia diversidad en la información recopilada. Con un total de **1939** registros, se ha logrado filtrar correctamente el dataset para incluir únicamente aquellas viviendas ubicadas en esta zona, aunque se han detectado algunos valores faltantes, lo cual es coherente con la estructura original del conjunto de datos.
+
+En cuanto a los precios, se observa una gran dispersión: los valores oscilan entre **77** y **1900** unidades monetarias. Tanto la mediana, que se sitúa en torno a **480**, como la media, cercana a **612.3**, sugieren que la mayoría de las casas se encuentran en ese rango de precios.
+
+El análisis del área construida también refleja una notable variabilidad, con dimensiones que van desde **48** hasta **1600** metros cuadrados. Los valores centrales (mediana de aproximadamente **247** y media de **282.3**) indican que la mayoría de las viviendas presentan áreas construidas en esos rangos.
+
+Además de los precios y el área, otros atributos importantes, como el número de parqueaderos, baños y habitaciones, muestran una variación considerable, alcanzando en ocasiones un máximo de 10 unidades. Estos indicadores son esenciales para comprender las características específicas y el nivel de comodidad que ofrecen las casas en la zona sur.
 
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
@@ -191,14 +210,13 @@ kable(summary(casas_zona_sur))
 
 ```
 
+#### **Gráfico de Dispersión en la Zona Sur**
 
-<p>
-El gráfico de dispersión para la Zona Sur presenta un coeficiente de correlación de 0.67, lo que indica una fuerte correlación positiva entre el precio y el área construida. Esto significa que existe una relación directa entre ambas variables: a mayor área construida, mayor es el precio de la vivienda.
+El gráfico de dispersión correspondiente a la Zona Sur revela un coeficiente de correlación de **0.67**, lo que evidencia una relación positiva y relativamente fuerte entre el precio y el área construida. Esto indica que, en general, un mayor espacio construido se asocia con un aumento en el precio de la vivienda.
 
-La línea de tendencia en el gráfico indica que, en promedio, el precio aumenta en 1.2 millones de pesos por cada metro cuadrado adicional de área construida.
+La línea de tendencia sugiere que, en promedio, cada metro cuadrado adicional incrementa el precio en aproximadamente **1.2** millones de pesos.
 
-Sin embargo, la dispersión de los puntos alrededor de la línea de tendencia muestra una variación considerable en los precios.
-</p>
+No obstante, la amplia dispersión de los puntos alrededor de la línea de tendencia pone de manifiesto una considerable variabilidad en los precios, lo que implica la influencia de otros factores adicionales.
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
@@ -244,17 +262,16 @@ kable(top_barrios_df_sur)
 ```
 
 
-<h3>Base 3 Casas Zona Oriente</h3>
+### **Base 3: Casas en Zona Oriente**
 
+El análisis descriptivo de las ofertas en la zona oriente evidencia una distribución de datos similar a la de otras zonas. Este subconjunto, conformado por **289** registros, muestra una considerable variabilidad en los atributos evaluados. Al igual que en otros conjuntos, se han detectado algunos valores faltantes, lo cual es consistente con la estructura original del dataset.
 
-<p>
-Las estadísticas descriptivas de las ofertas de casas en la zona oriente muestran una distribución similar en los datos. Con un total de 289 registros, se observa una variabilidad notable en los atributos considerados. Al igual que en otras zonas, se encuentran valores faltantes en algunos atributos, lo cual es coherente con la estructura original del dataset.
+En cuanto a los precios, se observa una amplia dispersión: los valores fluctúan entre **80** y **750** unidades monetarias. Tanto la mediana, situada en **235**, como la media, en **244.8**, indican que la mayoría de las propiedades se concentran en este rango de precios.
 
-En cuanto a los precios de las casas, se observa una variación considerable, con valores que van desde 80 hasta 750 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 235 y 244.8 unidades monetarias, respectivamente.
+El análisis del área construida revela también una diversidad significativa, con valores que varían desde **40** hasta **1745** metros cuadrados. Los valores centrales —una mediana de **179** y una media de **213.4** metros cuadrados— sugieren que la mayoría de las viviendas presentan áreas construidas en torno a estos parámetros.
 
-El análisis del área construida también muestra una diversidad significativa, con valores que van desde 40 hasta 1745 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 179 y 213.4 metros cuadrados, respectivamente.
+Adicionalmente, otros atributos relevantes, como el **número de parqueaderos, baños y habitaciones**, muestran variaciones notables, alcanzando en algunos casos un máximo de 10 unidades, lo que nos ayuda para comprender las características y el nivel de equipamiento de las casas en la zona oriente.
 
-Además de los precios y el área construida, otros atributos como el número de parqueaderos, baños y habitaciones también exhiben variaciones notables, con valores máximos de 10 en cada caso. </p>
 
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
@@ -272,12 +289,7 @@ kable(summary(casas_zona_oriente))
 
 ```
 
-<p>
-El análisis del gráfico de dispersión para la Zona Oriente revela una correlación positiva moderada entre el precio y el área construida, con un coeficiente de correlación de 0.41. Si bien existe una relación directa entre ambas variables, la influencia del área construida sobre el precio es menor que en las zonas Norte y Sur. La línea de tendencia indica un aumento promedio de 0.7 millones de pesos por cada metro cuadrado adicional, pero la dispersión significativa de los puntos alrededor de la línea refleja una notable variabilidad en los precios.
 
-Esta variabilidad puede ser explicada por una mayor influencia de otros factores como la ubicación, la calidad de la construcción, las características de la casa y las condiciones del mercado inmobiliario en la Zona Oriente. 
-
-</p>
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Gráfico de dispersión de precios versus área construida con ggplot2
 ggplot(casas_zona_oriente, aes(x = areaconst, y = preciom)) +
@@ -320,17 +332,23 @@ kable(top_barrios_df_oriente)
 
 ```
 
+#### **Análisis del Gráfico de Dispersión en la Zona Oriente**
 
-<h3> Base 4 Casas Zona Oeste</h3>
+El análisis del gráfico de dispersión en la Zona Oriente muestra una correlación positiva moderada entre el **precio y el área construida**, con un coeficiente de **0.41**. Esto indica que, aunque existe una relación directa en la que a mayor área corresponde un mayor precio, el impacto del área construida sobre el valor de la vivienda es menos pronunciado que en las zonas Norte y Sur.
+
+Por otro lado, la línea de tendencia revela que, en promedio, cada metro cuadrado adicional se traduce en un aumento de aproximadamente **0.7 millones** de pesos en el precio. Sin embargo, la notable dispersión de los puntos en torno a esta línea evidencia una variabilidad considerable en los precios, lo que sugiere que otros factores también están influyendo en la determinación del valor.
+
+Esta variabilidad en los precios puede explicarse por la influencia de otros elementos críticos, tales como la ubicación precisa de la propiedad, la calidad de la construcción, las características particulares de cada vivienda y las condiciones específicas del mercado inmobiliario en la Zona Oriente.
 
 
-<p>
-Las estadísticas descriptivas de las ofertas de casas en la zona oeste reflejan una distribución diversa en los datos. Con un total de 169 registros, se aprecia una variabilidad considerable en los atributos considerados. Al igual que en otras zonas, se identifican valores faltantes en algunos atributos, lo cual es coherente con la estructura original del dataset.
+### **Base 4: Casas en Zona Oeste**
 
-En relación a los precios de las casas, se evidencia una variación amplia, con valores que oscilan entre 135 y 1999 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 680 y 736.4 unidades monetarias, respectivamente.
+El análisis descriptivo de las ofertas de casas en la zona oeste muestra una notable diversidad en la información. Este subconjunto consta de **169** registros, lo que evidencia una amplia variabilidad en los atributos analizados. Al igual que en otras zonas, se han identificado algunos valores faltantes, lo cual es coherente con la estructura original del dataset.
 
-El análisis del área construida también muestra una diversidad notable, con valores que van desde 55 hasta 1200 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 300 y 343.2 metros cuadrados, respectivamente.
-</p>
+En cuanto a los precios, se observa un rango amplio que varía desde **135 hasta 1999** unidades monetarias. Tanto la mediana (aproximadamente **680**) como la media (alrededor de **736.4**) indican que la mayoría de las viviendas se encuentran en ese rango de precios, reflejando la heterogeneidad del mercado en esta zona.
+
+El estudio del área construida también resalta una considerable diversidad, con valores que oscilan entre **55 y 1200 metros cuadrados**. Los valores centrales, con una mediana de cerca de **300** y una media de aproximadamente **343.2** metros cuadrados, sugieren que la mayoría de las casas presentan áreas construidas en torno a estos parámetros.
+
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
@@ -346,11 +364,6 @@ kable(summary(casas_zona_oeste))
 
 ```
 
-
-<p>
-El gráfico de dispersión para la Zona Oeste muestra una correlación positiva moderada entre el precio y el área construida, con un coeficiente de correlación de 0.59. Esto indica una relación directa, pero no determinante, entre ambas variables. La línea de tendencia sugiere un aumento promedio de 0.95 millones de pesos por cada metro cuadrado adicional, pero la considerable dispersión de los puntos alrededor de la línea refleja una variación notable en los precios.
-
-</p>
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Gráfico de dispersión de precios versus área construida con ggplot2
@@ -394,16 +407,24 @@ kable(top_barrios_df_oeste)
 
 ```
 
-<h3> Base 5 Casas Zona Centro</h3>
+#### **Análisis del Gráfico de Dispersión en la Zona Oeste**
 
-<p>
-Las estadísticas descriptivas de las ofertas de casas en la zona centro revelan una distribución diversificada en los datos. Con un total de 100 registros, se destaca una variabilidad significativa en los atributos considerados. Al igual que en otras zonas, se encuentran valores faltantes en algunos atributos, lo cual es coherente con la estructura original del dataset.
+El gráfico de dispersión para la Zona Oeste evidencia una correlación moderadamente positiva entre el precio y el área construida, con un coeficiente de **0.59**. Esto implica que, si bien existe una relación directa entre estas variables, el área construida no determina de manera exclusiva el precio de las viviendas. 
 
-En cuanto a los precios de las casas, se observa una variación considerable, con valores que van desde 148 hasta 1100 unidades monetarias. Tanto la mediana como la media sugieren que la mayoría de las casas tienen precios alrededor de 310 y 339.2 unidades monetarias, respectivamente.
+Por otro lado, la línea de tendencia indica que, en promedio, cada metro cuadrado adicional se asocia con un incremento de **0.95 millones de pesos** en el precio. No obstante, la marcada dispersión de los puntos alrededor de esta línea revela una variabilidad considerable en los precios, lo que sugiere la influencia de otros factores adicionales.
 
-El análisis del área construida también muestra una diversidad significativa, con valores que van desde 74 hasta 750 metros cuadrados. La mediana y la media indican que la mayoría de las casas tienen un área construida de alrededor de 200 y 217.8 metros cuadrados, respectivamente.
 
-</p>
+
+### **Base 5 Casas Zona Centro**
+
+El análisis descriptivo de las ofertas de casas en la zona centro revela una gran diversidad en los datos, en donde, con un total de 100 registros, se observa una variabilidad significativa en los atributos evaluados, y, al igual que en otras zonas, se identifican algunos valores faltantes, lo cual es consistente con la estructura original del dataset.
+
+Respecto a los precios, se destaca una amplia dispersión: los valores oscilan entre **148 y 1100** unidades monetarias. Tanto la mediana, en torno a **310**, como la media, aproximadamente **339.2**, indican que la mayoría de las casas se agrupan en este rango de precios.
+
+Asimismo, el análisis del área construida muestra una notable diversidad, con dimensiones que varían desde **74 hasta 750** \(m^2\). Los valores centrales—una mediana cercana a **200** y una media de aproximadamente **217.8** \(m^2\), sugieren que la mayoría de las viviendas tienen áreas construidas en esos intervalos.
+
+
+
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Filtrar la base de datos para incluir solo las ofertas de casas de la zona norte
 casas_zona_centro <- subset(vivienda, tipo == "Casa" & zona == "Zona Centro")
@@ -418,9 +439,6 @@ kable(summary(casas_zona_centro))
 
 ```
 
-<p>
-El gráfico de dispersión para la Zona Centro revela una correlación positiva moderada entre el precio y el área construida, con un coeficiente de correlación de 0.53. Si bien existe una relación directa entre ambas variables, la influencia del área construida sobre el precio es menor que en otras zonas. La línea de tendencia indica un aumento promedio de 0.85 millones de pesos por cada metro cuadrado adicional, pero la notable dispersión de los puntos alrededor de la línea refleja una variabilidad considerable en los precios.
-</p>
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Gráfico de dispersión de precios versus área construida con ggplot2
@@ -464,10 +482,19 @@ kable(top_barrios_df_centro)
 
 ```
 
-<h3> Momento de discusión</h3>
-<p>
-En el siguiente mapa se puede observar a una sola vista como se encuentra la distribución de casas según la zona registrada en el dataset, es importante destacar que se logra identificar que existen barrios que según sus coordenadas comparten la misma zona, esto puede deberse a errores humanos en el ingreso de longitud y latitud o en la asignación de la variable barrio en el sistema de información que se diseñó para la captura de los datos.
-</p>
+#### **Gráfico de Dispersión: Zona Centro**
+
+El gráfico de dispersión correspondiente a la Zona Centro muestra una correlación moderada y positiva entre el precio y el área construida, evidenciada por un coeficiente de **0.53**. Aunque se observa que, en general, a mayor área corresponde un mayor precio, la influencia del área construida en el valor de las viviendas es menos determinante que en otras zonas. La línea de tendencia sugiere que, en promedio, cada metro cuadrado adicional incrementa el precio en 0.85 millones de pesos. Sin embargo, la amplia dispersión de los puntos alrededor de esta línea destaca una variabilidad significativa en los precios, lo que indica la posible intervención de otros factores en la determinación de los valores.
+
+
+
+### **Momento de discusión**
+
+#### **Visualización de la Distribución Geográfica por Zona**
+
+A continuación, el siguiente mapa ofrece una visión global de cómo se distribuyen las casas según la zona registrada en el dataset. En este, se puede observar que ciertos barrios, basándose en sus coordenadas, se agrupan en la misma zona. Esta coincidencia podría ser atribuida a errores en el registro de las coordenadas (***longitud y latitud***) o a equivocaciones en la asignación de la variable ***"barrio"*** durante el proceso de captura de datos en el sistema de información.
+
+
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 
@@ -504,19 +531,20 @@ mapa
 
 ```
 
-## 2. EDA 
-Correlación de la variable precio de la casa en función de: área construida, estrato, numero de baños, numero de habitaciones y zona donde se ubica la vivienda
+## **2. EDA**  
+### Correlación del Precio de la Casa con Otras Variables
+
+En este apartado se presenta un análisis exploratorio de datos (EDA) enfocado en estudiar la relación entre el precio de las viviendas (variable respuesta: *preciom*) y diversas variables predictoras: área construida (*areaconst*), estrato, número de baños (*banios*), número de habitaciones y la zona en la que se ubica la vivienda.
+
+Como resultado del análisis de correlación realizado para el tipo de vivienda "Casa", se han generado dos tipos de gráficos que ayudan a visualizar estas relaciones:
+
+- **Gráfico de Dispersión:**  
+  Este gráfico se utiliza para examinar la relación entre dos variables cuantitativas. En este contexto, se han trazado gráficos que muestran la relación entre el precio y cada una de las siguientes variables: área construida, estrato, número de baños y número de habitaciones. Cada punto en el gráfico representa una observación del conjunto de datos, donde la posición en los ejes ***x*** e ***y*** indica los valores correspondientes de las dos variables analizadas.
+
+- **Diagrama de Caja y Bigotes (Boxplot):**  
+  Este gráfico permite visualizar la distribución de una variable numérica en función de los distintos niveles de una variable categórica. En este caso, se ha utilizado para representar la distribución de los precios de las viviendas (***preciom***) en cada una de las zonas. Este tipo de visualización facilita la identificación de la mediana, los cuartiles y posibles valores atípicos en cada categoría de zona.
 
 
-<p>
-En este apartado teniendo en cuenta el EDA realizado como resultado del análisis de correlación entre la variable respuesta (preciom) del tipo de vivienda Casa y las variables predictoras (areaconst, estrato, banios, habitaciones y zona) se grafican a continuación 2 modelos de graficas:
-
-
-- Dispersión:  Este tipo de gráfico se utiliza para visualizar la relación entre dos variables cuantitativas, como el precio y el área construida, el precio y el estrato, el precio y el número de baños, y el precio y el número de habitaciones. Cada punto en el gráfico representa una observación en el conjunto de datos. La posición de cada punto en los ejes x e y representa los valores de las dos variables.
-
-- Caja de bigotes: Este tipo de gráfico se utiliza para visualizar la distribución de una variable numérica en diferentes niveles de una variable categórica. En este caso, se utiliza para visualizar la distribución de los precios (variable respuesta) en cada zona (variable categórica).
-
-</p>
 ```{r , warning=FALSE, message=FALSE, echo=FALSE }
 # Filtrar el dataframe para las viviendas de tipo "Casa"
 vivienda_casa <- subset(vivienda, tipo == "Casa")
@@ -534,7 +562,7 @@ cor_banios <- cor(vivienda_correlacion$preciom, vivienda_correlacion$banios)
 cor_habitaciones <- cor(vivienda_correlacion$preciom, vivienda_correlacion$habitaciones)
 
 # Gráfico de correlación: Preciom vs Área construida
-plot_precio_area <- plot_ly(vivienda_correlacion, x = ~areaconst, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'blue'), 
+plot_precio_area <- plot_ly(vivienda_correlacion, x = ~areaconst, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'red'), 
                             text = ~paste("Área construida: ", areaconst, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_area, 2)),
                             hoverinfo = 'text') %>%
   layout(title = "Correlación entre Precio y Área Construida (Casa)",
@@ -542,7 +570,7 @@ plot_precio_area <- plot_ly(vivienda_correlacion, x = ~areaconst, y = ~preciom, 
          yaxis = list(title = "Precio"))
 
 # Gráfico de correlación: Preciom vs Estrato
-plot_precio_estrato <- plot_ly(vivienda_correlacion, x = ~estrato, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'red'), 
+plot_precio_estrato <- plot_ly(vivienda_correlacion, x = ~estrato, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'blue'), 
                                text = ~paste("Estrato: ", estrato, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_estrato, 2)),
                                hoverinfo = 'text') %>%
   layout(title = "Correlación entre Precio y Estrato (Casa)",
@@ -550,7 +578,7 @@ plot_precio_estrato <- plot_ly(vivienda_correlacion, x = ~estrato, y = ~preciom,
          yaxis = list(title = "Precio"))
 
 # Gráfico de correlación: Preciom vs Baños
-plot_precio_banios <- plot_ly(vivienda_correlacion, x = ~banios, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'green'), 
+plot_precio_banios <- plot_ly(vivienda_correlacion, x = ~banios, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'black'), 
                               text = ~paste("Baños: ", banios, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_banios, 2)),
                               hoverinfo = 'text') %>%
   layout(title = "Correlación entre Precio y Baños (Casa)",
@@ -558,7 +586,7 @@ plot_precio_banios <- plot_ly(vivienda_correlacion, x = ~banios, y = ~preciom, t
          yaxis = list(title = "Precio"))
 
 # Gráfico de correlación: Preciom vs Habitaciones
-plot_precio_habitaciones <- plot_ly(vivienda_correlacion, x = ~habitaciones, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'orange'), 
+plot_precio_habitaciones <- plot_ly(vivienda_correlacion, x = ~habitaciones, y = ~preciom, type = 'scatter', mode = 'markers', marker = list(color = 'green'), 
                                     text = ~paste("Habitaciones: ", habitaciones, "<br>Precio: ", preciom, "<br>Correlación: ", round(cor_habitaciones, 2)),
                                     hoverinfo = 'text') %>%
   layout(title = "Correlación entre Precio y Habitaciones (Casa)",
@@ -572,8 +600,6 @@ plot_precio_zona <- plot_ly(vivienda_correlacion, x = ~zona, y = ~preciom, type 
   layout(title = "Correlación entre Precio y Zona (Casa)",
          xaxis = list(title = "Zona"),
          yaxis = list(title = "Precio"))
-
-
 
 ```
 
@@ -600,10 +626,12 @@ cor_matrix
 # Graficar la matriz de correlación
 corrplot(cor_matrix, method = "color", type = "upper", addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
-<p>La correlación más alta con "preciom" es con la variable "estrato" (0.6658), seguida por "areaconst" (0.6529) y "banios" (0.5581). Esto indica que hay una correlación positiva moderada a fuerte entre el precio de la vivienda y estas características.</p>
+
+En base a lo anterior, se puede apreciar que la variable **estrato** presenta la correlación más alta con **preciom** (*0.6658*), seguida de cerca por **areaconst** (*0.6529*) y **banios** (*0.5581*). Estos coeficientes indican que existe una relación positiva, de moderada a fuerte, entre el precio de la vivienda y estas características, lo que sugiere que a mayor estrato, mayor área construida o mayor número de baños, se tiende a observar un incremento en el precio.
 
 
-## 3. Estimación de un modelo de regresión lineal múltiple 
+
+## **3. Estimación de un modelo de regresión lineal múltiple**
 
 ```{r , warning=FALSE, message=FALSE, echo=FALSE}
 # Estimación de un modelo de regresión lineal múltiple
