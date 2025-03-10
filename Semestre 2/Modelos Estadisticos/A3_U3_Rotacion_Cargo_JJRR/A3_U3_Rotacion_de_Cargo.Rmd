@@ -50,19 +50,15 @@ if (!require("knitr")) {
 
 ```
 
-##Rotación de cargo
+## **Rotación de cargo**
 
 <p>En una organización, se busca comprender y prever los factores que influyen en la rotación de empleados entre distintos cargos. La empresa ha recopilado datos históricos sobre el empleo de sus trabajadores, incluyendo variables como la antigüedad en el cargo actual, el nivel de satisfacción laboral, el salario actual, edad y otros factores relevantes. La gerencia planea desarrollar un modelo de regresión logística que permita estimar la probabilidad de que un empleado cambie de cargo en el próximo período y determinar cuales factores indicen en mayor proporción a estos cambios.
 
-
-
 Con esta información, la empresa podrá tomar medidas proactivas para retener a su talento clave, identificar áreas de mejora en la gestión de recursos humanos y fomentar un ambiente laboral más estable y tranquilo. La predicción de la probabilidad de rotación de empleados ayudará a la empresa a tomar decisiones estratégicas informadas y a mantener un equipo de trabajo comprometido y satisfecho en sus roles actuales.
-
-
 
 A continuación se describen los pasos que la gerencia ha propuesto para el análisis: </p>
 
-## 1. Selección de variables
+## **1. Selección de variables**
 
 <p>Seleccione 3 variables categóricas (distintas de rotación) y 3 variables cuantitativas, que se consideren estén relacionadas con la rotación. <p>
 
@@ -83,20 +79,20 @@ str(rotacion)
 
 
 <ul>
-<b>Variables categóricas:</b>
+<b>**Variables categóricas:**</b>
 
 
-<li>Viaje de Negocios: Esta variable representa la frecuencia de los viajes de negocios de los empleados. Podría estar relacionada con la rotación, ya que los viajes constantes podrían afectar el equilibrio entre el trabajo y la vida personal de los empleados.</li>
-<li>Departamento: El departamento en el que trabaja un empleado puede influir en su satisfacción laboral y en sus oportunidades de crecimiento. Esto podría estar relacionado con la rotación.</li>
-<li>Horas Extra: La cantidad de horas extra trabajadas por los empleados podría estar relacionada con la rotación, ya que el exceso de trabajo puede llevar al agotamiento y a la insatisfacción laboral.
+<li>**Viaje de Negocios:** Esta variable representa la frecuencia de los viajes de negocios de los empleados. Podría estar relacionada con la rotación, ya que los viajes constantes podrían afectar el equilibrio entre el trabajo y la vida personal de los empleados.</li>
+<li>**Departamento:** El departamento en el que trabaja un empleado puede influir en su satisfacción laboral y en sus oportunidades de crecimiento. Esto podría estar relacionado con la rotación.</li>
+<li>**Horas Extra:** La cantidad de horas extra trabajadas por los empleados podría estar relacionada con la rotación, ya que el exceso de trabajo puede llevar al agotamiento y a la insatisfacción laboral.
 </li>
 
 
-<b>Variables cuantitativas:</b>
+<b>**Variables cuantitativas:**</b>
 
-<li>Edad: La edad de los empleados podría estar relacionada con la rotación, ya que las personas en diferentes etapas de su vida pueden tener diferentes prioridades y necesidades laborales.</li>
-<li>Ingreso Mensual: El salario de los empleados puede influir en su decisión de quedarse o irse de una empresa. Una remuneración más alta podría estar relacionada con una menor rotación.<7li>
-<li>Antigüedad en el Cargo: Cuánto tiempo ha estado un empleado en su puesto actual puede estar relacionado con su rotación. Los empleados con menos tiempo en el cargo podrían ser más propensos a rotar en busca de nuevas oportunidades.</li>
+<li>**Edad:** La edad de los empleados podría estar relacionada con la rotación, ya que las personas en diferentes etapas de su vida pueden tener diferentes prioridades y necesidades laborales.</li>
+<li>**Ingreso Mensual:** El salario de los empleados puede influir en su decisión de quedarse o irse de una empresa. Una remuneración más alta podría estar relacionada con una menor rotación.<7li>
+<li>**Antigüedad en el Cargo:** Cuánto tiempo ha estado un empleado en su puesto actual puede estar relacionado con su rotación. Los empleados con menos tiempo en el cargo podrían ser más propensos a rotar en busca de nuevas oportunidades.</li>
 </p>
 </ul>
 
@@ -194,26 +190,25 @@ subplot(
 ```
 <b>Hipótesis:</b>
 
-1. Viaje de Negocios: Se espera que exista una relación entre la frecuencia de los viajes de negocios y la rotación de empleados. La hipótesis es que los empleados que viajan frecuentemente por negocios tienen una mayor probabilidad de rotar que aquellos que viajan raramente.
+1. **Viaje de Negocios:** Se espera que exista una relación entre la frecuencia de los viajes de negocios y la rotación de empleados. La hipótesis es que los empleados que viajan frecuentemente por negocios tienen una mayor probabilidad de rotar que aquellos que viajan raramente.
 
-2. Departamento: Se espera que exista una relación entre el departamento en el que trabaja un empleado y su rotación. La hipótesis es que ciertos departamentos pueden tener tasas de rotación más altas que otros debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de crecimiento.
+2. **Departamento:** Se espera que exista una relación entre el departamento en el que trabaja un empleado y su rotación. La hipótesis es que ciertos departamentos pueden tener tasas de rotación más altas que otros debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de crecimiento.
 
-3. Horas Extra: Se espera que exista una relación entre trabajar horas extra y la rotación de empleados. La hipótesis es que los empleados que trabajan horas extra tienen una mayor probabilidad de rotar que aquellos que no lo hacen.
+3. **Horas Extra:** Se espera que exista una relación entre trabajar horas extra y la rotación de empleados. La hipótesis es que los empleados que trabajan horas extra tienen una mayor probabilidad de rotar que aquellos que no lo hacen.
 
-4. Edad: Se espera que exista una relación entre la edad de los empleados y su rotación. La hipótesis es que los empleados más jóvenes pueden tener una mayor probabilidad de rotar debido a la búsqueda de oportunidades de crecimiento, mientras que los empleados mayores pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y personal.
+4. **Edad:** Se espera que exista una relación entre la edad de los empleados y su rotación. La hipótesis es que los empleados más jóvenes pueden tener una mayor probabilidad de rotar debido a la búsqueda de oportunidades de crecimiento, mientras que los empleados mayores pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y personal.
 
-5. Ingreso Mensual: Se espera que exista una relación entre el nivel de ingresos de los empleados y su rotación. La hipótesis es que los empleados con salarios más bajos pueden tener una mayor probabilidad de rotar en busca de oportunidades de mejor remuneración, mientras que aquellos con salarios más altos pueden tener una menor probabilidad de rotar debido a la estabilidad financiera.
+5. **Ingreso Mensual:** Se espera que exista una relación entre el nivel de ingresos de los empleados y su rotación. La hipótesis es que los empleados con salarios más bajos pueden tener una mayor probabilidad de rotar en busca de oportunidades de mejor remuneración, mientras que aquellos con salarios más altos pueden tener una menor probabilidad de rotar debido a la estabilidad financiera.
 
-6. Antigüedad en el Cargo: Se espera que exista una relación entre la antigüedad en el cargo de los empleados y su rotación. La hipótesis es que los empleados con menos antigüedad en el cargo pueden tener una mayor probabilidad de rotar en busca de mejores oportunidades de carrera, mientras que aquellos con más antigüedad pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y las oportunidades de promoción.
+6. **Antigüedad en el Cargo:** Se espera que exista una relación entre la antigüedad en el cargo de los empleados y su rotación. La hipótesis es que los empleados con menos antigüedad en el cargo pueden tener una mayor probabilidad de rotar en busca de mejores oportunidades de carrera, mientras que aquellos con más antigüedad pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y las oportunidades de promoción.
 
-## 2. Análisis univariado
+## **2. Análisis univariado**
 
 <p>Realiza un análisis univariado (caracterización) de la información contenida en la base de datos rotación.
 
-
-
-Nota:
+**Nota:**
 Los indicadores o gráficos se usan dependiendo del tipo de variable (cuantitativas o cualitativas). Incluir interpretaciones de la variable rotación.</p>
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Variables cuantitativas
 # Estadísticas descriptivas
@@ -253,9 +248,10 @@ cat("\nTabla de frecuencia de las categorías para variables cualitativas:\n")
 kable(tabla_cualitativas)
 ```
 
-## 3. Análisis bivariado
+## **3. Análisis bivariado**
 
 <p>Realiza un análisis de bivariado en donde la variable respuesta sea rotacion codificada de la siguiente manera (y=1 es si rotación, y=0  es no rotación). Con base en estos resultados identifique cuales son las variables determinantes de la rotación e interpretar el signo del coeficiente estimado. Compare estos resultados con la hipótesis planteada en el punto 2.</p>
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Convertir la variable "Rotación" a 0 y 1
 rotacion$Rotación <- ifelse(rotacion$Rotación == "Si", 1, 0)
@@ -277,6 +273,7 @@ summary(modelo_ingreso_mensual)
 summary(modelo_antiguedad_cargo)
 
 ```
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Ajustar un modelo de regresión logística
 modelo <- glm(Rotación ~ `Viaje de Negocios` + Departamento + Horas_Extra + Edad + Ingreso_Mensual + Antigüedad_Cargo, data = rotacion, family = "binomial")
@@ -382,15 +379,15 @@ if (exists("modelo")) {
 <p> 
 La información de los Odds Ratios para las variables predictoras añade valor al informe al proporcionar una medida de la asociación entre cada variable y la probabilidad de rotación de empleados. Los Odds Ratios muestran cuánto aumenta o disminuye la probabilidad de rotación cuando una variable aumenta en una unidad, manteniendo todas las demás variables constantes.
 
-Horas Extra (Horas_ExtraSi): Un Odds Ratio de 4.155 indica que los empleados que trabajan horas extra tienen aproximadamente 4.155 veces más probabilidades de rotar que aquellos que no lo hacen, manteniendo todas las demás variables constantes.
+**Horas Extra (Horas_ExtraSi):** Un Odds Ratio de 4.155 indica que los empleados que trabajan horas extra tienen aproximadamente 4.155 veces más probabilidades de rotar que aquellos que no lo hacen, manteniendo todas las demás variables constantes.
 
-Departamento (DepartamentoVentas y DepartamentoRH): Los Odds Ratios de 1.914 y 1.547 respectivamente sugieren que pertenecer a los departamentos de Ventas o Recursos Humanos aumenta la probabilidad de rotación en aproximadamente 1.914 y 1.547 veces en comparación con otros departamentos, manteniendo todas las demás variables constantes.
+**Departamento (DepartamentoVentas y DepartamentoRH):** Los Odds Ratios de 1.914 y 1.547 respectivamente sugieren que pertenecer a los departamentos de Ventas o Recursos Humanos aumenta la probabilidad de rotación en aproximadamente 1.914 y 1.547 veces en comparación con otros departamentos, manteniendo todas las demás variables constantes.
 
-Ingreso Mensual (Ingreso_Mensual): Un Odds Ratio de 0.9999181 sugiere que por cada aumento unitario en el ingreso mensual, la probabilidad de rotación disminuye en un 0.0000819%, manteniendo todas las demás variables constantes. Esto indica una asociación muy débil entre el ingreso mensual y la rotación.
+**Ingreso Mensual (Ingreso_Mensual):** Un Odds Ratio de 0.9999181 sugiere que por cada aumento unitario en el ingreso mensual, la probabilidad de rotación disminuye en un 0.0000819%, manteniendo todas las demás variables constantes. Esto indica una asociación muy débil entre el ingreso mensual y la rotación.
 
-Edad (Edad) y Antigüedad en el Cargo (Antigüedad_Cargo): Los Odds Ratios de 0.968 y 0.894 respectivamente indican que por cada aumento unitario en la edad o la antigüedad en el cargo, la probabilidad de rotación disminuye en un 3.2% y un 10.6% respectivamente, manteniendo todas las demás variables constantes.
+**Edad (Edad) y Antigüedad en el Cargo (Antigüedad_Cargo):** Los Odds Ratios de 0.968 y 0.894 respectivamente indican que por cada aumento unitario en la edad o la antigüedad en el cargo, la probabilidad de rotación disminuye en un 3.2% y un 10.6% respectivamente, manteniendo todas las demás variables constantes.
 
-Viaje de Negocios (Viaje de Negocios Raramente y No Viaja): Los Odds Ratios de 0.5067 y 0.2582 respectivamente sugieren que los empleados que viajan raramente o no viajan tienen una menor probabilidad de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
+**Viaje de Negocios (Viaje de Negocios Raramente y No Viaja):** Los Odds Ratios de 0.5067 y 0.2582 respectivamente sugieren que los empleados que viajan raramente o no viajan tienen una menor probabilidad de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
 
 En resumen, los Odds Ratios proporcionan información adicional sobre la fuerza y la dirección de la asociación entre cada variable y la probabilidad de rotación de empleados, lo que ayuda a comprender mejor la influencia relativa de cada variable en el fenómeno de la rotación.</p>
 
@@ -407,7 +404,7 @@ Por ejemplo, en el caso del ingreso mensual, el coeficiente estimado podría ind
 </p>
 
 
-## 4. Estimación del modelo
+## **4. Estimación del modelo**
 <p>Realiza la estimación de un modelo de regresión logístico en el cual la variable respuesta es rotacion (y=1
  es si rotación, y=0 es no rotación) y las covariables las 6 seleccionadas en el punto 1. Interprete los coeficientes del modelo y la significancia de los parámetros.</p>
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
@@ -439,21 +436,21 @@ kable(coeficientes_df)
 
 A continuación se procede con la interpretación de los coeficientes:
 
-1. Intercept: Este es el intercepto del modelo. Representa el logaritmo de la razón de probabilidades de rotación cuando todas las variables predictoras son cero. En este caso, es 0.1619797, lo que significa que cuando todas las demás variables son cero, el log-odds de rotación es de aproximadamente 0.16.
+1. **Intercept:** Este es el intercepto del modelo. Representa el logaritmo de la razón de probabilidades de rotación cuando todas las variables predictoras son cero. En este caso, es 0.1619797, lo que significa que cuando todas las demás variables son cero, el log-odds de rotación es de aproximadamente 0.16.
 
-2. Viaje de NegociosNo_Viaja: Un coeficiente negativo (-1.3541771) indica que los empleados que no viajan por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan por negocios, manteniendo todas las demás variables constantes. 
+2. **Viaje de NegociosNo_Viaja:** Un coeficiente negativo (-1.3541771) indica que los empleados que no viajan por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan por negocios, manteniendo todas las demás variables constantes. 
 
-3. Viaje de NegociosRaramente: Un coeficiente negativo (-0.6797980) indica que los empleados que viajan raramente por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
+3. **Viaje de NegociosRaramente:** Un coeficiente negativo (-0.6797980) indica que los empleados que viajan raramente por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
 
-4. DepartamentoRH y DepartamentoVentas: Los coeficientes positivos (0.4363905 y 0.6494927 respectivamente) indican que pertenecer al departamento de Recursos Humanos o al departamento de Ventas está asociado con mayores log-odds de rotación, en comparación con el departamento de referencia (probablemente otro departamento no mencionado).
+4. **DepartamentoRH y DepartamentoVentas:** Los coeficientes positivos (0.4363905 y 0.6494927 respectivamente) indican que pertenecer al departamento de Recursos Humanos o al departamento de Ventas está asociado con mayores log-odds de rotación, en comparación con el departamento de referencia (probablemente otro departamento no mencionado).
 
-5. Horas_ExtraSi: Un coeficiente positivo (1.4243441) indica que trabajar horas extra está asociado con mayores log-odds de rotación.
+5. **Horas_ExtraSi:** Un coeficiente positivo (1.4243441) indica que trabajar horas extra está asociado con mayores log-odds de rotación.
 
-6. Edad y Antigüedad_Cargo: Los coeficientes negativos (-0.0321813 y -0.1117549 respectivamente) indican que el aumento en la edad y en la antigüedad en el cargo están asociados con menores log-odds de rotación.
+6. **Edad y Antigüedad_Cargo:** Los coeficientes negativos (-0.0321813 y -0.1117549 respectivamente) indican que el aumento en la edad y en la antigüedad en el cargo están asociados con menores log-odds de rotación.
 
-7. Ingreso_Mensual: Un coeficiente negativo (-0.0000819) indica que un aumento en el ingreso mensual está asociado con menores log-odds de rotación, aunque el efecto es muy pequeño y casi despreciable.
+7. **Ingreso_Mensual:** Un coeficiente negativo (-0.0000819) indica que un aumento en el ingreso mensual está asociado con menores log-odds de rotación, aunque el efecto es muy pequeño y casi despreciable.
 
-## 5. Evaluación
+## **5. Evaluación**
 <p>Evaluar el poder predictivo del modelo con base en la curva ROC y el AUC.</p>
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
@@ -491,7 +488,7 @@ Finalmente, en la imagen que se muestra, la curva ROC se encuentra por encima de
 El AUC de la curva ROC es de 0.7654207. Este valor indica que el modelo tiene un buen rendimiento para clasificar los casos. Se puede concluir que el modelo tiene un buen rendimiento para clasificar los casos. La curva ROC se encuentra por encima de la diagonal aleatoria y el AUC es de 0.7654207, lo que indica que el modelo es capaz de detectar los verdaderos positivos con una alta probabilidad y generar pocas falsas alarmas.
 </p>
 
-## 6. Predicciones
+## **6. Predicciones**
 <p>Realiza una predicción la probabilidad de que un individuo (hipotético) rote y defina un corte para decidir si se debe intervenir a este empleado o no (posible estrategia para motivar al empleado).</p>
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Definir las variables predictoras del empleado hipotético
@@ -549,7 +546,7 @@ print(grafico)
 ```
 <p>En este caso, teniendo en cuenta la información procesada por el modelo, se determina que no es necesario la intervención a la colaboradora Lucia, ya que, Lucía se siente cómoda y valorada en su posición actual. .</p>
 
-## 7. Conclusiones
+## **7. Conclusiones**
 <p>En las conclusiones adicione una discusión sobre cuál sería la estrategia para disminuir la rotación en la empresa (con base en las variables que resultaron significativas en el punto 3).
 
 </p>
@@ -566,9 +563,10 @@ Incentivar el desarrollo profesional y el crecimiento interno: Para contrarresta
 Revisar y ajustar la política de compensación: Se propone evaluar la estructura de remuneración para garantizar que sea competitiva y equitativa, especialmente en departamentos con altas tasas de rotación. Esto puede incluir ajustes salariales, bonificaciones por desempeño y beneficios adicionales que reconozcan y recompensen el esfuerzo y la dedicación de los empleados.
 
 Estas estrategias buscan abordar las preocupaciones específicas relacionadas con las variables identificadas en el análisis bivariado, con el objetivo de reducir la rotación de empleados y promover un entorno laboral más estable y satisfactorio.</p>
-## 8. Anexos - Repositorio Código fuente
 
-<b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos">Repositorio Github</a></b>
+## **8. Anexos - Repositorio Código fuente**
+
+<b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos">Repositorio de Github</a></b>
 
 
 
