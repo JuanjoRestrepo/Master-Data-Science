@@ -186,26 +186,33 @@ subplot(
   nrows = 1
 )
 ```
-<b>Hipótesis:</b>
+**Hipótesis:**
 
-1. **Viaje de Negocios:** Se espera que exista una relación entre la frecuencia de los viajes de negocios y la rotación de empleados. La hipótesis es que los empleados que viajan frecuentemente por negocios tienen una mayor probabilidad de rotar que aquellos que viajan raramente.
+1. **Viaje de Negocios:**  
+   Se plantea que la frecuencia de los viajes de negocios se asocia con la rotación de empleados. Es decir, se espera que aquellos empleados que viajan con mayor regularidad tengan una mayor probabilidad de abandonar la empresa en comparación con quienes realizan estos viajes con menor frecuencia.
 
-2. **Departamento:** Se espera que exista una relación entre el departamento en el que trabaja un empleado y su rotación. La hipótesis es que ciertos departamentos pueden tener tasas de rotación más altas que otros debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de crecimiento.
+2. **Departamento:**  
+   Se hipotetiza que el área o departamento en el que trabaja un empleado influye en su tasa de rotación. La idea es que ciertos departamentos podrían presentar tasas de rotación más elevadas debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de desarrollo profesional.
 
-3. **Horas Extra:** Se espera que exista una relación entre trabajar horas extra y la rotación de empleados. La hipótesis es que los empleados que trabajan horas extra tienen una mayor probabilidad de rotar que aquellos que no lo hacen.
+3. **Horas Extra:**  
+   La hipótesis sostiene que trabajar horas adicionales se relaciona con un incremento en la rotación. En otras palabras, se espera que los empleados que realizan horas extra tengan una mayor tendencia a abandonar la empresa, posiblemente por el desgaste y la insatisfacción generados por la sobrecarga laboral.
 
-4. **Edad:** Se espera que exista una relación entre la edad de los empleados y su rotación. La hipótesis es que los empleados más jóvenes pueden tener una mayor probabilidad de rotar debido a la búsqueda de oportunidades de crecimiento, mientras que los empleados mayores pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y personal.
+4. **Edad:**  
+   Se plantea que la edad de los empleados afecta su probabilidad de rotación. Específicamente, se anticipa que los trabajadores más jóvenes, en búsqueda de oportunidades de crecimiento y desarrollo, pueden tener una mayor tendencia a cambiar de empleo, mientras que los empleados de mayor edad podrían mostrar mayor estabilidad debido a compromisos laborales y personales consolidados.
 
-5. **Ingreso Mensual:** Se espera que exista una relación entre el nivel de ingresos de los empleados y su rotación. La hipótesis es que los empleados con salarios más bajos pueden tener una mayor probabilidad de rotar en busca de oportunidades de mejor remuneración, mientras que aquellos con salarios más altos pueden tener una menor probabilidad de rotar debido a la estabilidad financiera.
+5. **Ingreso Mensual:**  
+   Se espera que el nivel de ingresos tenga un impacto en la rotación. La hipótesis es que los empleados con salarios más bajos son más propensos a buscar mejores oportunidades de remuneración, mientras que aquellos que reciben ingresos más altos podrían estar más inclinados a permanecer en la empresa debido a la estabilidad financiera que les proporciona su salario.
 
-6. **Antigüedad en el Cargo:** Se espera que exista una relación entre la antigüedad en el cargo de los empleados y su rotación. La hipótesis es que los empleados con menos antigüedad en el cargo pueden tener una mayor probabilidad de rotar en busca de mejores oportunidades de carrera, mientras que aquellos con más antigüedad pueden tener una menor probabilidad de rotar debido a la estabilidad laboral y las oportunidades de promoción.
+6. **Antigüedad en el Cargo:**  
+   Se supone que la duración que un empleado ocupa su puesto actual influye en su rotación. Se anticipa que los empleados con menor antigüedad en el cargo tienen una mayor probabilidad de buscar nuevas oportunidades, en comparación con aquellos con más años en el puesto, quienes podrían beneficiarse de una mayor estabilidad y oportunidades de promoción.
 
-## **2. Análisis univariado**
 
-<p>Realiza un análisis univariado (caracterización) de la información contenida en la base de datos rotación.
+# **2. Análisis univariado**
+
+Realiza un análisis univariado (caracterización) de la información contenida en la base de datos rotación.
 
 **Nota:**
-Los indicadores o gráficos se usan dependiendo del tipo de variable (cuantitativas o cualitativas). Incluir interpretaciones de la variable rotación.</p>
+Los indicadores o gráficos se usan dependiendo del tipo de variable (cuantitativas o cualitativas). Incluir interpretaciones de la variable *rotación*.
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Variables cuantitativas
@@ -246,9 +253,9 @@ cat("\nTabla de frecuencia de las categorías para variables cualitativas:\n")
 kable(tabla_cualitativas)
 ```
 
-## **3. Análisis bivariado**
+# **3. Análisis bivariado**
 
-<p>Realiza un análisis de bivariado en donde la variable respuesta sea rotacion codificada de la siguiente manera (y=1 es si rotación, y=0  es no rotación). Con base en estos resultados identifique cuales son las variables determinantes de la rotación e interpretar el signo del coeficiente estimado. Compare estos resultados con la hipótesis planteada en el punto 2.</p>
+Realiza un análisis de bivariado en donde la variable respuesta sea *rotacion* codificada de la siguiente manera ($y=1$ es si rotación, $y=0$  es no rotación). Con base en estos resultados identifique cuales son las variables determinantes de la rotación e interpretar el signo del coeficiente estimado. Compare estos resultados con la hipótesis planteada en el punto 2.
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Convertir la variable "Rotación" a 0 y 1
@@ -309,40 +316,38 @@ if (exists("modelo")) {
 
 ```
 
-<p>
-**Comparación de Coeficientes con Hipótesis:**
+## **Comparación de los Coeficientes con las Hipótesis:**
 
 - **Viaje de Negocios:**
-  - **Coeficiente:** Viaje de Negocios No_Viaja: -1.3389, Raramente: -0.6346
-  - **Hipótesis:** Se esperaba que los empleados que viajan frecuentemente por negocios tuvieran una mayor probabilidad de rotación que aquellos que viajan raramente.
-  - **Conclusión:** Consistente con la hipótesis, ya que los coeficientes son negativos, indicando que aquellos que viajan menos tienen menores probabilidades de rotación.
+  - **Coeficiente:** No_Viaja: -1.3389, Raramente: -0.6346
+  - **Hipótesis:** Se esperaba que los empleados que realizan viajes frecuentes tengan una mayor propensión a la rotación en comparación con aquellos que viajan con menos frecuencia.
+  - **Conclusión:** Los coeficientes negativos confirman la hipótesis, ya que indican que quienes viajan menos presentan menores probabilidades de rotación.
 
 - **Departamento:**
   - **Coeficiente:** Departamento RH: 0.38175, Ventas: 0.48116
-  - **Hipótesis:** Se esperaba que ciertos departamentos tuvieran tasas de rotación más altas que otros debido a diferencias en la cultura organizacional, la carga de trabajo o las oportunidades de crecimiento.
-  - **Conclusión:** Consistente con la hipótesis, ya que algunos departamentos tienen coeficientes positivos, indicando tasas de rotación más altas.
+  - **Hipótesis:** Se anticipaba que ciertos departamentos mostrarían tasas de rotación más elevadas debido a diferencias en la cultura organizacional, la carga de trabajo y las oportunidades de crecimiento.
+  - **Conclusión:** La presencia de coeficientes positivos en algunos departamentos respalda la hipótesis, evidenciando que estos tienen una mayor tasa de rotación.
 
 - **Horas Extra:**
-  - **Coeficiente:** Horas Extra Si: 1.3274
-  - **Hipótesis:** Se esperaba que los empleados que trabajan horas extra tuvieran una mayor probabilidad de rotación que aquellos que no lo hacen.
-  - **Conclusión:** Consistente con la hipótesis, ya que el coeficiente es positivo, indicando que aquellos que trabajan horas extra tienen mayores probabilidades de rotación.
+  - **Coeficiente:** Horas Extra Sí: 1.3274
+  - **Hipótesis:** Se postulaba que trabajar horas extra incrementa la probabilidad de rotación.
+  - **Conclusión:** El coeficiente positivo respalda la hipótesis, ya que sugiere que los empleados que realizan horas adicionales tienen una mayor tendencia a rotar.
 
 - **Edad:**
   - **Coeficiente:** Edad: -0.05225
-  - **Hipótesis:** Se esperaba que los empleados más jóvenes tuvieran una mayor probabilidad de rotación que los mayores.
-  - **Conclusión:** Inconsistente con la hipótesis, ya que el coeficiente es negativo pero pequeño, indicando una relación débil entre la edad y la rotación.
+  - **Hipótesis:** Se esperaba que los empleados más jóvenes tuvieran mayor rotación en comparación con los de mayor edad.
+  - **Conclusión:** Aunque el coeficiente es negativo, su magnitud pequeña indica una relación débil, por lo que la hipótesis no se confirma de manera contundente.
 
 - **Ingreso Mensual:**
   - **Coeficiente:** Ingreso Mensual: -0.0001271
-  - **Hipótesis:** Se esperaba que los empleados con salarios más bajos tuvieran una mayor probabilidad de rotación.
-  - **Conclusión:** Inconsistente con la hipótesis, ya que el coeficiente es negativo pero cercano a cero, indicando una relación débil entre el ingreso mensual y la rotación.
+  - **Hipótesis:** Se preveía que los empleados con salarios más bajos tendrían mayor probabilidad de rotación.
+  - **Conclusión:** Dado que el coeficiente es negativo pero casi insignificante, la relación entre el ingreso y la rotación es débil, lo que contradice la hipótesis planteada.
 
 - **Antigüedad en el Cargo:**
   - **Coeficiente:** Antigüedad en el Cargo: -0.14628
-  - **Hipótesis:** Se esperaba que los empleados con menos antigüedad en el cargo tuvieran una mayor probabilidad de rotación que los que tienen más antigüedad.
-  - **Conclusión:** Inconsistente con la hipótesis, ya que el coeficiente es negativo pero pequeño, indicando una relación débil entre la antigüedad en el cargo y la rotación.
+  - **Hipótesis:** Se esperaba que los empleados con menor antigüedad en el cargo mostraran una mayor tendencia a rotar que aquellos con más tiempo en el puesto.
+  - **Conclusión:** Aunque el coeficiente es negativo, su pequeño valor sugiere una relación débil entre la antigüedad en el cargo y la rotación, lo que no respalda completamente la hipótesis.
 
-</p>
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Ajustar un modelo de regresión logística
@@ -374,37 +379,47 @@ if (exists("modelo")) {
 }
 
 ```
-<p> 
-La información de los Odds Ratios para las variables predictoras añade valor al informe al proporcionar una medida de la asociación entre cada variable y la probabilidad de rotación de empleados. Los Odds Ratios muestran cuánto aumenta o disminuye la probabilidad de rotación cuando una variable aumenta en una unidad, manteniendo todas las demás variables constantes.
 
-**Horas Extra (Horas_ExtraSi):** Un Odds Ratio de 4.155 indica que los empleados que trabajan horas extra tienen aproximadamente 4.155 veces más probabilidades de rotar que aquellos que no lo hacen, manteniendo todas las demás variables constantes.
+## **Comparación de Coeficientes con Hipótesis a través de Odds Ratios:**
 
-**Departamento (DepartamentoVentas y DepartamentoRH):** Los Odds Ratios de 1.914 y 1.547 respectivamente sugieren que pertenecer a los departamentos de Ventas o Recursos Humanos aumenta la probabilidad de rotación en aproximadamente 1.914 y 1.547 veces en comparación con otros departamentos, manteniendo todas las demás variables constantes.
+Los Odds Ratios de las variables predictoras enriquecen el informe al ofrecer una medida cuantitativa de la relación entre cada variable y la probabilidad de rotación de empleados. Estos indicadores cuantifican el cambio en dicha probabilidad cuando una variable aumenta en una unidad, manteniendo constantes las demás variables.
 
-**Ingreso Mensual (Ingreso_Mensual):** Un Odds Ratio de 0.9999181 sugiere que por cada aumento unitario en el ingreso mensual, la probabilidad de rotación disminuye en un 0.0000819%, manteniendo todas las demás variables constantes. Esto indica una asociación muy débil entre el ingreso mensual y la rotación.
+- **Horas Extra (Horas_ExtraSi):**  
+  Un Odds Ratio de 4.155 sugiere que los empleados que realizan horas extra tienen aproximadamente 4.155 veces más probabilidades de rotar que aquellos que no lo hacen, al controlar el efecto de las otras variables.
 
-**Edad (Edad) y Antigüedad en el Cargo (Antigüedad_Cargo):** Los Odds Ratios de 0.968 y 0.894 respectivamente indican que por cada aumento unitario en la edad o la antigüedad en el cargo, la probabilidad de rotación disminuye en un 3.2% y un 10.6% respectivamente, manteniendo todas las demás variables constantes.
+- **Departamento (DepartamentoVentas y DepartamentoRH):**  
+  Con Odds Ratios de 1.914 y 1.547 respectivamente, se evidencia que pertenecer a los departamentos de Ventas o Recursos Humanos incrementa la probabilidad de rotación en aproximadamente 1.914 y 1.547 veces, en comparación con otros departamentos, manteniendo constantes las demás variables.
 
-**Viaje de Negocios (Viaje de Negocios Raramente y No Viaja):** Los Odds Ratios de 0.5067 y 0.2582 respectivamente sugieren que los empleados que viajan raramente o no viajan tienen una menor probabilidad de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
+- **Ingreso Mensual (Ingreso_Mensual):**  
+  Un Odds Ratio de 0.9999181 indica que, por cada aumento unitario en el ingreso mensual, la probabilidad de rotación disminuye en un 0.0000819%. Esto denota una asociación extremadamente débil entre el nivel de ingreso y la rotación.
 
-En resumen, los Odds Ratios proporcionan información adicional sobre la fuerza y la dirección de la asociación entre cada variable y la probabilidad de rotación de empleados, lo que ayuda a comprender mejor la influencia relativa de cada variable en el fenómeno de la rotación.</p>
+- **Edad (Edad) y Antigüedad en el Cargo (Antigüedad_Cargo):**  
+  Los Odds Ratios de 0.968 y 0.894 implican que, por cada incremento unitario en la edad o en la antigüedad en el cargo, la probabilidad de rotación se reduce en un 3.2% y un 10.6% respectivamente, cuando se mantienen las demás variables constantes.
 
+- **Viaje de Negocios (Viaje de Negocios Raramente y No Viaja):**  
+  Con Odds Ratios de 0.5067 y 0.2582, se observa que los empleados que viajan raramente o que no viajan presentan una menor probabilidad de rotación en comparación con aquellos que realizan viajes frecuentes, al mantener constante el efecto de las otras variables.
 
-<p>
-**Discusión:**
-
-Al interpretar los coeficientes de regresión logística, nos centramos en la dirección y la magnitud del efecto de cada variable en la probabilidad de rotación. Sin embargo, al considerar los Odds Ratios, obtenemos una perspectiva más detallada de esta relación.
-
-Algunas discrepancias entre la interpretación de los coeficientes y los Odds Ratios pueden surgir debido a la transformación logarítmica aplicada en el modelo de regresión logística para calcular los coeficientes. Esta transformación no siempre refleja directamente la asociación entre las variables y la probabilidad de rotación.
-
-Por ejemplo, en el caso del ingreso mensual, el coeficiente estimado podría indicar una relación débil con la rotación, pero el Odds Ratio sugiere que incluso pequeños aumentos en el ingreso mensual pueden estar asociados con reducciones significativas en la probabilidad de rotación. Esta discrepancia resalta la importancia de considerar tanto los coeficientes como los Odds Ratios para obtener una comprensión completa de la relación entre las variables predictoras y la variable de respuesta.Mientras que los coeficientes de regresión logística nos proporcionan información sobre la dirección y la magnitud de la relación entre las variables predictoras y la probabilidad de rotación, los Odds Ratios nos ofrecen una perspectiva más intuitiva de cómo estos cambios afectan la probabilidad de rotación en términos de probabilidades relativas.
-
-</p>
+En síntesis, los Odds Ratios permiten cuantificar tanto la intensidad como la dirección de la relación entre cada variable y la probabilidad de rotación, siendo una métrica que facilita la comprensión detallada de cómo cada factor incide de manera relativa en el fenómeno de la rotación laboral.
 
 
-## **4. Estimación del modelo**
-<p>Realiza la estimación de un modelo de regresión logístico en el cual la variable respuesta es rotacion (y=1
- es si rotación, y=0 es no rotación) y las covariables las 6 seleccionadas en el punto 1. Interprete los coeficientes del modelo y la significancia de los parámetros.</p>
+## **Discusión:**
+
+## **Discusión:**
+
+Al interpretar los coeficientes de un modelo de regresión logística, se evalúa tanto la dirección como la magnitud del efecto de cada variable en la probabilidad de rotación. No obstante, al analizar los Odds Ratios se obtiene una perspectiva más detallada y cuantificable de dicha relación.
+
+No obstante, las discrepancias que existen entre la *interpretación de los coeficientes* y los *Odds Ratios* pueden surgir debido a la transformación logarítmica que se aplica en el modelo para obtener los coeficientes. Esta transformación no siempre traduce de forma directa la asociación entre las variables y la probabilidad de rotación.
+
+Por ejemplo, en el caso del ingreso mensual, mientras que el coeficiente estimado puede sugerir una relación débil con la rotación, el Odds Ratio revela que incluso pequeños incrementos en el ingreso pueden estar vinculados a reducciones significativas en la probabilidad de rotación. Esta diferencia resalta la importancia de analizar ambos indicadores para comprender de manera completa cómo las variables predictoras influyen en la variable de respuesta.
+
+En resumen, aunque los coeficientes de la regresión logística proporcionan información sobre la dirección y magnitud de las relaciones, los Odds Ratios ofrecen una interpretación más intuitiva al mostrar el impacto relativo de los cambios en cada variable sobre la probabilidad de rotación.
+
+
+# **4. Estimación del modelo**
+
+Realiza la estimación de un modelo de regresión logística en el cual la variable respuesta es **rotación** ($y = 1$ indica rotación y $y = 0$ indica no rotación) y las covariables corresponden a las 6 seleccionadas en el punto 1. Interprete los coeficientes del modelo y la significancia de los parámetros.
+
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Ajustar el modelo de regresión logística
 modelo <- glm(Rotación ~ `Viaje de Negocios` + Departamento + Horas_Extra + Edad + Ingreso_Mensual + Antigüedad_Cargo, data = rotacion, family = "binomial")
@@ -432,24 +447,27 @@ kable(coeficientes_df)
 
 ```
 
-A continuación se procede con la interpretación de los coeficientes:
 
-1. **Intercept:** Este es el intercepto del modelo. Representa el logaritmo de la razón de probabilidades de rotación cuando todas las variables predictoras son cero. En este caso, es 0.1619797, lo que significa que cuando todas las demás variables son cero, el log-odds de rotación es de aproximadamente 0.16.
+A continuación se presenta la interpretación de los coeficientes obtenidos por el modelo:
 
-2. **Viaje de NegociosNo_Viaja:** Un coeficiente negativo (-1.3541771) indica que los empleados que no viajan por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan por negocios, manteniendo todas las demás variables constantes. 
+1. **Intercepto:** Representa el logaritmo de la razón de probabilidades de rotación cuando todas las variables predictoras se establecen en cero. En este caso, su valor es 0.1619797, lo que indica que, en ausencia de cualquier influencia de las demás variables, el log-odds de rotación es aproximadamente 0.16.
 
-3. **Viaje de NegociosRaramente:** Un coeficiente negativo (-0.6797980) indica que los empleados que viajan raramente por negocios tienen menores log-odds de rotación en comparación con aquellos que viajan frecuentemente por negocios, manteniendo todas las demás variables constantes.
+2. **Viaje de NegociosNo_Viaja:** El coeficiente negativo de -1.3541771 sugiere que, manteniendo constantes las demás variables, los empleados que no viajan por negocios presentan log-odds de rotación inferiores en comparación con aquellos que sí realizan viajes.
 
-4. **DepartamentoRH y DepartamentoVentas:** Los coeficientes positivos (0.4363905 y 0.6494927 respectivamente) indican que pertenecer al departamento de Recursos Humanos o al departamento de Ventas está asociado con mayores log-odds de rotación, en comparación con el departamento de referencia (probablemente otro departamento no mencionado).
+3. **Viaje de NegociosRaramente:** Con un coeficiente de -0.6797980, se evidencia que los empleados que viajan raramente por negocios tienen log-odds de rotación menores respecto a quienes viajan frecuentemente, siempre que las demás variables permanezcan constantes.
 
-5. **Horas_ExtraSi:** Un coeficiente positivo (1.4243441) indica que trabajar horas extra está asociado con mayores log-odds de rotación.
+4. **DepartamentoRH y DepartamentoVentas:** Los coeficientes positivos de 0.4363905 y 0.6494927, respectivamente, indican que pertenecer al departamento de Recursos Humanos o al de Ventas se asocia con mayores log-odds de rotación en comparación con el departamento de referencia, asumiendo que las demás variables se mantienen sin cambios.
 
-6. **Edad y Antigüedad_Cargo:** Los coeficientes negativos (-0.0321813 y -0.1117549 respectivamente) indican que el aumento en la edad y en la antigüedad en el cargo están asociados con menores log-odds de rotación.
+5. **Horas_ExtraSi:** Un coeficiente positivo de 1.4243441 muestra que trabajar horas extra está vinculado a un incremento en los log-odds de rotación, lo que implica una mayor probabilidad de rotación, manteniendo constantes las demás variables.
 
-7. **Ingreso_Mensual:** Un coeficiente negativo (-0.0000819) indica que un aumento en el ingreso mensual está asociado con menores log-odds de rotación, aunque el efecto es muy pequeño y casi despreciable.
+6. **Edad y Antigüedad_Cargo:** Los coeficientes negativos de -0.0321813 para la edad y -0.1117549 para la antigüedad en el cargo indican que, conforme aumenta la edad o la antigüedad, los log-odds de rotación disminuyen, lo que sugiere una menor probabilidad de rotación.
 
-## **5. Evaluación**
-<p>Evaluar el poder predictivo del modelo con base en la curva ROC y el AUC.</p>
+7. **Ingreso_Mensual:** El coeficiente negativo de -0.0000819 implica que cada incremento unitario en el ingreso mensual se asocia con una leve disminución en los log-odds de rotación. Aunque el efecto es casi despreciable, señala una relación inversa entre el ingreso y la probabilidad de rotación.
+
+
+# **5. Evaluación**
+Evaluar el poder predictivo del modelo con base en la curva ROC y el AUC.
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
 # Predecir las probabilidades de rotación utilizando el modelo
@@ -486,7 +504,9 @@ Finalmente, en la imagen que se muestra, la curva ROC se encuentra por encima de
 El AUC de la curva ROC es de 0.7654207. Este valor indica que el modelo tiene un buen rendimiento para clasificar los casos. Se puede concluir que el modelo tiene un buen rendimiento para clasificar los casos. La curva ROC se encuentra por encima de la diagonal aleatoria y el AUC es de 0.7654207, lo que indica que el modelo es capaz de detectar los verdaderos positivos con una alta probabilidad y generar pocas falsas alarmas.
 </p>
 
-## **6. Predicciones**
+
+
+# **6. Predicciones**
 <p>Realiza una predicción la probabilidad de que un individuo (hipotético) rote y defina un corte para decidir si se debe intervenir a este empleado o no (posible estrategia para motivar al empleado).</p>
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Definir las variables predictoras del empleado hipotético
@@ -544,7 +564,9 @@ print(grafico)
 ```
 <p>En este caso, teniendo en cuenta la información procesada por el modelo, se determina que no es necesario la intervención a la colaboradora Lucia, ya que, Lucía se siente cómoda y valorada en su posición actual. .</p>
 
-## **7. Conclusiones**
+
+
+# **7. Conclusiones**
 <p>En las conclusiones adicione una discusión sobre cuál sería la estrategia para disminuir la rotación en la empresa (con base en las variables que resultaron significativas en el punto 3).
 
 </p>
