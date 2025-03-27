@@ -3,11 +3,11 @@ title: "Actividad3 Unidad3: Rotación de Cargo"
 author: "Juan José Restrepo Rosero y Miller Eduardo Perdomo"
 date: "2025-03-31"
 output: 
+  pdf_document:
+    toc: yes
   html_document:
     toc: yes
     toc_float: yes
-  pdf_document:
-    toc: yes
 ---
 
 ```{r setup, include=FALSE}
