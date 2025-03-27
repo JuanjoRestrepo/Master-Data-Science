@@ -1,6 +1,6 @@
 ---
 title: "Actividad3 Unidad3: Rotación de Cargo"
-author: "Juan José Restrepo Rosero"
+author: "Juan José Restrepo Rosero y Miller Eduardo Perdomo"
 date: "2025-03-31"
 output: 
   html_document:
@@ -50,15 +50,15 @@ if (!require("knitr")) {
 
 ```
 
-## **Rotación de cargo**
+# **Rotación de cargo**
 
-<p>En una organización, se busca comprender y prever los factores que influyen en la rotación de empleados entre distintos cargos. La empresa ha recopilado datos históricos sobre el empleo de sus trabajadores, incluyendo variables como la antigüedad en el cargo actual, el nivel de satisfacción laboral, el salario actual, edad y otros factores relevantes. La gerencia planea desarrollar un modelo de regresión logística que permita estimar la probabilidad de que un empleado cambie de cargo en el próximo período y determinar cuales factores indicen en mayor proporción a estos cambios.
+<p>En una organización, se busca comprender y prever los factores que influyen en la **rotación de empleados** entre distintos cargos. La empresa ha recopilado datos históricos sobre el empleo de sus trabajadores, incluyendo variables como la antigüedad en el cargo actual, el nivel de satisfacción laboral, el salario actual, edad y otros factores relevantes. La gerencia planea desarrollar un modelo de regresión logística que permita estimar la probabilidad de que un empleado cambie de cargo en el próximo período y determinar cuales factores indicen en mayor proporción a estos cambios.
 
 Con esta información, la empresa podrá tomar medidas proactivas para retener a su talento clave, identificar áreas de mejora en la gestión de recursos humanos y fomentar un ambiente laboral más estable y tranquilo. La predicción de la probabilidad de rotación de empleados ayudará a la empresa a tomar decisiones estratégicas informadas y a mantener un equipo de trabajo comprometido y satisfecho en sus roles actuales.
 
 A continuación se describen los pasos que la gerencia ha propuesto para el análisis: </p>
 
-## **1. Selección de variables**
+# **1. Selección de variables**
 
 <p>Seleccione 3 variables categóricas (distintas de rotación) y 3 variables cuantitativas, que se consideren estén relacionadas con la rotación. <p>
 
@@ -73,28 +73,26 @@ summary(rotacion)
 str(rotacion)
 
 ```
-<p>Con  base en la estructura del dataframe acerca de la rotación laboral se muestra la información de 1470 empleados. Se detallan aspectos clave como la edad promedio de los empleados (36.92 años) y su experiencia laboral (11.28 años), junto con una diversidad de características demográficas y laborales como género, estado civil, departamento y cargo. Además, se exploran variables relacionadas con la satisfacción y el rendimiento laboral, así como factores potencialmente influyentes en la rotación, como el equilibrio entre trabajo y vida personal, horas extras y antigüedad en la empresa. </p>
+A partir de la estructura del dataframe sobre la *rotación laboral*, se presenta la información correspondiente a 1470 empleados. En esta, se destacan aspectos fundamentales como la **edad promedio de los trabajadores (36,92 años)** y su **experiencia laboral media (11,28 años)**, complementados por una amplia gama de características demográficas y profesionales, tales como **género, estado civil, departamento y cargo**. Asimismo, se analizan variables relacionadas con la **satisfacción** y el **desempeño en el trabajo**, además de examinar factores potencialmente determinantes de la rotación, tales como el **equilibrio entre la vida laboral y personal**, la **realización de horas extras** y la **antigüedad en la empresa**.
 
-<p> Teniendo en cuenta la información que contiene el dataframe, se seleccionan las siguientes variables
+Teniendo en cuenta la información contenida en el dataframe, se procede a la selección de las siguientes variables:
 
+## **Variables Categóricas:**
+- **Viaje de Negocios:** Esta variable indica la frecuencia con la que los empleados realizan desplazamientos por motivos laborales. Una alta frecuencia de viajes podría perturbar el equilibrio entre la vida profesional y personal, lo que, a su vez, podría contribuir a mayores tasas de rotación.
 
-<ul>
-<b>**Variables categóricas:**</b>
+- **Departamento:** El departamento o área en la que se desempeña un empleado influye directamente en su satisfacción laboral y en las oportunidades de crecimiento profesional. La pertenencia a ciertos departamentos puede estar asociada a condiciones laborales que favorecen o desincentivan la permanencia en la organización.
 
-
-<li>**Viaje de Negocios:** Esta variable representa la frecuencia de los viajes de negocios de los empleados. Podría estar relacionada con la rotación, ya que los viajes constantes podrían afectar el equilibrio entre el trabajo y la vida personal de los empleados.</li>
-<li>**Departamento:** El departamento en el que trabaja un empleado puede influir en su satisfacción laboral y en sus oportunidades de crecimiento. Esto podría estar relacionado con la rotación.</li>
-<li>**Horas Extra:** La cantidad de horas extra trabajadas por los empleados podría estar relacionada con la rotación, ya que el exceso de trabajo puede llevar al agotamiento y a la insatisfacción laboral.
-</li>
+- **Horas Extra:** El número de horas adicionales trabajadas por los empleados puede reflejar una carga laboral excesiva, la cual está vinculada al agotamiento y a la insatisfacción, incrementando el riesgo de que los empleados opten por abandonar la empresa.
 
 
-<b>**Variables cuantitativas:**</b>
+## **Variables Cuantitativas:**
+- **Edad:** La edad de los empleados es un factor relevante en el estudio de la rotación, ya que las diferentes etapas de la vida profesional y personal implican prioridades y necesidades laborales que pueden influir en la decisión de permanecer o cambiar de empleo.
 
-<li>**Edad:** La edad de los empleados podría estar relacionada con la rotación, ya que las personas en diferentes etapas de su vida pueden tener diferentes prioridades y necesidades laborales.</li>
-<li>**Ingreso Mensual:** El salario de los empleados puede influir en su decisión de quedarse o irse de una empresa. Una remuneración más alta podría estar relacionada con una menor rotación.<7li>
-<li>**Antigüedad en el Cargo:** Cuánto tiempo ha estado un empleado en su puesto actual puede estar relacionado con su rotación. Los empleados con menos tiempo en el cargo podrían ser más propensos a rotar en busca de nuevas oportunidades.</li>
-</p>
-</ul>
+- **Ingreso Mensual:** El salario mensual es un determinante clave en la retención de personal; una remuneración competitiva puede favorecer la estabilidad laboral, mientras que una compensación inadecuada podría aumentar la tendencia a la rotación.
+
+- **Antigüedad en el Cargo:** El tiempo que un empleado ha ocupado su posición actual refleja su nivel de adaptación y compromiso. Aquellos con menor antigüedad en el cargo pueden estar más inclinados a buscar nuevas oportunidades, mientras que una mayor permanencia podría asociarse a una rotación reducida.
+
+
 
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 
