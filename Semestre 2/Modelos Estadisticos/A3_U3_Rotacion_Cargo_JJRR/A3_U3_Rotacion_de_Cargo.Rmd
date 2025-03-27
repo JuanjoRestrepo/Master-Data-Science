@@ -561,7 +561,7 @@ print(grafico)
 En base a la información procesada por el modelo, se concluye que no es necesaria ninguna intervención en el caso de la colaboradora Lucía, dado que se encuentra cómoda y valorada en su posición actual.
 
 
-## **7. Conclusiones**
+# **7. Conclusiones**
 
 En las conclusiones se discute la estrategia para reducir la rotación en la empresa, fundamentada en las variables que resultaron significativas en el análisis bivariado. A partir de los hallazgos del punto 3, se proponen las siguientes cuatro estrategias, basadas en las variables Viaje de Negocios, Departamento y Horas Extra:
 
@@ -580,11 +580,7 @@ En las conclusiones se discute la estrategia para reducir la rotación en la emp
 Estas estrategias están diseñadas para abordar de manera específica las variables identificadas en el análisis bivariado, con el fin de reducir la rotación de empleados y promover un entorno laboral más estable y satisfactorio.
 
 
-
-## **8. Anexos - Repositorio del Código**
+# **8. Anexos - Repositorio del Código**
 
 <b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos">Repositorio de Github</a></b>
-
-
-
 
