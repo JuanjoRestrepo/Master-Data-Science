@@ -484,30 +484,22 @@ auc_result <- auc(roc_obj)
 cat("El área bajo la curva (AUC) es:", auc_result)
 
 ```
-<p>
 
-**Curva ROC:**
+### **Curva ROC:**
 
-La curva ROC muestra la probabilidad de detección verdadera (TPR) en función de la probabilidad de falsa alarma (FPR) para diferentes umbrales de clasificación.
-La curva ROC se traza en un espacio bidimensional, con la FPR en el eje X y la TPR en el eje Y.
-Una curva ROC ideal es la que se encuentra en la esquina superior izquierda del gráfico, lo que indica que el modelo es capaz de detectar todos los casos positivos sin generar ninguna falsa alarma.
+La curva ROC representa la relación entre la tasa de verdaderos positivos (TPR) y la tasa de falsos positivos (FPR) a lo largo de diferentes umbrales de clasificación. Se dibuja en un plano bidimensional, donde el eje X corresponde a la FPR y el eje Y a la TPR. Una curva ROC ideal se ubica en la esquina superior izquierda del gráfico, lo que significa que el modelo logra identificar correctamente todos los casos positivos sin incurrir en falsos positivos.
 
-**Área bajo la curva (AUC):**
+### **Área bajo la curva (AUC):**
 
-El AUC es la proporción de la superficie total del gráfico ROC que se encuentra debajo de la curva.
-El AUC se expresa como un valor numérico entre 0 y 1.
-Un AUC de 1 indica que el modelo es perfecto, mientras que un AUC de 0 indica que el modelo no es mejor que una adivinanza aleatoria.
+El AUC corresponde a la proporción del área total bajo la curva ROC. Este indicador se expresa mediante un valor numérico que oscila entre 0 y 1. Un AUC de 1 implica que el modelo clasifica perfectamente, mientras que un AUC de 0 equivale a un rendimiento similar al de una clasificación aleatoria.
 
-
-
-Finalmente, en la imagen que se muestra, la curva ROC se encuentra por encima de la diagonal aleatoria. Esto indica que el modelo es mejor que una adivinanza aleatoria para clasificar los casos.
-El AUC de la curva ROC es de 0.7654207. Este valor indica que el modelo tiene un buen rendimiento para clasificar los casos. Se puede concluir que el modelo tiene un buen rendimiento para clasificar los casos. La curva ROC se encuentra por encima de la diagonal aleatoria y el AUC es de 0.7654207, lo que indica que el modelo es capaz de detectar los verdaderos positivos con una alta probabilidad y generar pocas falsas alarmas.
-</p>
-
+En la imagen presentada, la curva ROC se sitúa por encima de la diagonal que representa la clasificación aleatoria, lo que demuestra que el modelo supera a una simple adivinanza en la clasificación de casos. Con un AUC de 0.7654207, se evidencia un rendimiento sólido del modelo, ya que este valor indica que el modelo detecta de manera eficiente los verdaderos positivos y mantiene bajas las tasas de falsas alarmas.
 
 
 # **6. Predicciones**
-<p>Realiza una predicción la probabilidad de que un individuo (hipotético) rote y defina un corte para decidir si se debe intervenir a este empleado o no (posible estrategia para motivar al empleado).</p>
+Realiza una predicción la probabilidad de que un individuo (hipotético) rote y defina un corte para decidir si se debe intervenir a este empleado o no (posible estrategia para motivar al empleado).
+
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Definir las variables predictoras del empleado hipotético
 nuevo_dato <- data.frame(
@@ -522,7 +514,10 @@ nuevo_dato <- data.frame(
 print(nuevo_dato)
 
 ```
-<p>Lucía, una empleada dedicada y comprometida con su trabajo en una empresa de ventas. Lucía ha decidido establecerse en un puesto que no requiere viajes de negocios, ya que prefiere pasar tiempo en casa con su familia. A pesar de su dedicación, últimamente ha tenido que trabajar horas extras para cumplir con las demandas del trabajo. A sus 35 años, Lucía se encuentra en una etapa estable de su vida laboral, con una antigüedad en su cargo de 5 años. Con un ingreso mensual de 3,800,000 pesos.  </p>
+
+Lucía es una empleada dedicada y comprometida en una empresa de ventas. Ha optado por un puesto que no requiere viajes de negocios, debido a que prefiere pasar tiempo en casa con su familia. A pesar de su compromiso, últimamente se ha visto obligada a trabajar horas extras para satisfacer las demandas laborales. A sus 35 años, Lucía se encuentra en una etapa estable de su vida profesional, contando con 5 años de antigüedad en su cargo y percibiendo un ingreso mensual de 3,800,000 pesos.
+
+
 ```{r , warning=FALSE, echo=FALSE, message=FALSE}
 # Predecir las probabilidades de rotación utilizando el modelo y los datos definidos
 prob_pred <- predict(modelo, data = nuevo_dato, type = "response")
@@ -562,29 +557,31 @@ print(grafico)
 
 
 ```
-<p>En este caso, teniendo en cuenta la información procesada por el modelo, se determina que no es necesario la intervención a la colaboradora Lucia, ya que, Lucía se siente cómoda y valorada en su posición actual. .</p>
+
+En base a la información procesada por el modelo, se concluye que no es necesaria ninguna intervención en el caso de la colaboradora Lucía, dado que se encuentra cómoda y valorada en su posición actual.
+
+
+## **7. Conclusiones**
+
+En las conclusiones se discute la estrategia para reducir la rotación en la empresa, fundamentada en las variables que resultaron significativas en el análisis bivariado. A partir de los hallazgos del punto 3, se proponen las siguientes cuatro estrategias, basadas en las variables Viaje de Negocios, Departamento y Horas Extra:
+
+- **Mejorar el ambiente laboral y la conciliación:**  
+  Se plantea disminuir la necesidad de realizar viajes frecuentes por negocios, especialmente en aquellos departamentos con elevadas tasas de rotación. Esto se puede lograr mediante la implementación de políticas que promuevan un adecuado equilibrio entre el trabajo y la vida personal, tales como la flexibilidad laboral, la adopción de programas de trabajo remoto y la oferta de beneficios orientados a la conciliación.
+
+- **Optimizar la distribución de tareas y responsabilidades:**  
+  Se recomienda revisar la asignación de la carga de trabajo en departamentos con altas tasas de rotación, como el de Ventas, con el objetivo de reducir la dependencia de horas extras de manera constante. Esto implica evaluar la distribución de tareas, asegurar una asignación óptima de recursos y establecer sistemas de rotación de turnos para disminuir el agotamiento laboral.
+
+- **Incentivar el desarrollo profesional y el crecimiento interno:**  
+  Para contrarrestar la rotación en departamentos específicos, se sugiere implementar programas de desarrollo profesional y de promoción interna. Dichos programas pueden incluir capacitación continua, mentoría y planes de carrera personalizados, que incentiven a los empleados a permanecer en la organización y a desarrollar su potencial.
+
+- **Revisar y ajustar la política de compensación:**  
+  Se propone evaluar la estructura de remuneración para garantizar que sea competitiva y equitativa, en especial en aquellos departamentos donde se observa alta rotación. Esto podría incluir ajustes salariales, la implementación de bonificaciones por desempeño y la incorporación de beneficios adicionales que reconozcan el esfuerzo y compromiso de los empleados.
+
+Estas estrategias están diseñadas para abordar de manera específica las variables identificadas en el análisis bivariado, con el fin de reducir la rotación de empleados y promover un entorno laboral más estable y satisfactorio.
 
 
 
-# **7. Conclusiones**
-<p>En las conclusiones adicione una discusión sobre cuál sería la estrategia para disminuir la rotación en la empresa (con base en las variables que resultaron significativas en el punto 3).
-
-</p>
-
-
-<p>Tenieendo cuenta las variables identificadas en el análisis bivariado del punto 3. se presentan a continuación el diseño de 4 estraegias basadas en: Viaje de Negocios, Departamento y Horas Extra.
-
-Mejorar el ambiente laboral y la conciliación: Se busca reducir la necesidad de viajar frecuentemente por negocios, especialmente en departamentos con altas tasas de rotación, mediante la implementación de políticas que fomenten un equilibrio adecuado entre el trabajo y la vida personal. Esto puede incluir la promoción de flexibilidad laboral, programas de trabajo remoto y beneficios para empleados que favorezcan la conciliación.
-
-Optimizar la distribución de tareas y responsabilidades: Se propone revisar la distribución de carga laboral en departamentos con altas tasas de rotación, como Ventas, para minimizar la necesidad de trabajar horas extras de manera constante. Esto implica una evaluación de la carga de trabajo, la asignación de recursos adecuados y la implementación de sistemas de rotación de turnos que reduzcan la fatiga laboral.
-
-Incentivar el desarrollo profesional y el crecimiento interno: Para contrarrestar la rotación en departamentos específicos, se sugiere implementar programas de desarrollo profesional y oportunidades de crecimiento interno. Estos programas pueden incluir capacitación continua, mentoría y planes de carrera personalizados para motivar a los empleados a permanecer en la organización y avanzar en sus roles.
-
-Revisar y ajustar la política de compensación: Se propone evaluar la estructura de remuneración para garantizar que sea competitiva y equitativa, especialmente en departamentos con altas tasas de rotación. Esto puede incluir ajustes salariales, bonificaciones por desempeño y beneficios adicionales que reconozcan y recompensen el esfuerzo y la dedicación de los empleados.
-
-Estas estrategias buscan abordar las preocupaciones específicas relacionadas con las variables identificadas en el análisis bivariado, con el objetivo de reducir la rotación de empleados y promover un entorno laboral más estable y satisfactorio.</p>
-
-## **8. Anexos - Repositorio Código fuente**
+## **8. Anexos - Repositorio del Código**
 
 <b><a href="https://github.com/JuanjoRestrepo/Master-Data-Science/tree/main/Semestre%202/Modelos%20Estadisticos">Repositorio de Github</a></b>
 
