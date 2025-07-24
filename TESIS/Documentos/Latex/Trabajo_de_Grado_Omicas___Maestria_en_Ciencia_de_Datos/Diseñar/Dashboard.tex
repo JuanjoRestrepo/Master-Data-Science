@@ -1,0 +1,71 @@
+% Para el diseño del Dashboard, se tuvo en cuenta que el objetivo es generar una serie de visualizaciones para poder mostrar los siguientes indicadores industriales:\\
+
+% \begin{itemize}
+%     \item Tiempos de Operación.
+%     \item Tiempos de Inactividad (Downtime).
+%     \item Número de productos producidos.
+% \end{itemize}
+
+% A partir de los indicadores establecidos y de la estructura de la base de datos, se concluyó que la información necesaria para alimentar el Dasboard son:\\
+
+% \begin{itemize}
+%     \item Tiempo de ejecución de la pieza por máquina: El tiempo que toma la máquina en realizar una pieza de la orden.
+%     \item Tiempo de ejecución total en terminar una orden.
+%     \item Total de piezas producidas.
+%     \item Tiempo presupuestado de trabajo para la máquina.
+%     \item Total de piezas producidas con el detalle de su Status (Error, Creadas, Ejecutando y Finalizadas).
+%     \item Información de las órdenes (Material, Cantidad, Status y entre otros.)
+% \end{itemize}
+
+% Otro punto importante por discutir, es el método o forma en que el Dashboard procederá a hacer alimentado, es decir, contará con conexión directa a la base, se dará uso de ETL (Extraer, Transformar y Cargar, por sus siglas en inglés) para la obtención de datos, o se alimentará a partir de un Excel que se llenará a partir del coordinador.\\
+
+% Con base en esto, se averiguó sobre las herramientas existentes para generar reportes, en donde se encuentran: Looker Studio, Power BI, Tableu, Grafana y entre otras. Para este caso, se decidió utilizar Looker Studio, debido a su fácil manipulación y facilidad en el diseño estético del reporte.\\
+
+% A partir de esto, se optó por alimentar al Dashboard a través de un Google Sheets, ya que presenta conexión directa con Looker Studio y del mismo modo, este Google Sheets será alimentado por la información que el software de control consulta de la base de datos. Cabe aclarar que Looker Studio también presenta conexión directa a Neo4j, pero para la activación de este Plug-in, se debe tener una subscripción de pago, por lo tanto, se puede retomar esta conexión directa para trabajos futuros.\\
+
+% El diseño generado para el reporte de los indicadores se espera realizar en 5 páginas para ilustrar la información de una forma ordenada y concreta. Lo anterior se visualiza en las siguientes figuras 
+% \ref{fig:or}, \ref{fig:tor}, \ref{fig:fre}, \ref{fig:insasrs} y \ref{fig:inspec}.\\
+
+% \begin{itemize}
+%     \item \textbf{Página 1: Reporte de Órdenes}
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.6]{images/ordenes.png}
+%         \caption{Boceto Reporte de Órdenes}
+%         \label{fig:or}
+%         \end{figure}
+%     \newpage
+%     \item \textbf{Página 2: Reporte Estación Torno}
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.6]{images/tornodash.png}
+%         \caption{Boceto Reporte Estación Torno}
+%         \label{fig:tor}
+%         \end{figure}
+
+%     \item \textbf{Página 3: Reporte Estación Fresado}
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.6]{images/fresadodash.png}
+%         \caption{Boceto Reporte Estación Fresado}
+%         \label{fig:fre}
+%         \end{figure}
+%     \newpage
+%     \item \textbf{Página 4: Reporte Estación ASRS}
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.75]{images/ins_asrs (1).png}
+%         \caption{Boceto Reporte Estación ASRS}
+%         \label{fig:insasrs}
+%         \end{figure}
+
+%     \item \textbf{Página 5: Reporte Estación Inspección}
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.75]{images/ins.drawio.png}
+%         \caption{Boceto Reporte Estación Inspección}
+%         \label{fig:inspec}
+%         \end{figure}
+
+%     \newpage
+% \end{itemize}

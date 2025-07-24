@@ -1,0 +1,145 @@
+% \subsection{Diseño conceptual}
+% Como se mencionó en la introducción del proyecto, el desarrollo de la base de datos se realizará a partir del lenguaje Cypher y de la plataforma de desarrollo Neo4j. Para el primer diseño, se pensó en la representación de máquinas y elementos existentes de la celda, como un nodo en la base de datos. Es decir, la celda cuenta con estaciones, sus estaciones con máquinas, las máquinas fabrican piezas y estas piezas necesitan de material disponible.\\
+
+% Estas relaciones, son las que decidimos optar como las etiquetas que permitieran conectar a los nodos. Por tal razón, el primer diseño de la celda se presenta en la figura \ref{fig:BD1}:\\
+
+% \newpage
+
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.35]{images/tesis-Boceto 1 Base.drawio.png}
+%         \caption{Boceto No.1 Base de Datos}
+%         \label{fig:BD1}
+%         \end{figure}
+
+
+% Como podemos ver en la figura \ref{fig:BD1} , se definieron los nodos tipo:\newline
+
+% \begin{itemize}
+%     \item Máquinas (Nodos Naranjas)
+%     \item Estaciones (Nodos Grises)
+%     \item Orden (Nodos Amarillos)
+%     \item Sistema (Nodo Azul)
+%     \item Material (Nodos Rojos)
+%     \item Piezas (Nodos Verdes)
+% \end{itemize}
+
+% Las relaciones creadas, tienen el mismo nombre de los nodos. Cabe aclarar que en la figura \ref{fig:BD1}, el nombre que se reflejará en cada nodo estará dado por las características de cada Máquina, Estación, Material, entre otros. Por ejemplo: Nodo tipo “Máquinas” tendrá nombre : CNC Torno.\newline
+
+% Frente a la visualización de la base de datos, se permitió conseguir una fácil interpretación, en cuanto a la estructura física de la celda y la relación entre sus componentes.\newline
+
+% Se determinó que todos los nodos que conformen la base tendrán por default la fecha de creación y de actualización. Esto con el fin de cumplir con etiquetas claves y básicas de la información que brinda una base de datos.\newline
+
+% Frente a este primer boceto, se analizó el cómo sería su acople a la celda de manufactura y al dashboard, y si el diseño era suficiente para el funcionamiento actual de la celda de manufactura.\newline
+
+% A partir de eso, se generaron los siguientes puntos para tener en cuenta al alimentar el dashboard y poder obtener los indicadores establecidos:\newline
+
+% \begin{itemize}
+%     \item Producción dada por las órdenes creadas y la cantidad de piezas a realizar.
+%     \item Tiempo activo de las máquinas.
+%     \item Tiempo presupuestado del uso de las máquinas.
+%     \item Fallos y tipo de fallo de la máquina.\\
+% \end{itemize}
+
+% Por ende, se optó por añadir esta información a partir de nuevas relaciones entre la máquina implicada y la orden creada, en donde dicha relación guardará esta información en formato JSON o lista para acceder a él y alimentar los indicadores.\\
+
+% Por otro lado, al presentar el primer boceto a nuestros directivos y los expertos del CAP, resaltaron que el diseño realizado, no tiene en cuenta que tanto el material y el tipo de pieza a realizar, afecta en el archivo .NC que la máquina CNC debe de ejecutar. Es decir, como se logra ver en la figura \ref{fig:BD1}, el nodo \textbf{estación} es aquel que me permite acceder al archivo .NC del proceso. Pero inicialmente, se pensó que era el mismo archivo para la ejecución de la CNC sin depender de la pieza a fabricar y del material.\\
+
+% Debido a esto, se decidió no sólo contar con un sólo archivo .NC por pieza y material disponible, si no que se contará con x archivos donde x = p*m, donde p es el número de piezas y m es el número de tipos de materiales.\\
+
+% \newpage
+
+% \subsection{Depuración del diseño}
+
+% A partir de la primera corrección por parte de los expertos del CAP y de los directivos, se procedió a generar un segundo diseño de la base de datos, con el fin de que la lógica y estructura lograra abarcar tanto las correcciones realizadas, como el objetivo y funcionalidad de la base.\\
+
+% Dado esto, en la figura \ref{fig:BD2} se muestra el diseño resultante:\\
+
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.4]{images/tesis-Boceto 2 Base.drawio.png}
+%         \caption{Boceto No.2 Base de Datos}
+%         \label{fig:BD2}
+%         \end{figure}
+        
+% Los principales cambios realizados se encuentran en la eliminación de los nodos tipo Material, dado que este nodo aportaba únicamente la cantidad disponible, por lo que se decidió guardar esa información en el nodo \textbf{Storage}.\\
+
+% Por otro lado, en los nodos tipo \textbf{Station}, se añadieron dos tipos de propiedades, una referente a los archivos que se deben ejecutar por el material Aluminio, y el otro, correspondiente al material Empack. Es decir, se cuenta con dos estaciones (Lathe y Milling) donde se implementa una máquina CNC para generar el proceso. Además, contamos actualmente con el diseño de tres piezas, lo que implica que por estación, cada material tendrá tres archivos diferentes por ejecutar; dando un total de seis archivos por material.\\
+
+% Al presentar las modificaciones realizadas, se recibieron diferentes correcciones y recomendaciones por parte de los directivos. Entre ellas están:
+
+% \begin{itemize}
+%     \item No es conveniente establecer la dirección de los archivos .NC como una propiedad guardada en listas. Esto principalmente porque la base de datos perdería la adaptabilidad a otro tipo de celdas de manufactura. Es decir, en este momento fue pensada a las tres piezas y dos materiales con los que se cuentan. Por eso, el agregar esos archivos en una propiedad dificulta su adaptabilidad.\\
+
+%     El problema está cuando ya no sean tres piezas si no \textbf{p} piezas, o \textbf{m} materiales. Esto implica que el nodo \textbf{Station} tendrá que añadir \textbf{x} propiedades con \textbf{p*m} archivos en formato de lista.
+
+%     \item Se recomendó idear un nuevo boceto, donde dejáramos a un lado la arquitectura ya desarrollada, y se tratará de diseñar una completamente nuevo donde se pueda reflejar el funcionamiento del proceso en vez de la composición de la celda. Es decir, cada nodo representará una serie de tareas o pasos que se deben llevar a cabo para ejecutar el proceso.
+% \end{itemize}
+
+% \subsection{Boceto Final:} 
+
+% A partir de las recomendaciones y modificaciones dadas, se planteó un nuevo boceto desde cero, tratando de visualizar la base como una serie de pasos o tareas a ejecutar para que el proceso tenga éxito. Esto implica, que a partir de la lógica del funcionamiento de la celda de manufactura \ref{fig:logica}, existen una serie de pasos que se ejecutan para que una pieza P con material M pueda realizarse.\\
+
+% A partir del diagrama lógico, se obtuvieron 2 diseños pre-eliminares para la base de datos. El primer boceto consiste en:\newline
+
+% \begin{itemize}
+%     \item Se volvió a considerar el nodo \textbf{Estación}, cuyo nodo estará compuesto a su vez por los nodos \textbf{Máquinas}. Esto con el fin de volver a representar la estructura de la celda y con la adaptabilidad a cualquier otro tipo de celda, ya que la base de una celda de manufactura se centra en una serie de estaciones compuestas por un equipo de máquinas.
+%     \item Los nodos \textbf{Pieza} estarán relacionados a una serie de pasos que se deben de ejecutar para conseguir la realización de esta.
+%     \item Se creó una nueva relación denominada \textbf{NEXT}, indicando el paso siguiente que se debe de ejecutar para la realización de la pieza.
+%     \item Se eliminó el nodo \textbf{System} dado que no presenta ningún atributo o información relevante para el sistema.
+% \end{itemize}
+
+% A partir de esto, el tercer boceto se presentó de la siguiente manera:\newline
+
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.45]{images/tesis-Boceto Final Base.drawio.png}
+%         \caption{Boceto No.3 Base de Datos}
+%         \label{fig:BD3}
+%         \end{figure}
+
+% Como podemos ver en la figura \ref{fig:BD3} , se definieron los nodos tipo:\newline
+
+% \begin{itemize}
+%     \item Machine (Nodos Verdes)
+%     \item Station (Nodos Azules)
+%     \item Order (Nodos Amarillos)
+%     \item Pasos tipo A (Nodos Grises)
+%     \item Pasos tipo B (Nodos Rojos)
+%     \item Material (Nodos Morados)
+%     \item Piece (Nodos Naranjas)
+% \end{itemize}
+
+% En cuanto a este diseño, se tuvo en cuenta que se puede adaptar a cualquier tipo de celda, más su interpretación se vuelve cada vez más compleja si se agranda el catálogo de piezas y materiales. Esto se debe principalmente a que se crearán \textbf{n} nodos con diferentes propiedades haciendo referencia a los pasos que se deben ejecutar, ya que los pasos son diferentes dependiendo de la pieza a producir, y los archivos se modifican dependiendo del material de la pieza.\newline
+
+% Por otro lado, el segundo boceto consiste en:
+
+% \begin{itemize}
+%     \item Analizar los pasos que se deben de ejecutar no como una serie de tareas, si no por estación a la cuál dará uso. Este con el fin de que existen acciones o tareas que consisten en ejecutar la misma estación pero con diferente archivo, por lo que se recurrió al software de control para controlar la activación de las estaciones a partir de las estaciones por las que debe de pasar la pieza, esto implica que los archivos ya no serán un atributo a considerar.
+%     \item La etiqueta \textbf{STEP} contará con un atributo referente al número de paso y este será utilizado para referenciar la estación y el orden que utiliza la pieza para su producción.
+%     \item Se eliminó el nodo \textbf{System} dado que no presenta ningún atributo o información relevante para el sistema.
+% \end{itemize}
+
+% A partir de esto, el boceto No.4 de la base de datos se puede apreciar en la figura \ref{fig:BD4}:
+% \newpage
+%         \begin{figure}[h!]
+%         \centering
+%         \includegraphics[scale=0.4]{images/tesis-Boceto Final Base2.drawio.png}
+%         \caption{Boceto No.4 Base de Datos}
+%         \label{fig:BD4}
+%         \end{figure}
+
+% Como podemos ver en la figura \ref{fig:BD4} , se definieron los nodos tipo:\newline
+
+% \begin{itemize}
+%     \item \textbf{Machines (Nodos Morados):} Estos nodos harán referencia a todas las máquinas presentes en la celda manufactura. En nuestro caso, los robot Mitsubishi, bandas, CNC Torno, CNC Fresado, ASRS y robot UR3.
+%     \item \textbf{Estaciones (Nodos Naranjas)}: El nodo estaciones hará representación de las diferentes etapas de trabajo existentes en la celda de manufactura.
+%     \item \textbf{Order (Nodos Amarillos):} Los nodos tipo orden permitirán llevar un registro de órdenes generadas y ejecutadas por parte de la celda de manufactura. Se resalta, que cada Orden sólo puede producir un material en específico.
+%     \item\textbf{Material (Nodos Rojos):} Estos nodos pretenden guardar la información de los diferentes materiales que se usan para la producción de las piezas. Este nodo brindará información de disponibilidad de piezas.
+%     \item\textbf{Pieces (Nodos Azules):} El nodo pieza, hace referencia a los diferentes modelos o bocetos de pieza que se pueden realizar. Cabe resaltar, que a partir de este nodo, se definen los pasos que se deben de ejecutar para la realización de la pieza. Del mismo modo, este nodo cuenta con un atributo referente a la cantidad de piezas producidas.
+% \end{itemize}
+
+        
+% Al presentar los dos bocetos a los directivos, se determinó que el boceto en el cuál basaremos nuestra base de datos es el Boceto No.4. Esto ya que cumple con los requisitos de ser adaptable a cualquier otro tipo de Celda de Manufactura, y que a su vez, trata de reflejar la lógica funcional de la celda.\newline
+
+% Adicionalmente, este boceto permite que al realizar la implementación en otro tipo de celda, o si se presentan modificaciones ya sea agregando/quitando estaciones en la celda, no afectará en la lógica de la creación de una nueva orden, dado que ésta se adaptará a partir de las nuevas características que presente la base de Datos.\newline
