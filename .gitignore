@@ -3,3 +3,33 @@
 .RData
 .Ruserdata
 .env/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Editor and IDE
+.vscode/
+.idea/
+
+# LaTeX intermediate files
+*.aux
+*.bbl
+*.blg
+*.idx
+*.ind
+*.lof
+*.lot
+*.out
+*.toc
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.fls
