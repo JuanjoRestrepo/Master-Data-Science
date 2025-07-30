@@ -1,0 +1,20 @@
+@article{HEZI2025108513,
+title = {CIMIL-CRC: A clinically-informed multiple instance learning framework for patient-level colorectal cancer molecular subtypes classification from H&E stained images},
+journal = {Computer Methods and Programs in Biomedicine},
+volume = {259},
+pages = {108513},
+year = {2025},
+issn = {0169-2607},
+doi = {https://doi.org/10.1016/j.cmpb.2024.108513},
+url = {https://www.sciencedirect.com/science/article/pii/S0169260724005066},
+author = {Hadar Hezi and Matan Gelber and Alexander Balabanov and Yosef E. Maruvka and Moti Freiman},
+keywords = {Multiple instance learning, Colorectal cancer, Digital pathology},
+abstract = {Background and objective:
+Treatment approaches for colorectal cancer (CRC) are highly dependent on the molecular subtype, as immunotherapy has shown efficacy in cases with microsatellite instability (MSI) but is ineffective for the microsatellite stable (MSS) subtype. There is promising potential in utilizing deep neural networks (DNNs) to automate the differentiation of CRC subtypes by analyzing hematoxylin and eosin (H&E) stained whole-slide images (WSIs). Due to the extensive size of WSIs, multiple instance learning (MIL) techniques are typically explored. However, existing MIL methods focus on identifying the most representative image patches for classification, which may result in the loss of critical information. Additionally, these methods often overlook clinically relevant information, like the tendency for MSI class tumors to predominantly occur on the proximal (right side) colon.
+Methods:
+We introduce ‘CIMIL-CRC’, a DNN framework that: (1) solves the MSI/MSS MIL problem by efficiently combining a pre-trained feature extraction model with principal component analysis (PCA) to aggregate information from all patches, and (2) integrates clinical priors, particularly the tumor location within the colon, into the model to enhance patient-level classification accuracy. We assessed our CIMIL-CRC method using the average area under the receiver operating characteristic curve (AUROC) from a 5-fold cross-validation experimental setup for model development on the TCGA-CRC-DX cohort, contrasting it with a baseline patch-level classification, a MIL-only approach, and a clinically-informed patch-level classification approach.
+Results:
+Our CIMIL-CRC outperformed all methods (AUROC: 0.92±0.002 (95% CI 0.91–0.92), vs. 0.79±0.02 (95% CI 0.76–0.82), 0.86±0.01 (95% CI 0.85–0.88), and 0.87±0.01 (95% CI 0.86–0.88), respectively). The improvement was statistically significant. To the best of our knowledge, this is the best result achieved for MSI/MSS classification on this dataset.
+Conclusion:
+Our CIMIL-CRC method holds promise for offering insights into the key representations of histopathological images and suggests a straightforward implementation.}
+}

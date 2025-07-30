@@ -1,0 +1,101 @@
+PMID- 39717428
+OWN - NLM
+STAT- PubMed-not-MEDLINE
+LR  - 20250104
+IS  - 2229-5089 (Print)
+IS  - 2153-3539 (Electronic)
+VI  - 15
+DP  - 2024 Dec
+TI  - Multiple Instance Learning for WSI: A comparative analysis of attention-based 
+      approaches.
+PG  - 100403
+LID - 10.1016/j.jpi.2024.100403 [doi]
+LID - 100403
+AB  - Whole slide images (WSI), obtained by high-resolution digital scanning of 
+      microscope slides at multiple scales, are the cornerstone of modern Digital 
+      Pathology. However, they represent a particular challenge to artificial 
+      intelligence (AI)-based/AI-mediated analysis because pathology labeling is 
+      typically done at slide-level, instead of tile-level. It is not just that medical 
+      diagnostics is recorded at the specimen level, the detection of oncogene mutation 
+      is also experimentally obtained, and recorded by initiatives like The Cancer 
+      Genome Atlas (TCGA), at the slide level. This configures a dual challenge: (a) 
+      accurately predicting the overall cancer phenotype and (b) finding out what 
+      cellular morphologies are associated with it at the tile level. To better 
+      understand and address these challenges, two existing weakly supervised Multiple 
+      Instance Learning (MIL) approaches were explored and compared: Attention MIL 
+      (AMIL) and Additive MIL (AdMIL). These architectures were analyzed on tumor 
+      detection (a task where these models obtained good results previously) and TP53 
+      mutation detection (a much less explored task). For tumor detection, we built a 
+      dataset from Lung Squamous Cell Carcinoma (TCGA-LUSC) slides, with 349 positive 
+      and 349 negative slides. The patches were extracted from 5× magnification. For 
+      TP53 mutation detection, we explored a dataset built from Invasive Breast 
+      Carcinoma (TCGA-BRCA) slides, with 347 positive and 347 negative slides. In this 
+      case, we explored three different magnification levels: 5×, 10×, and 20×. Our 
+      results show that a modified additive implementation of MIL matched the 
+      performance of reference implementation (AUC 0.96), and was only slightly 
+      outperformed by AMIL (AUC 0.97) on the tumor detection task. TP53 mutation was 
+      most sensitive to features at the higher applications where cellular morphology 
+      is resolved. More interestingly from the perspective of the molecular 
+      pathologist, we highlight the possible ability of these MIL architectures to 
+      identify distinct sensitivities to morphological features (through the detection 
+      of regions of interest, ROIs) at different amplification levels. This ability for 
+      models to obtain tile-level ROIs is very appealing to pathologists as it provides 
+      the possibility for these algorithms to be integrated in a digital staining 
+      application for analysis, facilitating the navigation through these 
+      high-dimensional images and the diagnostic process.
+CI  - © 2024 The Authors.
+FAU - Afonso, Martim
+AU  - Afonso M
+AD  - Instituto Superior Técnico, Universidade de Lisboa, Av. Rovisco Pais, Lisbon 
+      1049-001, Portugal.
+FAU - Bhawsar, Praphulla M S
+AU  - Bhawsar PMS
+AD  - Division of Cancer Epidemiology and Genetics, National Cancer Institute, National 
+      Institutes of Health, Bethesda 20850, MD, USA.
+FAU - Saha, Monjoy
+AU  - Saha M
+AD  - Division of Cancer Epidemiology and Genetics, National Cancer Institute, National 
+      Institutes of Health, Bethesda 20850, MD, USA.
+FAU - Almeida, Jonas S
+AU  - Almeida JS
+AD  - Division of Cancer Epidemiology and Genetics, National Cancer Institute, National 
+      Institutes of Health, Bethesda 20850, MD, USA.
+FAU - Oliveira, Arlindo L
+AU  - Oliveira AL
+AD  - Instituto Superior Técnico, Universidade de Lisboa, Av. Rovisco Pais, Lisbon 
+      1049-001, Portugal.
+AD  - INESC-ID, R. Alves Redol 9, Lisbon 1000-029, Portugal.
+LA  - eng
+PT  - Journal Article
+DEP - 20241020
+PL  - United States
+TA  - J Pathol Inform
+JT  - Journal of pathology informatics
+JID - 101528849
+PMC - PMC11665302
+OTO - NOTNLM
+OT  - Attention mechanism
+OT  - Cancer
+OT  - Multiple instance learning
+OT  - TP53
+OT  - Whole slide image
+COIS- The authors declare that they have no known competing financial interests or 
+      personal relationships that could have appeared to influence the work reported in 
+      this article.
+EDAT- 2024/12/24 06:20
+MHDA- 2024/12/24 06:21
+PMCR- 2024/10/20
+CRDT- 2024/12/24 04:42
+PHST- 2024/04/25 00:00 [received]
+PHST- 2024/09/09 00:00 [revised]
+PHST- 2024/10/17 00:00 [accepted]
+PHST- 2024/12/24 06:21 [medline]
+PHST- 2024/12/24 06:20 [pubmed]
+PHST- 2024/12/24 04:42 [entrez]
+PHST- 2024/10/20 00:00 [pmc-release]
+AID - S2153-3539(24)00042-7 [pii]
+AID - 100403 [pii]
+AID - 10.1016/j.jpi.2024.100403 [doi]
+PST - epublish
+SO  - J Pathol Inform. 2024 Oct 20;15:100403. doi: 10.1016/j.jpi.2024.100403. 
+      eCollection 2024 Dec.
