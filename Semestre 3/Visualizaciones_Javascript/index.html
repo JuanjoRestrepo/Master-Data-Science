@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Android Games Sales - Google Charts (Dashboard)</title>
+
+    <!-- Google Charts -->
+    <script
+      type="text/javascript"
+      src="https://www.gstatic.com/charts/loader.js"
+    ></script>
+    <!-- PapaParse (robusto parser CSV, maneja comillas y comas internas) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <style>
+      body {
+        font-family: Inter, 'Segoe UI', Arial, sans-serif;
+        margin: 18px;
+        background: #f6f7fb;
+        color: #111;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 12px;
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0;
+      }
+      p.lead {
+        margin: 0;
+        color: #444;
+        font-size: 13px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 14px;
+      }
+      .chart {
+        background: white;
+        border-radius: 8px;
+        border: 1px solid #e6e9ef;
+        padding: 10px;
+        box-shadow: 0 1px 0 rgba(0, 0, 0, 0.02);
+      }
+      .wide {
+        grid-column: 1 / -1;
+      }
+      #topK {
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+      .hint {
+        font-size: 12px;
+        color: #666;
+        margin-top: 6px;
+      }
+      footer {
+        margin-top: 18px;
+        font-size: 12px;
+        color: #666;
+      }
+      @media (max-width: 900px) {
+        .grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Android Games Sales — Dashboard (Google Charts)</h1>
+        <p class="lead">
+          Versión local • Usa Live Server o un servidor estático. CSV:
+          <code>data/android_games_sales.csv</code>
+        </p>
+      </div>
+    </header>
+
+    <div id="topK"></div>
+
+    <div class="grid">
+      <div class="chart" id="treemap_div" style="height: 360px"></div>
+      <div class="chart" id="sankey_div" style="height: 360px"></div>
+      <div class="chart" id="bubble_div" style="height: 360px"></div>
+      <div class="chart" id="area_div" style="height: 360px"></div>
+      <div class="chart" id="calendar_div" style="height: 360px"></div>
+      <div class="chart" id="gauge_div" style="height: 200px"></div>
+      <div
+        class="chart wide"
+        id="debug_div"
+        style="height: 120px; overflow: auto"
+      >
+        <strong>Debug / primeros registros parseados:</strong>
+        <pre
+          id="debug_pre"
+          style="white-space: pre-wrap; font-size: 12px; color: #222"
+        ></pre>
+      </div>
+    </div>
+
+    <script>
+      /* -----------------------
+   CONFIG
+   ----------------------- */
+      const DATA_PATH = 'data/android_games_sales.csv'; // cambia si tu CSV tiene otro nombre/ruta
+
+      /* -----------------------
+   CARGA DE LIBS (Google Charts)
+   ----------------------- */
+      google.charts.load('current', {
+        packages: [
+          'treemap',
+          'sankey',
+          'corechart',
+          'calendar',
+          'gauge',
+          'bubble',
+          'controls',
+        ],
+      });
+      google.charts.setOnLoadCallback(init);
+
+      /* -----------------------
+   UTIL: fetch + PapaParse
+   ----------------------- */
+      async function fetchCSV(path) {
+        try {
+          const txt = await fetch(path).then((r) => {
+            if (!r.ok) throw new Error(`HTTP ${r.status} - ${r.statusText}`);
+            return r.text();
+          });
+          return new Promise((resolve, reject) => {
+            Papa.parse(txt, {
+              header: true,
+              skipEmptyLines: true,
+              dynamicTyping: false, // convertimos manualmente
+              complete: (results) =>
+                resolve({ header: results.meta.fields, rows: results.data }),
+              error: (err) => reject(err),
+            });
+          });
+        } catch (err) {
+          throw new Error('Error fetching/parsing CSV: ' + err.message);
+        }
+      }
+
+      /* -----------------------
+   Init principal
+   ----------------------- */
+      async function init() {
+        try {
+          const csv = await fetchCSV(DATA_PATH);
+          let rows = csv.rows;
+          if (!rows || rows.length === 0)
+            throw new Error('CSV cargado pero vacío o mal parseado.');
+
+          // convertir campos numéricos de forma segura
+          rows.forEach((r) => {
+            // Normaliza nombres: si algunos headers difieren, añade here aliases
+            r.Global_Sales = toNumberSafe(r.Global_Sales);
+            r.US_Sales = toNumberSafe(r.US_Sales);
+            r.EU_Sales = toNumberSafe(r.EU_Sales);
+            r.JP_Sales = toNumberSafe(r.JP_Sales);
+            r.User_rating = toNumberSafe(r.User_rating);
+            r.Critic_Rating = toNumberSafe(r.Critic_Rating);
+            r.Year_of_Release = toNumberSafe(r.Year_of_Release);
+            r.Release_Date = (r.Release_Date || '').trim();
+            // normalizar strings básicos
+            r.Genre = (r.Genre || 'Unknown').trim();
+            r.Platform = (r.Platform || 'Unknown').trim();
+            r.Publisher = (r.Publisher || 'Unknown').trim();
+            r.Name = (r.Name || 'Untitled').trim();
+          });
+
+          // debug: primeras filas
+          document.getElementById('debug_pre').textContent = JSON.stringify(
+            rows.slice(0, 6),
+            null,
+            2
+          );
+
+          const totalGlobal = rows.reduce(
+            (s, r) => s + (Number(r.Global_Sales) || 0),
+            0
+          );
+          document.getElementById(
+            'topK'
+          ).innerHTML = `<div id="info_top"><strong>Total global sales:</strong> ${(
+            totalGlobal / 1e6
+          ).toFixed(2)} M (unidades monetarias)</div>`;
+
+          // Dibuja gráficos
+          drawTreemap(rows);
+          drawSankey(rows);
+          drawBubble(rows);
+          drawStackedArea(rows);
+          drawCalendar(rows);
+          drawGauge(totalGlobal);
+
+          console.log(
+            'Dashboard cargado correctamente. Registros:',
+            rows.length
+          );
+        } catch (err) {
+          console.error('Init error:', err);
+          document.getElementById('debug_pre').textContent =
+            'Error inicial: ' + err.message;
+          alert(
+            'Error cargando datos: ' +
+              err.message +
+              '\nRevisa la consola para más detalles.'
+          );
+        }
+      }
+
+      /* -----------------------
+   Helpers
+   ----------------------- */
+      function toNumberSafe(x) {
+        if (x === undefined || x === null || x === '') return 0;
+        // eliminar posibles separadores de miles (coma o punto) si detectados con heurística
+        if (typeof x === 'string') {
+          // quitar espacios
+          let s = x.replace(/\s+/g, '');
+          // si contiene coma y punto, asumir coma miles y punto decimal? heurística simple:
+          // pero mejor remover comas si aparecen y dejar punto como decimal
+          s = s.replace(/,/g, '');
+          // convertir a número
+          const n = Number(s);
+          return Number.isFinite(n) ? n : 0;
+        }
+        if (typeof x === 'number') return x;
+        return 0;
+      }
+
+      /* -----------------------
+   Charts (funciones)
+   ----------------------- */
+
+      function drawTreemap(rows) {
+        const map = {};
+        rows.forEach((r) => {
+          const g = r.Genre || 'Unknown';
+          const p = r.Publisher || 'Unknown';
+          if (!map[g]) map[g] = { total: 0, publishers: {} };
+          map[g].total += Number(r.Global_Sales) || 0;
+          map[g].publishers[p] =
+            (map[g].publishers[p] || 0) + (Number(r.Global_Sales) || 0);
+        });
+        const data = new google.visualization.DataTable();
+        data.addColumn('string', 'Category');
+        data.addColumn('string', 'Parent');
+        data.addColumn('number', 'Size');
+        Object.keys(map).forEach((g) => {
+          data.addRow([g, null, map[g].total]);
+          Object.keys(map[g].publishers).forEach((p) => {
+            data.addRow([p, g, map[g].publishers[p]]);
+          });
+        });
+        const tree = new google.visualization.TreeMap(
+          document.getElementById('treemap_div')
+        );
+        tree.draw(data, {
+          minColor: '#f6c7c7',
+          midColor: '#ffd59e',
+          maxColor: '#4caf50',
+          headerHeight: 18,
+          fontColor: 'black',
+          showScale: true,
+          generateTooltip: showTreemapTooltip,
+        });
+        function showTreemapTooltip(row, size, value) {
+          return `<div style="padding:6px"><strong>${data.getValue(
+            row,
+            0
+          )}</strong><br/>Ventas: ${size.toLocaleString()}</div>`;
+        }
+      }
+
+      function drawSankey(rows) {
+        const map = {};
+        rows.forEach((r) => {
+          const g = r.Genre || 'Unknown';
+          const pl = r.Platform || 'Unknown';
+          const key = g + '|' + pl;
+          map[key] = (map[key] || 0) + (Number(r.Global_Sales) || 0);
+        });
+        const data = new google.visualization.DataTable();
+        data.addColumn('string', 'From');
+        data.addColumn('string', 'To');
+        data.addColumn('number', 'Weight');
+        Object.keys(map).forEach((k) => {
+          const [g, pl] = k.split('|');
+          data.addRow([g, pl, map[k]]);
+        });
+        const chart = new google.visualization.Sankey(
+          document.getElementById('sankey_div')
+        );
+        chart.draw(data, { sankey: { link: { color: { fill: '#b9c0d8' } } } });
+      }
+
+      function drawBubble(rows) {
+        const data = new google.visualization.DataTable();
+        data.addColumn('number', 'Critic');
+        data.addColumn('number', 'User');
+        data.addColumn('string', 'Title');
+        data.addColumn('number', 'GlobalSales');
+        rows.forEach((r) => {
+          // filtramos filas sin GlobalSales para evitar burbujas diminutas
+          const gs = Number(r.Global_Sales) || 0;
+          if (gs <= 0) return;
+          data.addRow([
+            Number(r.Critic_Rating) || 0,
+            Number(r.User_rating) || 0,
+            r.Name || 'Untitled',
+            gs,
+          ]);
+        });
+        const chart = new google.visualization.BubbleChart(
+          document.getElementById('bubble_div')
+        );
+        chart.draw(data, {
+          title: 'Critic vs User rating (size = Global Sales)',
+          hAxis: { title: 'Critic Score' },
+          vAxis: { title: 'User Rating' },
+          sizeAxis: { minSize: 6, maxSize: 42 },
+          explorer: { actions: ['dragToZoom', 'rightClickToReset'] },
+        });
+      }
+
+      function drawStackedArea(rows) {
+        const agg = {};
+        rows.forEach((r) => {
+          const y = Number(r.Year_of_Release) || 0;
+          if (!agg[y]) agg[y] = { US: 0, EU: 0, JP: 0, Other: 0 };
+          agg[y].US += Number(r.US_Sales) || 0;
+          agg[y].EU += Number(r.EU_Sales) || 0;
+          agg[y].JP += Number(r.JP_Sales) || 0;
+          const other = Math.max(
+            0,
+            (Number(r.Global_Sales) || 0) -
+              (Number(r.US_Sales) ||
+                0 + Number(r.EU_Sales) ||
+                0 + Number(r.JP_Sales) ||
+                0)
+          );
+          agg[y].Other += other;
+        });
+        const data = new google.visualization.DataTable();
+        data.addColumn('string', 'Year');
+        data.addColumn('number', 'US');
+        data.addColumn('number', 'EU');
+        data.addColumn('number', 'JP');
+        data.addColumn('number', 'Other');
+        Object.keys(agg)
+          .sort((a, b) => a - b)
+          .forEach((y) => {
+            data.addRow([
+              String(y),
+              agg[y].US,
+              agg[y].EU,
+              agg[y].JP,
+              agg[y].Other,
+            ]);
+          });
+        const chart = new google.visualization.AreaChart(
+          document.getElementById('area_div')
+        );
+        chart.draw(data, {
+          isStacked: true,
+          title: 'Regional Sales by Year (stacked)',
+          hAxis: { title: 'Year' },
+          vAxis: { title: 'Sales (units)' },
+        });
+      }
+
+      function drawCalendar(rows) {
+        // require Release_Date con formato YYYY-MM-DD
+        const counts = {};
+        rows.forEach((r) => {
+          const d = (r.Release_Date || '').trim();
+          if (!d) return;
+          counts[d] = (counts[d] || 0) + 1;
+        });
+        const data = new google.visualization.DataTable();
+        data.addColumn({ type: 'date', id: 'Date' });
+        data.addColumn({ type: 'number', id: 'Releases' });
+        Object.keys(counts)
+          .sort()
+          .forEach((d) => {
+            const parts = d.split('-');
+            if (parts.length < 3) return;
+            const dt = new Date(
+              Number(parts[0]),
+              Number(parts[1]) - 1,
+              Number(parts[2])
+            );
+            data.addRow([dt, counts[d]]);
+          });
+        const chart = new google.visualization.Calendar(
+          document.getElementById('calendar_div')
+        );
+        chart.draw(data, { title: 'Releases by Date', height: 350 });
+      }
+
+      function drawGauge(totalGlobal) {
+        const valueM = (Number(totalGlobal) || 0) / 1e6;
+        const maxRange = Math.max(10, Math.ceil(valueM * 1.2));
+        const data = google.visualization.arrayToDataTable([
+          ['Label', 'Value'],
+          ['TotalM', valueM],
+        ]);
+        const chart = new google.visualization.Gauge(
+          document.getElementById('gauge_div')
+        );
+        chart.draw(data, { min: 0, max: maxRange, minorTicks: 5 });
+      }
+    </script>
+
+    <footer>
+      <div class="hint">
+        Si algún gráfico no aparece: abre la consola del navegador (F12) y pega
+        el error aquí para que lo revisemos.
+      </div>
+    </footer>
+  </body>
+</html>
