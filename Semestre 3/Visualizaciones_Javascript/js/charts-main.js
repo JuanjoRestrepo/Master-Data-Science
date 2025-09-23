@@ -1,7 +1,4 @@
-// charts-main.js - versión "auto-layout" robusta
-// Crea layout si falta, carga CSV, genera columnas faltantes si es necesario,
-// dibuja 6 visualizaciones y muestra estado en #debugStatus (si existe).
-
+// charts-main.js - Auto-layout + filtros (Category, Top-N) + ocultar debug al finalizar
 (function () {
   // ---------- Utilities ----------
   function logStatus(msg, level = 'info') {
@@ -20,26 +17,21 @@
       l.rel = 'stylesheet';
       l.href = 'css/styles.css';
       document.head.appendChild(l);
-      logStatus(
-        'Se ha insertado css/styles.css automáticamente (si no estaba).'
-      );
+      logStatus('Se insertó css/styles.css automáticamente.');
     }
   }
 
-  // Crea un contenedor grid con 6 cards (si no existe)
   function ensureGridAndCards() {
     let grid = document.querySelector('.grid');
     if (!grid) {
       grid = document.createElement('div');
       grid.className = 'grid';
-      // insertamos AFTER debugStatus si existe, sino al body
       const debug = document.getElementById('debugStatus');
       if (debug && debug.nextSibling)
         debug.parentNode.insertBefore(grid, debug.nextSibling);
       else document.body.appendChild(grid);
-      logStatus('Se creó un elemento .grid dinámicamente.');
+      logStatus('Se creó elemento .grid dinámicamente.');
     }
-
     const ids = [
       { id: 'chart_top10', title: 'Figure A — Top 10 by Global Sales' },
       {
@@ -57,17 +49,14 @@
       },
       { id: 'chart_table', title: 'Figure F — Top-rated games table' },
     ];
-
     ids.forEach((it) => {
       if (!document.getElementById(it.id)) {
         const card = document.createElement('div');
         card.className = 'card';
-        // title
         const h = document.createElement('div');
         h.className = 'chart-title';
         h.textContent = it.title;
         card.appendChild(h);
-        // chart container
         const chartDiv = document.createElement('div');
         chartDiv.id = it.id;
         chartDiv.style.minHeight = '300px';
@@ -75,12 +64,12 @@
         grid.appendChild(card);
         logStatus(`Se creó placeholder para #${it.id}`);
       } else {
-        logStatus(`Elemento destino #${it.id} ya existe en el DOM.`);
+        logStatus(`Elemento destino #${it.id} ya existe.`);
       }
     });
   }
 
-  // Conversion helpers
+  // parsing numbers robusto
   function parseNumberFromString(v) {
     if (v === null || v === undefined) return NaN;
     const s = String(v).trim();
@@ -100,11 +89,14 @@
   }
   const nn = (x) => (isNaN(x) || x === null ? 0 : x);
 
-  // ---------- Main flow ----------
+  // ---------- App state ----------
+  let itemsGlobal = []; // array of item objects
+  let headersGlobal = [];
+
+  // ---------- DOM ready ----------
   document.addEventListener('DOMContentLoaded', () => {
     try {
       ensureStylesheet();
-      // crear debugStatus si no existe (para mensajes visibles)
       if (!document.getElementById('debugStatus')) {
         const dbg = document.createElement('div');
         dbg.id = 'debugStatus';
@@ -116,57 +108,112 @@
         logStatus('debugStatus creado automáticamente.');
       }
       ensureGridAndCards();
-
-      // Asegurar google charts loader
+      ensureControlsArea(); // crea controles si falta
+      // carga Google Charts si hace falta
       if (typeof google === 'undefined' || !google.charts) {
         const s = document.createElement('script');
         s.src = 'https://www.gstatic.com/charts/loader.js';
         s.onload = () => {
-          logStatus('Google Charts cargado (loader).');
+          logStatus('Google Charts loader cargado.');
           google.charts.load('current', {
             packages: ['corechart', 'table', 'scatter'],
           });
           google.charts.setOnLoadCallback(drawAll);
         };
         s.onerror = () => {
-          logStatus('Error cargando el loader de Google Charts.', 'error');
+          logStatus('Error cargando Google Charts loader.', 'error');
         };
         document.head.appendChild(s);
       } else {
-        logStatus('Google Charts ya definido en la página.');
+        logStatus('Google Charts ya definido.');
         google.charts.load('current', {
           packages: ['corechart', 'table', 'scatter'],
         });
         google.charts.setOnLoadCallback(drawAll);
       }
     } catch (e) {
-      logStatus('Error inicializando layout: ' + e.message, 'error');
+      logStatus('Error inicializando: ' + e.message, 'error');
     }
   });
 
-  // ---------- drawAll: carga CSV y dibuja ----------
+  // ---------- Controls UI ----------
+  function ensureControlsArea() {
+    // create container above grid or inside download_area
+    let container = document.getElementById('controlsArea');
+    if (!container) {
+      const downloadArea = document.getElementById('download_area');
+      container = document.createElement('div');
+      container.id = 'controlsArea';
+      container.className = 'card';
+      container.style.display = 'flex';
+      container.style.alignItems = 'center';
+      container.style.gap = '12px';
+      container.style.marginBottom = '12px';
+      container.innerHTML = `
+        <label style="font-weight:600; margin-right:6px;">Category:</label>
+        <select id="selCategory"><option value="__all__">All</option></select>
+        <label style="font-weight:600; margin-left:12px;">Top N:</label>
+        <input id="inputTopN" type="range" min="5" max="50" value="10" />
+        <span id="labelTopN">10</span>
+        <button id="btnRegenerate" class="btn btn-primary" title="Regenerate random sales/ratings">Regenerar aleatorios</button>
+        <button id="btnToggleDebug" class="btn" title="Mostrar/ocultar debug">Toggle Debug</button>
+      `;
+      if (downloadArea) downloadArea.appendChild(container);
+      else
+        document.body.insertBefore(container, document.querySelector('.grid'));
+      // events
+      document.getElementById('inputTopN').addEventListener('input', (e) => {
+        document.getElementById('labelTopN').textContent = e.target.value;
+        redrawFiltered();
+      });
+      document
+        .getElementById('selCategory')
+        .addEventListener('change', redrawFiltered);
+      document.getElementById('btnRegenerate').addEventListener('click', () => {
+        // regenerate random values in the in-memory items (US/EU/JP/Global/User/Critic)
+        itemsGlobal.forEach((it) => {
+          it.us = Math.floor(Math.random() * 1_000_000) + 1;
+          it.eu = Math.floor(Math.random() * 1_000_000) + 1;
+          it.jp = Math.floor(Math.random() * 1_000_000) + 1;
+          it.global = it.us + it.eu + it.jp + Math.floor(Math.random() * 10000);
+          it.user_rating = Number((Math.random() * 4 + 1).toFixed(1));
+          it.critic_rating = Math.floor(Math.random() * 81) + 20;
+        });
+        logStatus('Valores aleatorios regenerados (en memoria).');
+        redrawFiltered();
+      });
+      document
+        .getElementById('btnToggleDebug')
+        .addEventListener('click', () => {
+          const dbg = document.getElementById('debugStatus');
+          if (!dbg) return;
+          dbg.style.display = dbg.style.display === 'none' ? '' : 'none';
+        });
+      logStatus('Controles creados.');
+    }
+  }
+
+  // ---------- Draw flow ----------
   async function drawAll() {
-    logStatus('drawAll() iniciado - intentando fetch del CSV...');
+    logStatus('drawAll() iniciado - fetch CSV...');
     try {
       const resp = await fetch('data/android_games_sales.csv', {
         cache: 'no-store',
       });
       if (!resp.ok) {
-        logStatus('Fetch fallido. response.status=' + resp.status, 'error');
+        logStatus('Fetch fallido: ' + resp.status, 'error');
         return;
       }
       let txt = (await resp.text()).replace(/^\uFEFF/, '').trim();
       if (!txt) {
-        logStatus('CSV cargado pero vacío.', 'error');
+        logStatus('CSV vacío.', 'error');
         return;
       }
       const rows = txt
         .split(/\r?\n/)
         .map((r) => r.split(';').map((c) => (c === undefined ? '' : c.trim())));
-      logStatus(`CSV leído. Filas totales (incl. header): ${rows.length}`);
-
-      // Normalizar headers y detectar si faltan las columnas requeridas
-      let headers = rows[0].map((h) => (h ? h.trim() : ''));
+      logStatus(`CSV leído. Filas totales: ${rows.length}`);
+      headersGlobal = rows[0].map((h) => (h ? h.trim() : ''));
       const required = [
         'US_Sales',
         'EU_sales',
@@ -175,58 +222,48 @@
         'User_rating',
         'Critic_Rating',
       ];
-      const missing = required.filter((c) => {
-        const map = headers.map((x) => (x ? x.toLowerCase() : ''));
-        return map.indexOf(c.toLowerCase()) === -1;
-      });
-
-      // Generar valores aleatorios si faltan
+      const missing = required.filter(
+        (c) =>
+          headersGlobal
+            .map((h) => (h ? h.toLowerCase() : ''))
+            .indexOf(c.toLowerCase()) === -1
+      );
       if (missing.length) {
         logStatus(
-          'Columnas faltantes detectadas: ' +
+          'Columnas faltantes: ' +
             missing.join(', ') +
-            '. Se generarán aleatoriamente.'
+            '. Se generan aleatoriamente (memoria).'
         );
-        headers = headers.concat(missing);
+        headersGlobal = headersGlobal.concat(missing);
         for (let i = 1; i < rows.length; i++) {
-          while (rows[i].length < headers.length - missing.length)
+          while (rows[i].length < headersGlobal.length - missing.length)
             rows[i].push('');
           const newVals = missing.map((col) => {
             if (/Sales/i.test(col))
               return String(Math.floor(Math.random() * 1_000_000) + 1);
             if (/User_rating/i.test(col))
-              return String((Math.random() * 4 + 1).toFixed(1)); // 1.0-5.0
+              return String((Math.random() * 4 + 1).toFixed(1));
             if (/Critic_Rating/i.test(col))
-              return String(Math.floor(Math.random() * 81) + 20); // 20-100
+              return String(Math.floor(Math.random() * 81) + 20);
             return String(Math.floor(Math.random() * 1_000_000) + 1);
           });
           rows[i] = rows[i].concat(newVals);
         }
-        logStatus(
-          'Valores aleatorios generados en memoria. (No se sobrescribe el archivo local).'
-        );
-      } else {
-        logStatus('Todas las columnas requeridas ya existen en el CSV.');
-      }
-
-      // preparar dataRows (solo filas con longitud correcta)
-      const dataRows = rows.slice(1).filter((r) => r.length === headers.length);
-      logStatus(
-        `Filas de datos válidas (matching header length): ${dataRows.length}`
-      );
-      logStatus('Encabezados: ' + headers.join(' | '));
-
+        logStatus('Valores aleatorios agregados (en memoria).');
+      } else logStatus('Todas las columnas requeridas existen.');
+      const dataRows = rows
+        .slice(1)
+        .filter((r) => r.length === headersGlobal.length);
+      logStatus(`Filas válidas (matching length): ${dataRows.length}`);
       // helper idx
       function idx(name) {
-        let i = headers.indexOf(name);
+        let i = headersGlobal.indexOf(name);
         if (i >= 0) return i;
-        i = headers
+        i = headersGlobal
           .map((h) => (h ? h.toLowerCase() : ''))
           .indexOf(name.toLowerCase());
         return i >= 0 ? i : -1;
       }
-
-      // índices
       const iTitle = idx('title'),
         iGlobal = idx('Global_sales'),
         iUS = idx('US_Sales'),
@@ -239,9 +276,8 @@
         iPrice = idx('price'),
         iGrowth30 = idx('growth (30 days)'),
         iGrowth60 = idx('growth (60 days)');
-
-      // construir items
-      const items = dataRows.map((r) => ({
+      // build items
+      itemsGlobal = dataRows.map((r) => ({
         title: (iTitle >= 0 ? r[iTitle] : '') || '',
         global: parseNumberFromString(iGlobal >= 0 ? r[iGlobal] : '') || 0,
         us: parseNumberFromString(iUS >= 0 ? r[iUS] : '') || 0,
@@ -258,210 +294,228 @@
         growth60:
           parseNumberFromString(iGrowth60 >= 0 ? r[iGrowth60] : '') || 0,
       }));
-
-      // --- Dibujos (idem versión previa) ---
-      // A Top10
-      try {
-        const top10 = items
-          .slice()
-          .sort((a, b) => nn(b.global) - nn(a.global))
-          .slice(0, 10);
-        const dtTop = new google.visualization.DataTable();
-        dtTop.addColumn('string', 'Title');
-        dtTop.addColumn('number', 'Global Sales');
-        top10.forEach((t) => dtTop.addRow([t.title, nn(t.global)]));
-        const chartTop = new google.visualization.ColumnChart(
-          document.getElementById('chart_top10')
-        );
-        chartTop.draw(dtTop, {
-          legend: { position: 'none' },
-          chartArea: { left: 140, top: 40, width: '62%' },
-          height: 360,
-        });
-        logStatus('Figure A dibujada.');
-      } catch (e) {
-        logStatus('Error dibujando Figure A: ' + e.message, 'error');
-      }
-
-      // B Pie regions
-      try {
-        const sumUS = items.reduce((s, i) => s + nn(i.us), 0),
-          sumEU = items.reduce((s, i) => s + nn(i.eu), 0),
-          sumJP = items.reduce((s, i) => s + nn(i.jp), 0);
-        const sumOther = items.reduce(
-          (s, i) => s + (nn(i.global) - nn(i.us) - nn(i.eu) - nn(i.jp)),
-          0
-        );
-        const dtPie = new google.visualization.DataTable();
-        dtPie.addColumn('string', 'Region');
-        dtPie.addColumn('number', 'Sales');
-        dtPie.addRows([
-          ['US', sumUS],
-          ['Europe', sumEU],
-          ['Japan', sumJP],
-          ['Other', sumOther],
-        ]);
-        const chartPie = new google.visualization.PieChart(
-          document.getElementById('chart_pie_regions')
-        );
-        chartPie.draw(dtPie, {
-          pieHole: 0.4,
-          chartArea: { left: 20, top: 40, width: '80%' },
-          height: 360,
-        });
-        logStatus('Figure B dibujada.');
-      } catch (e) {
-        logStatus('Error dibujando Figure B: ' + e.message, 'error');
-      }
-
-      // C Avg user rating by category
-      try {
-        const byCat = {};
-        items.forEach((it) => {
-          const c = it.category || '(unknown)';
-          if (!byCat[c]) byCat[c] = { sum: 0, count: 0 };
-          if (!isNaN(it.user_rating)) {
-            byCat[c].sum += it.user_rating;
-            byCat[c].count += 1;
-          }
-        });
-        const catArr = Object.keys(byCat).map((k) => ({
-          cat: k,
-          avg: byCat[k].count ? byCat[k].sum / byCat[k].count : 0,
-          count: byCat[k].count,
-        }));
-        const topCats = catArr.sort((a, b) => b.count - a.count).slice(0, 8);
-        const dtCat = new google.visualization.DataTable();
-        dtCat.addColumn('string', 'Category');
-        dtCat.addColumn('number', 'Avg User Rating');
-        topCats.forEach((c) => dtCat.addRow([c.cat, Number(c.avg.toFixed(2))]));
-        const chartBar = new google.visualization.BarChart(
-          document.getElementById('chart_bar_rating')
-        );
-        chartBar.draw(dtCat, {
-          legend: { position: 'none' },
-          chartArea: { left: 140, top: 40, width: '60%' },
-          vAxis: { minValue: 0, maxValue: 5 },
-          height: 360,
-        });
-        logStatus('Figure C dibujada.');
-      } catch (e) {
-        logStatus('Error dibujando Figure C: ' + e.message, 'error');
-      }
-
-      // D Scatter installs vs price
-      try {
-        const validScatter = items
-          .filter(
-            (i) => !isNaN(i.installs) && !isNaN(i.price) && i.installs > 0
-          )
-          .sort((a, b) => b.installs - a.installs)
-          .slice(0, 200);
-        const dtScatter = new google.visualization.DataTable();
-        dtScatter.addColumn('number', 'Installs');
-        dtScatter.addColumn('number', 'Price');
-        dtScatter.addColumn({
-          type: 'string',
-          role: 'tooltip',
-          p: { html: false },
-        });
-        validScatter.forEach((it) => {
-          const tooltip = `${it.title}\nInstalls: ${Math.round(
-            nn(it.installs)
-          ).toLocaleString()}\nPrice: ${nn(it.price)}`;
-          dtScatter.addRow([nn(it.installs), nn(it.price), tooltip]);
-        });
-        const chartScatter = new google.visualization.ChartWrapper({
-          chartType: 'ScatterChart',
-          dataTable: dtScatter,
-          options: {
-            hAxis: { title: 'Installs' },
-            vAxis: { title: 'Price' },
-            pointSize: 6,
-            legend: 'none',
-            tooltip: { isHtml: false },
-            height: 360,
-          },
-          containerId: 'chart_scatter',
-        });
-        chartScatter.draw();
-        logStatus('Figure D dibujada.');
-      } catch (e) {
-        logStatus('Error dibujando Figure D: ' + e.message, 'error');
-      }
-
-      // E Growth line
-      try {
-        const growthByCat = {};
-        items.forEach((it) => {
-          const c = it.category || '(unknown)';
-          if (!growthByCat[c]) growthByCat[c] = { g30: 0, g60: 0, count: 0 };
-          if (!isNaN(it.growth30)) growthByCat[c].g30 += it.growth30;
-          if (!isNaN(it.growth60)) growthByCat[c].g60 += it.growth60;
-          growthByCat[c].count += 1;
-        });
-        const gArr = Object.keys(growthByCat).map((k) => ({
-          cat: k,
-          g30: growthByCat[k].count
-            ? growthByCat[k].g30 / growthByCat[k].count
-            : 0,
-          g60: growthByCat[k].count
-            ? growthByCat[k].g60 / growthByCat[k].count
-            : 0,
-          count: growthByCat[k].count,
-        }));
-        const gTop = gArr.sort((a, b) => b.count - a.count).slice(0, 6);
-        const dtGrowth = new google.visualization.DataTable();
-        dtGrowth.addColumn('string', 'Category');
-        dtGrowth.addColumn('number', 'Growth30');
-        dtGrowth.addColumn('number', 'Growth60');
-        gTop.forEach((g) =>
-          dtGrowth.addRow([
-            g.cat,
-            Number(g.g30.toFixed(2)),
-            Number(g.g60.toFixed(2)),
-          ])
-        );
-        const chartLine = new google.visualization.LineChart(
-          document.getElementById('chart_line_growth')
-        );
-        chartLine.draw(dtGrowth, {
-          chartArea: { left: 140, top: 40, width: '55%' },
-          height: 360,
-        });
-        logStatus('Figure E dibujada.');
-      } catch (e) {
-        logStatus('Error dibujando Figure E: ' + e.message, 'error');
-      }
-
-      // F Table top-rated
-      try {
-        const dtTable = new google.visualization.DataTable();
-        dtTable.addColumn('string', 'Title');
-        dtTable.addColumn('number', 'User Rating');
-        dtTable.addColumn('number', 'Global Sales');
-        const tableRows = items
-          .filter((it) => !isNaN(it.user_rating))
-          .sort((a, b) => b.user_rating - a.user_rating || b.global - a.global)
-          .slice(0, 20);
-        tableRows.forEach((r) =>
-          dtTable.addRow([r.title, nn(r.user_rating), nn(r.global)])
-        );
-        const chartTable = new google.visualization.Table(
-          document.getElementById('chart_table')
-        );
-        chartTable.draw(dtTable, {
-          showRowNumber: true,
-          width: '100%',
-          height: 360,
-        });
-        logStatus('Figure F dibujada.');
-      } catch (e) {
-        logStatus('Error dibujando Figure F: ' + e.message, 'error');
-      }
+      logStatus(`Items construidos: ${itemsGlobal.length}`);
+      populateCategorySelect();
+      // first draw using default controls
+      redrawFiltered();
+      // hide debugStatus after success (but leave toggle)
+      setTimeout(() => {
+        const dbg = document.getElementById('debugStatus');
+        if (dbg) dbg.style.display = 'none';
+      }, 500);
+      logStatus('Render inicial completado. Debug oculto automáticamente.');
     } catch (err) {
       logStatus('Excepción en drawAll: ' + (err.message || err), 'error');
       console.error(err);
     }
-  } // end drawAll
-})();
+  }
+
+  // ---------- Controls helpers ----------
+  function populateCategorySelect() {
+    const sel = document.getElementById('selCategory');
+    if (!sel) return;
+    const cats = Array.from(
+      new Set(itemsGlobal.map((it) => it.category || '(unknown)'))
+    ).sort();
+    sel.innerHTML =
+      '<option value="__all__">All</option>' +
+      cats.map((c) => `<option value="${c}">${c}</option>`).join('');
+    logStatus(`Select Category poblado (${cats.length} categorias).`);
+  }
+
+  // ---------- Redraw pipeline ----------
+  function getFilteredItems() {
+    const sel = document.getElementById('selCategory');
+    const inputTopN = document.getElementById('inputTopN');
+    const category = sel ? sel.value : '__all__';
+    const topN = inputTopN ? Number(inputTopN.value) : 10;
+    let arr = itemsGlobal.slice();
+    if (category && category !== '__all__')
+      arr = arr.filter((it) => it.category === category);
+    return { items: arr, topN };
+  }
+
+  function redrawFiltered() {
+    const { items, topN } = getFilteredItems();
+    try {
+      // A TopN by global
+      const dtTop = new google.visualization.DataTable();
+      dtTop.addColumn('string', 'Title');
+      dtTop.addColumn('number', 'Global Sales');
+      items
+        .slice()
+        .sort((a, b) => nn(b.global) - nn(a.global))
+        .slice(0, topN)
+        .forEach((t) => dtTop.addRow([t.title, nn(t.global)]));
+      const chartTop = new google.visualization.ColumnChart(
+        document.getElementById('chart_top10')
+      );
+      chartTop.draw(dtTop, {
+        legend: { position: 'none' },
+        chartArea: { left: 140, top: 40, width: '62%' },
+        height: 360,
+      });
+
+      // B Pie regions (suma de la selección)
+      const sumUS = items.reduce((s, i) => s + nn(i.us), 0),
+        sumEU = items.reduce((s, i) => s + nn(i.eu), 0),
+        sumJP = items.reduce((s, i) => s + nn(i.jp), 0);
+      const sumOther = items.reduce(
+        (s, i) => s + (nn(i.global) - nn(i.us) - nn(i.eu) - nn(i.jp)),
+        0
+      );
+      const dtPie = new google.visualization.DataTable();
+      dtPie.addColumn('string', 'Region');
+      dtPie.addColumn('number', 'Sales');
+      dtPie.addRows([
+        ['US', sumUS],
+        ['Europe', sumEU],
+        ['Japan', sumJP],
+        ['Other', sumOther],
+      ]);
+      const chartPie = new google.visualization.PieChart(
+        document.getElementById('chart_pie_regions')
+      );
+      chartPie.draw(dtPie, {
+        pieHole: 0.4,
+        chartArea: { left: 20, top: 40, width: '80%' },
+        height: 360,
+      });
+
+      // C Avg user rating by category (within selected category only shows that cat => use global categories)
+      // For this chart we'll compute avg across categories present in the current filtered items
+      const byCat = {};
+      items.forEach((it) => {
+        const c = it.category || '(unknown)';
+        if (!byCat[c]) byCat[c] = { sum: 0, count: 0 };
+        if (!isNaN(it.user_rating)) {
+          byCat[c].sum += it.user_rating;
+          byCat[c].count += 1;
+        }
+      });
+      const catArr = Object.keys(byCat).map((k) => ({
+        cat: k,
+        avg: byCat[k].count ? byCat[k].sum / byCat[k].count : 0,
+        count: byCat[k].count,
+      }));
+      const topCats = catArr.sort((a, b) => b.count - a.count).slice(0, 8);
+      const dtCat = new google.visualization.DataTable();
+      dtCat.addColumn('string', 'Category');
+      dtCat.addColumn('number', 'Avg User Rating');
+      topCats.forEach((c) => dtCat.addRow([c.cat, Number(c.avg.toFixed(2))]));
+      const chartBar = new google.visualization.BarChart(
+        document.getElementById('chart_bar_rating')
+      );
+      chartBar.draw(dtCat, {
+        legend: { position: 'none' },
+        chartArea: { left: 140, top: 40, width: '60%' },
+        vAxis: { minValue: 0, maxValue: 5 },
+        height: 360,
+      });
+
+      // D Scatter installs vs price
+      const validScatter = items
+        .filter((i) => !isNaN(i.installs) && !isNaN(i.price) && i.installs > 0)
+        .sort((a, b) => b.installs - a.installs)
+        .slice(0, 200);
+      const dtScatter = new google.visualization.DataTable();
+      dtScatter.addColumn('number', 'Installs');
+      dtScatter.addColumn('number', 'Price');
+      dtScatter.addColumn({
+        type: 'string',
+        role: 'tooltip',
+        p: { html: false },
+      });
+      validScatter.forEach((it) =>
+        dtScatter.addRow([
+          nn(it.installs),
+          nn(it.price),
+          `${it.title}\nInstalls: ${Math.round(
+            nn(it.installs)
+          ).toLocaleString()}\nPrice: ${nn(it.price)}`,
+        ])
+      );
+      const chartScatter = new google.visualization.ChartWrapper({
+        chartType: 'ScatterChart',
+        dataTable: dtScatter,
+        options: {
+          hAxis: { title: 'Installs' },
+          vAxis: { title: 'Price' },
+          pointSize: 6,
+          legend: 'none',
+          tooltip: { isHtml: false },
+          height: 360,
+        },
+        containerId: 'chart_scatter',
+      });
+      chartScatter.draw();
+
+      // E Growth line (avg per category top6)
+      const growthByCat = {};
+      items.forEach((it) => {
+        const c = it.category || '(unknown)';
+        if (!growthByCat[c]) growthByCat[c] = { g30: 0, g60: 0, count: 0 };
+        if (!isNaN(it.growth30)) growthByCat[c].g30 += it.growth30;
+        if (!isNaN(it.growth60)) growthByCat[c].g60 += it.growth60;
+        growthByCat[c].count += 1;
+      });
+      const gArr = Object.keys(growthByCat).map((k) => ({
+        cat: k,
+        g30: growthByCat[k].count
+          ? growthByCat[k].g30 / growthByCat[k].count
+          : 0,
+        g60: growthByCat[k].count
+          ? growthByCat[k].g60 / growthByCat[k].count
+          : 0,
+        count: growthByCat[k].count,
+      }));
+      const gTop = gArr.sort((a, b) => b.count - a.count).slice(0, 6);
+      const dtGrowth = new google.visualization.DataTable();
+      dtGrowth.addColumn('string', 'Category');
+      dtGrowth.addColumn('number', 'Growth30');
+      dtGrowth.addColumn('number', 'Growth60');
+      gTop.forEach((g) =>
+        dtGrowth.addRow([
+          g.cat,
+          Number(g.g30.toFixed(2)),
+          Number(g.g60.toFixed(2)),
+        ])
+      );
+      const chartLine = new google.visualization.LineChart(
+        document.getElementById('chart_line_growth')
+      );
+      chartLine.draw(dtGrowth, {
+        chartArea: { left: 140, top: 40, width: '55%' },
+        height: 360,
+      });
+
+      // F Table top-rated
+      const dtTable = new google.visualization.DataTable();
+      dtTable.addColumn('string', 'Title');
+      dtTable.addColumn('number', 'User Rating');
+      dtTable.addColumn('number', 'Global Sales');
+      const tableRows = items
+        .filter((it) => !isNaN(it.user_rating))
+        .sort((a, b) => b.user_rating - a.user_rating || b.global - a.global)
+        .slice(0, 20);
+      tableRows.forEach((r) =>
+        dtTable.addRow([r.title, nn(r.user_rating), nn(r.global)])
+      );
+      const chartTable = new google.visualization.Table(
+        document.getElementById('chart_table')
+      );
+      chartTable.draw(dtTable, {
+        showRowNumber: true,
+        width: '100%',
+        height: 360,
+      });
+
+      logStatus(
+        'Redraw completado (TopN=' + topN + ', items=' + items.length + ').'
+      );
+    } catch (e) {
+      logStatus('Error en redrawFiltered: ' + (e.message || e), 'error');
+      console.error(e);
+    }
+  }
+})(); // end IIFE
