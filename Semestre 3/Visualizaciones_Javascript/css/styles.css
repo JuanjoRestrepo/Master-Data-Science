@@ -330,3 +330,162 @@ body.dark .theme-toggle {
 .theme-toggle input[type='checkbox']:checked::after {
   transform: translateX(16px);
 }
+
+/* Forzar legibilidad de tooltips y tablas de Google Charts */
+.google-visualization-table-table,
+.google-visualization-table-table td,
+.google-visualization-table-table th {
+  color: var(--text) !important;
+}
+.google-visualization-tooltip {
+  color: var(--text) !important;
+  background: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Forzar legibilidad de la tabla de Google Visualization */
+.google-visualization-table-table,
+.google-visualization-table-table td,
+.google-visualization-table-table th {
+  color: var(--text) !important;
+  background: transparent !important;
+}
+
+.google-visualization-table-table th {
+  font-weight: 600 !important;
+  background: var(--card-bg) !important;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06) !important;
+}
+
+/* En modo claro, damos fondo blanco a la tabla para máximo contraste */
+body:not(.dark) .google-visualization-table-table {
+  background: #ffffff !important;
+}
+
+/* Tabla fija (Figure F) siempre en blanco/negro */
+#chart_table .google-visualization-table-table,
+#chart_table .google-visualization-table-table td,
+#chart_table .google-visualization-table-table th {
+  color: #111 !important;
+  background: #fff !important;
+}
+
+#chart_table .google-visualization-table-table th {
+  font-weight: 600 !important;
+  background: #f9f9f9 !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+/* ---------------------------------------------------------------
+   Botones / chips / controles fijos (siempre texto negro / fondo blanco)
+   Aplica a los elementos del panel de controles para que no cambien
+   con el Dark/Light mode.
+   --------------------------------------------------------------- */
+#controlsArea,
+#controlsArea .chip,
+#controlsArea .btn,
+#controlsArea button,
+#controlsArea .theme-toggle,
+#controlsArea .icon-btn,
+#controlsArea .download-area,
+#controlsArea label {
+  color: #111 !important; /* texto negro */
+  background-color: #fff !important; /* fondo blanco */
+  border: 1px solid #d9d9d9 !important; /* borde claro */
+  border-radius: 8px !important;
+}
+
+/* ajustes de padding/espaciado sólo para los hijos directos (no rompen layout) */
+#controlsArea .chip,
+#controlsArea .btn,
+#controlsArea button,
+#controlsArea .theme-toggle {
+  padding: 6px 10px !important;
+  font-weight: 600 !important;
+  box-shadow: none !important;
+}
+
+/* hover / active suave */
+#controlsArea .chip:hover,
+#controlsArea .btn:hover,
+#controlsArea button:hover,
+#controlsArea .theme-toggle:hover {
+  background-color: #f5f5f5 !important;
+  color: #111 !important;
+}
+#controlsArea .chip:active,
+#controlsArea .btn:active,
+#controlsArea button:active,
+#controlsArea .theme-toggle:active {
+  background-color: #ececec !important;
+  transform: none !important;
+}
+
+/* Si hay icon-btn (PNG/PDF/CSV) mantenemos también texto negro y fondo claro */
+.card .card-toolbar .icon-btn {
+  background: #fff !important;
+  border: 1px solid #e6e6e6 !important;
+  color: #111 !important;
+}
+
+/* ---------------------------------------------------------------
+   Tooltips y tabla: mantener fuente original (heredada del body)
+   --------------------------------------------------------------- */
+/* Google tooltip usará la fuente heredada del body */
+.google-visualization-tooltip {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: var(
+    --text
+  ) !important; /* texto acorde al tema para elementos generales */
+}
+
+/* Aseguramos que la tabla también use la fuente del body */
+#chart_table .google-visualization-table-table,
+#chart_table .google-visualization-table-table td,
+#chart_table .google-visualization-table-table th {
+  font-family: inherit !important;
+  color: #111 !important; /* mantener negro (tabla fija) */
+  background: #fff !important;
+}
+
+/* ---------- Forzar Label TopN y controles numéricos a color fijo (negro) ---------- */
+#labelTopN {
+  color: #111 !important; /* número fijo en negro */
+  font-weight: 700;
+  padding-left: 6px;
+}
+
+/* Si hay otras etiquetas numéricas dentro de controles que quieras iguales */
+#controlsArea span,
+#controlsArea .small-number {
+  color: #111 !important;
+}
+
+/* ---------- Forzar tooltips de Google Charts a estilo "light mode" ---------- */
+/* Nota: google-visualization-tooltip es un div insertado en body; lo forzamos */
+.google-visualization-tooltip {
+  background: #ffffff !important; /* fondo blanco */
+  color: #111 !important; /* texto negro */
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.08) !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  padding: 6px 8px !important;
+  border-radius: 6px !important;
+}
+
+/* Para tooltips SVG o elementos que Google pudiese pintar con clases distintas */
+div[role='tooltip'] {
+  background: #ffffff !important;
+  color: #111 !important;
+}
+
+/* Aseguramos también que las "burbujas" / etiquetas dentro de los charts (si
+   generan elementos <text> con fill) prioricen color oscuro cuando sean textos flotantes.
+   Esto actúa como respaldo visual, aunque lo ideal es pasar opciones desde JS. */
+svg text,
+svg tspan {
+  fill: currentColor; /* permitirá que los chart text hereden color via CSS si Google lo aplica */
+}

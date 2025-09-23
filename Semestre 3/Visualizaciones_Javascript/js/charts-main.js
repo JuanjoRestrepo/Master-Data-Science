@@ -11,6 +11,7 @@
       ul.appendChild(li);
     }
   }
+
   function parseNumberFromString(v) {
     if (v == null) return NaN;
     const s = String(v).trim();
@@ -27,7 +28,17 @@
     const n = parseFloat(t);
     return isNaN(n) ? NaN : n;
   }
+
   const nn = (x) => (isNaN(x) || x === null ? 0 : x);
+
+  // Devuelve colores actuales del tema leyendo variables CSS
+  function getThemeColors() {
+    const cs = getComputedStyle(document.body);
+    const textColor = (cs.getPropertyValue('--text') || '').trim() || '#0f172a';
+    const mutedColor =
+      (cs.getPropertyValue('--muted') || '').trim() || '#6b7280';
+    return { textColor, mutedColor };
+  }
 
   // --------- State ----------
   let headersGlobal = [];
@@ -46,6 +57,7 @@
         wrapper.appendChild(document.body.firstChild);
       document.body.appendChild(wrapper);
     }
+
     // debug area
     if (!document.getElementById('debugStatus')) {
       const dbg = document.createElement('div');
@@ -54,6 +66,7 @@
       document.querySelector('.container').prepend(dbg);
       logStatus('Debug status creado.');
     }
+
     // controls area
     if (!document.getElementById('controlsArea')) {
       const controls = document.createElement('div');
@@ -87,6 +100,7 @@
         document.querySelector('.grid') || document.createElement('div');
       grid.classList.add('grid');
       document.querySelector('.container').insertBefore(controls, grid);
+
       // events
       document.getElementById('inputTopN').addEventListener('input', (e) => {
         document.getElementById('labelTopN').textContent = e.target.value;
@@ -95,9 +109,9 @@
       document
         .getElementById('selCategory')
         .addEventListener('change', redrawFiltered);
-      document.getElementById('searchTitle').addEventListener('input', () => {
-        debounceRedraw();
-      });
+      document
+        .getElementById('searchTitle')
+        .addEventListener('input', () => debounceRedraw());
       document
         .getElementById('btnRegenerate')
         .addEventListener('click', regenerateRandoms);
@@ -122,6 +136,7 @@
           redrawFiltered();
         });
     }
+
     // cards & grid
     const required = [
       { id: 'chart_top10', title: 'Figure A — Top 10 by Global Sales' },
@@ -155,6 +170,7 @@
         h.className = 'chart-title';
         h.textContent = it.title;
         card.appendChild(h);
+
         // toolbar
         const toolbar = document.createElement('div');
         toolbar.className = 'card-toolbar';
@@ -162,11 +178,13 @@
                              <div class="icon-btn" data-target="${it.id}" data-action="pdf" title="Descargar PDF"><span>PDF</span></div>
                              <div class="icon-btn" data-target="${it.id}" data-action="csv" title="Descargar CSV"><span>CSV</span></div>`;
         card.appendChild(toolbar);
+
         const cdiv = document.createElement('div');
         cdiv.id = it.id;
         cdiv.style.minHeight = '300px';
         card.appendChild(cdiv);
         grid.appendChild(card);
+
         // attach toolbar events
         toolbar.querySelectorAll('.icon-btn').forEach((btn) => {
           btn.addEventListener('click', async (ev) => {
@@ -178,11 +196,10 @@
       }
     });
 
-    // theme wiring (ensure inputs exist)
+    // theme wiring
     const themeToggleEl = document.getElementById('themeToggle');
     if (themeToggleEl) {
       const cb = document.getElementById('themeCheckbox');
-      // init after small delay to ensure localStorage access
       setTimeout(() => initThemeFromStorage(), 50);
       cb.addEventListener('change', (e) => {
         const checked = !!e.target.checked;
@@ -197,7 +214,6 @@
   // --------- Export handlers ----------
   async function ensureJsPdf() {
     if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve();
-    // try dynamic load
     return new Promise((resolve, reject) => {
       const src =
         'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
@@ -215,14 +231,13 @@
     });
   }
 
-  // Export table/card DOM to PNG using html2canvas
+  // Export element to PNG using html2canvas
   async function exportElementAsPNG(element, filename = 'export.png') {
     if (typeof html2canvas === 'undefined') {
       logStatus('html2canvas no disponible para exportar PNG.', 'error');
       return;
     }
     try {
-      // Increase scale for better resolution
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
@@ -240,14 +255,12 @@
     }
   }
 
-  // Special handler for table PNG export (chart_table)
   async function exportTableAsPNG() {
     const el = document.getElementById('chart_table');
     if (!el) {
       logStatus('Elemento de tabla no encontrado', 'error');
       return;
     }
-    // If the table is a google visualization, it may create a wrapper; try to find the table DOM
     const tableDOM = el.querySelector('table') || el;
     await exportElementAsPNG(tableDOM, 'chart_table.png');
   }
@@ -279,8 +292,7 @@
         logStatus('Chart no disponible para export: ' + targetId, 'error');
         return;
       }
-      // ChartWrapper or visualization chart
-      const chartNative = chartObj.getChart ? chartObj.getChart() : chartObj; // wrapper or chart
+      const chartNative = chartObj.getChart ? chartObj.getChart() : chartObj;
       if (!chartNative || typeof chartNative.getImageURI !== 'function') {
         logStatus(
           'Este tipo de elemento no admite export de imagen: ' + targetId,
@@ -295,11 +307,9 @@
         return;
       }
       if (action === 'pdf') {
-        // ensure jsPDF
         await ensureJsPdf();
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: 'landscape' });
-        // Add image to PDF and scale to page
         const w = pdf.internal.pageSize.getWidth() - 20;
         const h = pdf.internal.pageSize.getHeight() - 20;
         pdf.addImage(uri, 'PNG', 10, 10, w, h);
@@ -480,7 +490,6 @@
     sel.innerHTML =
       '<option value="__all__">All</option>' +
       cats.map((c) => `<option value="${c}">${c}</option>`).join('');
-    // create chips
     let chips = document.getElementById('chipsArea');
     if (!chips) {
       chips = document.createElement('div');
@@ -530,7 +539,7 @@
     try {
       localStorage.setItem('dashboard_theme_dark', isDark ? '1' : '0');
     } catch (e) {}
-    // Redraw charts so they respect transparency/background
+    // redraw charts to respect theme
     if (typeof redrawFiltered === 'function') {
       setTimeout(() => redrawFiltered(), 80);
     }
@@ -564,6 +573,7 @@
         .trim()
         .toLowerCase();
       const topN = Number(document.getElementById('inputTopN')?.value || 10);
+
       let arr = itemsGlobal.slice();
       if (sel && sel.value !== '__all__')
         arr = arr.filter((it) => it.category === sel.value);
@@ -572,7 +582,18 @@
           (it.title || '').toLowerCase().includes(search)
         );
 
-      // A TopN (Column)
+      const theme = getThemeColors();
+      const textColor = theme.textColor;
+      const mutedColor = theme.mutedColor;
+
+      // sync font: take body computed font-family first token
+      const fontName = (
+        getComputedStyle(document.body).fontFamily || 'Inter, Arial, sans-serif'
+      )
+        .split(',')[0]
+        .replace(/["']/g, '');
+
+      // ---------- A: TopN (Column) ----------
       const dtTop = new google.visualization.DataTable();
       dtTop.addColumn('string', 'Title');
       dtTop.addColumn('number', 'Global Sales');
@@ -587,17 +608,33 @@
         document.getElementById('chart_top10')
       );
       chartTop.draw(dtTop, {
-        legend: { position: 'none' },
+        fontName: fontName,
+        legend: {
+          position: 'none',
+          textStyle: { color: textColor, fontName: fontName },
+        },
         chartArea: { left: 120, top: 40, width: '62%' },
         height: 360,
         colors: [palette[0]],
-        vAxis: { format: '#,###' },
+        vAxis: {
+          format: '#,###',
+          textStyle: { color: textColor, fontName: fontName },
+          titleTextStyle: { color: textColor, fontName: fontName },
+        },
+        hAxis: { textStyle: { color: textColor, fontName: fontName } },
         animation: { startup: true, duration: 420 },
+        titleTextStyle: { color: textColor, fontName: fontName },
         backgroundColor: { fill: 'transparent' },
+
+        // ---- tooltip forzado a estilo light ----
+        tooltip: {
+          textStyle: { color: '#111', fontName: fontName },
+          isHtml: true,
+        },
       });
       chartMap['chart_top10'] = chartTop;
 
-      // B Pie
+      // ---------- B: Pie ----------
       const sumUS = arr.reduce((s, i) => s + nn(i.us), 0),
         sumEU = arr.reduce((s, i) => s + nn(i.eu), 0),
         sumJP = arr.reduce((s, i) => s + nn(i.jp), 0);
@@ -618,17 +655,27 @@
         document.getElementById('chart_pie_regions')
       );
       chartPie.draw(dtPie, {
+        fontName: fontName,
         pieHole: 0.45,
-        legend: { position: 'right', alignment: 'center' },
+        legend: {
+          position: 'right',
+          alignment: 'center',
+          textStyle: { color: textColor, fontName: fontName },
+        },
         pieSliceText: 'percentage',
         chartArea: { left: 20, top: 40, width: '60%' },
         height: 360,
         colors: palette,
         backgroundColor: { fill: 'transparent' },
+
+        tooltip: {
+          textStyle: { color: '#111', fontName: fontName },
+          isHtml: true,
+        },
       });
       chartMap['chart_pie_regions'] = chartPie;
 
-      // C Avg user rating by category (bar)
+      // ---------- C: Avg user rating by category (Bar) ----------
       const byCat = {};
       arr.forEach((it) => {
         const c = it.category || '(unknown)';
@@ -652,16 +699,27 @@
         document.getElementById('chart_bar_rating')
       );
       chartBar.draw(dtCat, {
-        legend: { position: 'none' },
+        fontName: fontName,
+        legend: {
+          position: 'none',
+          textStyle: { color: textColor, fontName: fontName },
+        },
         chartArea: { left: 140, top: 40, width: '60%' },
-        vAxis: { minValue: 0, maxValue: 5, format: '#,###' },
+        vAxis: {
+          minValue: 0,
+          maxValue: 5,
+          format: '#,###',
+          textStyle: { color: textColor, fontName: fontName },
+        },
+        hAxis: { textStyle: { color: textColor, fontName: fontName } },
         height: 360,
         colors: [palette[2]],
         backgroundColor: { fill: 'transparent' },
+        tooltip: { textStyle: { color: textColor, fontName: fontName } },
       });
       chartMap['chart_bar_rating'] = chartBar;
 
-      // D Scatter
+      // ---------- D: Scatter ----------
       const validScatter = arr
         .filter((i) => !isNaN(i.installs) && !isNaN(i.price) && i.installs > 0)
         .sort((a, b) => b.installs - a.installs)
@@ -687,17 +745,29 @@
         document.getElementById('chart_scatter')
       );
       chartScatter.draw(dtScatter, {
-        hAxis: { title: 'Installs', format: 'short' },
-        vAxis: { title: 'Price', format: '#,###' },
+        fontName: fontName,
+        hAxis: {
+          title: 'Installs',
+          format: 'short',
+          textStyle: { color: textColor, fontName: fontName },
+          titleTextStyle: { color: textColor, fontName: fontName },
+        },
+        vAxis: {
+          title: 'Price',
+          format: '#,###',
+          textStyle: { color: textColor, fontName: fontName },
+          titleTextStyle: { color: textColor, fontName: fontName },
+        },
         pointSize: 6,
         legend: 'none',
         height: 360,
         colors: [palette[0]],
         backgroundColor: { fill: 'transparent' },
+        tooltip: { textStyle: { color: textColor, fontName: fontName } },
       });
       chartMap['chart_scatter'] = chartScatter;
 
-      // E Growth line
+      // ---------- E: Growth line ----------
       const growthByCat = {};
       arr.forEach((it) => {
         const c = it.category || '(unknown)';
@@ -732,14 +802,19 @@
         document.getElementById('chart_line_growth')
       );
       chartLine.draw(dtGrowth, {
+        fontName: fontName,
         chartArea: { left: 140, top: 40, width: '55%' },
         height: 360,
         colors: [palette[1], palette[0]],
         backgroundColor: { fill: 'transparent' },
+        hAxis: { textStyle: { color: textColor, fontName: fontName } },
+        vAxis: { textStyle: { color: textColor, fontName: fontName } },
+        legend: { textStyle: { color: textColor, fontName: fontName } },
+        tooltip: { textStyle: { color: textColor, fontName: fontName } },
       });
       chartMap['chart_line_growth'] = chartLine;
 
-      // F Table
+      // ---------- F: Table ----------
       const dtTable = new google.visualization.DataTable();
       dtTable.addColumn('string', 'Title');
       dtTable.addColumn('number', 'User Rating');
@@ -760,8 +835,94 @@
         showRowNumber: true,
         width: '100%',
         height: 360,
+        fontName: fontName,
       });
       chartMap['chart_table'] = chartTable;
+
+      // Aplicar estilo fijo a la tabla (siempre blanco/negro y fuente fija)
+      (function applyTableTheme() {
+        const fixedFont = fontName + ', Arial, sans-serif';
+        const applyNow = () => {
+          try {
+            const container = document.getElementById('chart_table');
+            if (!container) return false;
+            const tableEl = container.querySelector('table');
+            if (!tableEl) return false;
+
+            // Forzar estilo fijo: texto negro y fondo blanco
+            tableEl.style.color = '#111';
+            tableEl.style.background = '#fff';
+            tableEl.style.fontFamily = fixedFont;
+
+            // Cabeceras
+            const ths = tableEl.querySelectorAll('th');
+            ths.forEach((th) => {
+              th.style.color = '#111';
+              th.style.fontWeight = '600';
+              th.style.background = '#f9f9f9';
+              th.style.borderBottom = '1px solid #ddd';
+            });
+
+            // Filas / celdas
+            tableEl.querySelectorAll('td').forEach((td) => {
+              td.style.color = '#111';
+              td.style.background = '#fff';
+            });
+
+            // Ajustes generales
+            tableEl.style.borderCollapse = 'separate';
+            tableEl.style.borderSpacing = '0 4px';
+            tableEl.style.width = '100%';
+
+            return true;
+          } catch (err) {
+            return false;
+          }
+        };
+
+        if (applyNow()) return;
+        setTimeout(() => {
+          if (applyNow()) return;
+          setTimeout(() => applyNow(), 140);
+        }, 30);
+
+        // also set font on container itself as backup
+        try {
+          const c = document.getElementById('chart_table');
+          if (c) c.style.fontFamily = fixedFont;
+        } catch (e) {}
+      })();
+
+      // Ensure tooltips inherit page font (some charts/tooltips created later)
+      try {
+        const tooltips = document.querySelectorAll(
+          '.google-visualization-tooltip'
+        );
+        tooltips.forEach((t) => {
+          t.style.fontFamily = fontName + ', Arial, sans-serif';
+        });
+      } catch (e) {}
+
+      // Backup: asegurar que cualquier tooltip creado dinámicamente tenga el estilo forzado
+      setTimeout(() => {
+        try {
+          document
+            .querySelectorAll(
+              '.google-visualization-tooltip, div[role="tooltip"]'
+            )
+            .forEach((t) => {
+              t.style.background = '#fff';
+              t.style.color = '#111';
+              t.style.border = '1px solid rgba(0,0,0,0.08)';
+              t.style.boxShadow = '0 8px 20px rgba(2,6,23,0.08)';
+              t.style.fontFamily = fontName + ', Arial, sans-serif';
+              t.style.padding = '6px 8px';
+              t.style.borderRadius = '6px';
+            });
+        } catch (e) {
+          /* ignore */
+        }
+      }, 80);
 
       logStatus(`Redraw OK. items=${arr.length}, topN=${topN}`);
     } catch (e) {
