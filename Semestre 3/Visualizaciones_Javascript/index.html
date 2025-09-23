@@ -1,49 +1,59 @@
-<head>
-  ...
-  <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
-    rel="stylesheet"
-  />
-  <link rel="stylesheet" href="css/styles.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-</head>
-<body>
-  <div class="header">
-    <div>
-      <h1>Android Games — Google Charts (local CSV)</h1>
-      <p class="muted">
-        6 visualizaciones generadas desde
-        <code>data/android_games_sales.csv</code>
-      </p>
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Android Games — Dashboard</title>
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <!-- jsPDF (opcional: cargado también dinámicamente en runtime) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas for DOM->PNG (table export) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  </head>
+  <body>
+    <div class="header">
+      <div>
+        <h1>Android Games — Google Charts (local CSV)</h1>
+        <p class="muted">
+          6 visualizaciones generadas desde
+          <code>data/android_games_sales.csv</code>
+        </p>
+      </div>
+      <div class="small-note">Live Server · Local</div>
     </div>
-    <div class="small-note">Live Server · Local</div>
-  </div>
 
-  <!-- contenedor para mostrar mensaje / botón de descarga creado por el script -->
-  <div id="download_area"></div>
+    <!-- contenedor para mostrar mensaje / botón de descarga creado por el script -->
+    <div id="download_area"></div>
 
-  <div class="grid">
-    <!-- tus cards -->
-  </div>
+    <div class="grid">
+      <!-- Las cards las inyecta charts-main.js -->
+    </div>
 
-  <script src="https://www.gstatic.com/charts/loader.js"></script>
-  <script src="js/charts-main.js"></script>
-  <!-- Panel de estado para debugging (mantenlo visible mientras depuramos) -->
-  <div
-    id="debugStatus"
-    style="
-      margin: 12px 0;
-      padding: 10px;
-      background: #fff6;
-      border-radius: 8px;
-      border: 1px dashed #cbd5e1;
-    "
-  >
-    <strong>Debug status</strong>
-    <ul
-      id="statusList"
-      style="margin: 6px 0 0 18px; padding: 0; list-style: decimal"
-    ></ul>
-  </div>
-</body>
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+    <script src="js/charts-main.js"></script>
+
+    <!-- Panel de estado para debugging (mantenlo visible mientras depuramos) -->
+    <div
+      id="debugStatus"
+      style="
+        margin: 12px 0;
+        padding: 10px;
+        background: #fff6;
+        border-radius: 8px;
+        border: 1px dashed #cbd5e1;
+      "
+    >
+      <strong>Debug status</strong>
+      <ul
+        id="statusList"
+        style="margin: 6px 0 0 18px; padding: 0; list-style: decimal"
+      ></ul>
+    </div>
+  </body>
+</html>

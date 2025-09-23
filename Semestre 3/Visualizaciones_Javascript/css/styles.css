@@ -1,4 +1,4 @@
-/* styles.css - Modern dashboard theme + toolbar/export buttons */
+/* styles.css - Modern dashboard theme + toolbar/export buttons + Dark Mode */
 :root {
   --bg-1: linear-gradient(180deg, #f3f6fb 0%, #eef2f8 100%);
   --card-bg: #ffffff;
@@ -248,4 +248,85 @@ h1 {
   #controlsArea.card {
     gap: 8px;
   }
+}
+
+/* ---------- Theme: dark / light toggling ---------- */
+body.dark {
+  --bg-1: linear-gradient(180deg, #0b1220 0%, #071023 100%);
+  --card-bg: #071127;
+  --muted: #9aa7b2;
+  --text: #e6eef6;
+  --accent-1: #60a5fa;
+  --accent-2: #1e3a8a;
+  --accent-3: #34d399;
+  --glass: rgba(255, 255, 255, 0.04);
+  --shadow-1: 0 12px 30px rgba(2, 6, 23, 0.6);
+}
+
+/* Make Google charts appear transparent so the card background shows */
+.card > div[id^='chart_'] > svg,
+.card > div[id^='chart_'] canvas,
+.card > div[id^='chart_'] {
+  background: transparent !important;
+}
+
+/* Toggle appearance for controls in dark mode */
+body.dark #controlsArea.card {
+  background: linear-gradient(
+    180deg,
+    rgba(8, 12, 20, 0.7),
+    rgba(6, 10, 18, 0.7)
+  );
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+body.dark .btn-ghost {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+/* small style for the theme toggle */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 600;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: #fff;
+}
+body.dark .theme-toggle {
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+}
+.theme-toggle input[type='checkbox'] {
+  width: 36px;
+  height: 20px;
+  appearance: none;
+  background: #e6e6e6;
+  border-radius: 999px;
+  position: relative;
+  outline: none;
+  cursor: pointer;
+}
+.theme-toggle input[type='checkbox']::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.18s ease;
+  box-shadow: 0 2px 6px rgba(2, 6, 23, 0.15);
+}
+.theme-toggle input[type='checkbox']:checked {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+}
+.theme-toggle input[type='checkbox']:checked::after {
+  transform: translateX(16px);
 }

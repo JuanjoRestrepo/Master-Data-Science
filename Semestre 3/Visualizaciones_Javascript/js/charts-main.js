@@ -1,4 +1,4 @@
-// charts-main.js - Modern UI + branding colors + export PNG/PDF + formatting
+// charts-main.js - Modern UI + branding colors + export PNG/PDF + formatting + Dark/Light mode + html2canvas table export
 (function () {
   // --------- Helpers ----------
   function logStatus(msg, level = 'info') {
@@ -74,6 +74,14 @@
         <button id="btnRegenerate" class="btn btn-primary">Regenerar aleatorios</button>
         <button id="btnDownload" class="btn btn-ghost">Descargar CSV aumentado</button>
         <button id="btnToggleDebug" class="btn btn-ghost">Toggle Debug</button>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <div class="theme-toggle" id="themeToggle" title="Cambiar Dark/Light mode">
+            <label style="display:inline-flex;align-items:center;gap:8px">
+              <input id="themeCheckbox" type="checkbox" aria-label="Toggle dark mode" />
+              <span id="themeLabel">Dark</span>
+            </label>
+          </div>
+        </div>
       `;
       const grid =
         document.querySelector('.grid') || document.createElement('div');
@@ -169,6 +177,21 @@
         });
       }
     });
+
+    // theme wiring (ensure inputs exist)
+    const themeToggleEl = document.getElementById('themeToggle');
+    if (themeToggleEl) {
+      const cb = document.getElementById('themeCheckbox');
+      // init after small delay to ensure localStorage access
+      setTimeout(() => initThemeFromStorage(), 50);
+      cb.addEventListener('change', (e) => {
+        const checked = !!e.target.checked;
+        document.getElementById('themeLabel').textContent = checked
+          ? 'Dark'
+          : 'Light';
+        applyTheme(checked);
+      });
+    }
   }
 
   // --------- Export handlers ----------
@@ -240,22 +263,17 @@
 
   async function handleExportAction(targetId, action) {
     try {
-      // table CSV special case
+      // CSV (table) special case
       if (action === 'csv' && targetId === 'chart_table') {
-        createDownloadButton(); // whole CSV
-        if (action === 'png') {
-          // If it's table specifically, export DOM with html2canvas
-          if (targetId === 'chart_table') {
-            await exportTableAsPNG();
-            return;
-          }
-          // otherwise for typical Google Charts we already used getImageURI
-          downloadURI(uri, `${targetId}.png`);
-          logStatus('PNG descargado: ' + targetId);
-          return;
-        }
+        createDownloadButton();
         return;
       }
+      // PNG for table: use html2canvas
+      if (action === 'png' && targetId === 'chart_table') {
+        await exportTableAsPNG();
+        return;
+      }
+
       const chartObj = chartMap[targetId];
       if (!chartObj) {
         logStatus('Chart no disponible para export: ' + targetId, 'error');
@@ -505,6 +523,37 @@
     redrawFiltered();
   }
 
+  // --------- Theme (Dark/Light) ----------
+  function applyTheme(isDark) {
+    if (isDark) document.body.classList.add('dark');
+    else document.body.classList.remove('dark');
+    try {
+      localStorage.setItem('dashboard_theme_dark', isDark ? '1' : '0');
+    } catch (e) {}
+    // Redraw charts so they respect transparency/background
+    if (typeof redrawFiltered === 'function') {
+      setTimeout(() => redrawFiltered(), 80);
+    }
+  }
+  function initThemeFromStorage() {
+    let stored = null;
+    try {
+      stored = localStorage.getItem('dashboard_theme_dark');
+    } catch (e) {}
+    const isDark =
+      stored === '1' ||
+      (stored === null &&
+        window.matchMedia &&
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const cb = document.getElementById('themeCheckbox');
+    if (cb) {
+      cb.checked = isDark;
+      const lbl = document.getElementById('themeLabel');
+      if (lbl) lbl.textContent = isDark ? 'Dark' : 'Light';
+    }
+    applyTheme(isDark);
+  }
+
   // --------- Redraw (draws all charts & stores chart instances) ----------
   function redrawFiltered() {
     try {
@@ -522,6 +571,7 @@
         arr = arr.filter((it) =>
           (it.title || '').toLowerCase().includes(search)
         );
+
       // A TopN (Column)
       const dtTop = new google.visualization.DataTable();
       dtTop.addColumn('string', 'Title');
@@ -531,7 +581,6 @@
         .sort((a, b) => nn(b.global) - nn(a.global))
         .slice(0, topN)
         .forEach((t) => dtTop.addRow([t.title, nn(t.global)]));
-      // number format for column chart
       const nf = new google.visualization.NumberFormat({ pattern: '#,###' });
       nf.format(dtTop, 1);
       const chartTop = new google.visualization.ColumnChart(
@@ -544,6 +593,7 @@
         colors: [palette[0]],
         vAxis: { format: '#,###' },
         animation: { startup: true, duration: 420 },
+        backgroundColor: { fill: 'transparent' },
       });
       chartMap['chart_top10'] = chartTop;
 
@@ -574,6 +624,7 @@
         chartArea: { left: 20, top: 40, width: '60%' },
         height: 360,
         colors: palette,
+        backgroundColor: { fill: 'transparent' },
       });
       chartMap['chart_pie_regions'] = chartPie;
 
@@ -606,6 +657,7 @@
         vAxis: { minValue: 0, maxValue: 5, format: '#,###' },
         height: 360,
         colors: [palette[2]],
+        backgroundColor: { fill: 'transparent' },
       });
       chartMap['chart_bar_rating'] = chartBar;
 
@@ -641,6 +693,7 @@
         legend: 'none',
         height: 360,
         colors: [palette[0]],
+        backgroundColor: { fill: 'transparent' },
       });
       chartMap['chart_scatter'] = chartScatter;
 
@@ -682,6 +735,7 @@
         chartArea: { left: 140, top: 40, width: '55%' },
         height: 360,
         colors: [palette[1], palette[0]],
+        backgroundColor: { fill: 'transparent' },
       });
       chartMap['chart_line_growth'] = chartLine;
 
@@ -697,7 +751,6 @@
       tableRows.forEach((r) =>
         dtTable.addRow([r.title, nn(r.user_rating), nn(r.global)])
       );
-      // format global sales column
       const fmt = new google.visualization.NumberFormat({ pattern: '#,###' });
       fmt.format(dtTable, 2);
       const chartTable = new google.visualization.Table(
@@ -736,7 +789,7 @@
     }
   }
 
-  // --------- Draw initial ----------
+  // --------- Draw initial (calls drawAll defined above) ----------
   async function drawAll() {
     try {
       await (async () => {
