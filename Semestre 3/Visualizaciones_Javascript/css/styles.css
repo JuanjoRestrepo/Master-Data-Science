@@ -1,4 +1,4 @@
-/* styles.css - Modern dashboard theme (replace file) */
+/* styles.css - Modern dashboard theme + toolbar/export buttons */
 :root {
   --bg-1: linear-gradient(180deg, #f3f6fb 0%, #eef2f8 100%);
   --card-bg: #ffffff;
@@ -25,12 +25,12 @@ body {
   font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
   background: var(--bg-1);
   color: var(--text);
+  padding: 20px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  padding: 20px;
 }
 
-/* Center container */
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -44,8 +44,6 @@ body {
   gap: 12px;
   margin-bottom: 14px;
 }
-.header-left {
-}
 h1 {
   margin: 0;
   font-size: 20px;
@@ -57,23 +55,21 @@ h1 {
   margin-top: 6px;
   font-size: 13px;
 }
-
-/* Small note */
 .small-note {
   font-size: 12px;
   color: var(--muted);
   align-self: center;
 }
 
-/* Controls container */
+/* Controls */
 #controlsArea.card {
   display: flex;
   gap: 12px;
   align-items: center;
   background: linear-gradient(
     180deg,
-    rgba(255, 255, 255, 0.9),
-    rgba(255, 255, 255, 0.85)
+    rgba(255, 255, 255, 0.95),
+    rgba(255, 255, 255, 0.9)
   );
   padding: 10px;
   border-radius: 10px;
@@ -82,20 +78,17 @@ h1 {
   border: 1px solid rgba(15, 23, 42, 0.04);
   flex-wrap: wrap;
 }
-
-/* Inputs and select */
 #controlsArea select,
-#controlsArea input[type='search'] {
-  appearance: none;
-  -webkit-appearance: none;
+#controlsArea input[type='search'],
+#controlsArea input[type='color'] {
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid rgba(15, 23, 42, 0.06);
-  min-width: 140px;
+  min-width: 120px;
   background: #fff;
 }
 #controlsArea input[type='range'] {
-  width: 140px;
+  width: 130px;
 }
 #controlsArea .small {
   font-size: 13px;
@@ -141,6 +134,7 @@ h1 {
   box-shadow: var(--shadow-1);
   border: 1px solid rgba(15, 23, 42, 0.03);
   transition: transform 0.18s ease, box-shadow 0.18s ease;
+  position: relative;
 }
 .card:hover {
   transform: translateY(-4px);
@@ -154,30 +148,44 @@ h1 {
   color: var(--text);
 }
 
-/* Chart containers */
+/* Chart container */
 .card > div[id^='chart_'] {
   min-height: 300px;
 }
 
-/* Download area */
-.download-area {
+/* Toolbar inside card (top-right) */
+.card .card-toolbar {
+  position: absolute;
+  top: 10px;
+  right: 12px;
   display: flex;
-  gap: 12px;
+  gap: 6px;
+  z-index: 10;
+}
+.card .icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 12px;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  cursor: pointer;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
 }
-.download-area .muted {
-  margin: 0;
+.card .icon-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+/* small icons - text fallback */
+.icon-btn span {
+  font-size: 12px;
   color: var(--muted);
-  font-size: 13px;
 }
 
-/* Table styling placeholder */
-.google-visualization-table-td {
-  font-size: 13px;
-}
-
-/* Category chips (when present) */
+/* Chips */
 .chips {
   display: flex;
   gap: 8px;
@@ -198,6 +206,19 @@ h1 {
   box-shadow: 0 6px 20px rgba(37, 99, 235, 0.12);
 }
 
+/* download area */
+.download-area {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.download-area .muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 /* debug area */
 #debugStatus {
   margin-top: 16px;
@@ -213,12 +234,16 @@ h1 {
   font-size: 13px;
 }
 
-/* Responsive tweak */
+/* responsive */
 @media (max-width: 640px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+  h1 {
+    font-size: 18px;
+  }
+  .card {
+    padding: 10px;
+  }
+  .chart-title {
+    font-size: 14px;
   }
   #controlsArea.card {
     gap: 8px;
