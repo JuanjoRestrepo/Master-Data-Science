@@ -192,6 +192,43 @@
     });
   }
 
+  // Export table/card DOM to PNG using html2canvas
+  async function exportElementAsPNG(element, filename = 'export.png') {
+    if (typeof html2canvas === 'undefined') {
+      logStatus('html2canvas no disponible para exportar PNG.', 'error');
+      return;
+    }
+    try {
+      // Increase scale for better resolution
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      const uri = canvas.toDataURL('image/png');
+      downloadURI(uri, filename);
+      logStatus(`PNG exportado: ${filename}`);
+    } catch (e) {
+      logStatus(
+        'Error exportando elemento a PNG: ' + (e.message || e),
+        'error'
+      );
+      console.error(e);
+    }
+  }
+
+  // Special handler for table PNG export (chart_table)
+  async function exportTableAsPNG() {
+    const el = document.getElementById('chart_table');
+    if (!el) {
+      logStatus('Elemento de tabla no encontrado', 'error');
+      return;
+    }
+    // If the table is a google visualization, it may create a wrapper; try to find the table DOM
+    const tableDOM = el.querySelector('table') || el;
+    await exportElementAsPNG(tableDOM, 'chart_table.png');
+  }
+
   function downloadURI(uri, name) {
     const a = document.createElement('a');
     a.href = uri;
@@ -206,6 +243,17 @@
       // table CSV special case
       if (action === 'csv' && targetId === 'chart_table') {
         createDownloadButton(); // whole CSV
+        if (action === 'png') {
+          // If it's table specifically, export DOM with html2canvas
+          if (targetId === 'chart_table') {
+            await exportTableAsPNG();
+            return;
+          }
+          // otherwise for typical Google Charts we already used getImageURI
+          downloadURI(uri, `${targetId}.png`);
+          logStatus('PNG descargado: ' + targetId);
+          return;
+        }
         return;
       }
       const chartObj = chartMap[targetId];
