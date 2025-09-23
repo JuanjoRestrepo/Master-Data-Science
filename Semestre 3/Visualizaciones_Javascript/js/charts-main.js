@@ -651,6 +651,14 @@
         ['Japan', sumJP],
         ['Other', sumOther],
       ]);
+
+      const pieColors = [
+        palette[0] || '#2563eb', // US - azul (usa tu primer color si está definido)
+        palette[1] || '#f97316', // Europe - naranja
+        palette[2] || '#10b981', // Japan - verde
+        '#8b5cf6', // Other - púrpura recomendado
+      ];
+
       const chartPie = new google.visualization.PieChart(
         document.getElementById('chart_pie_regions')
       );
@@ -665,9 +673,8 @@
         pieSliceText: 'percentage',
         chartArea: { left: 20, top: 40, width: '60%' },
         height: 360,
-        colors: palette,
+        colors: pieColors,
         backgroundColor: { fill: 'transparent' },
-
         tooltip: {
           textStyle: { color: '#111', fontName: fontName },
           isHtml: true,
