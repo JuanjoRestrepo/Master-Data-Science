@@ -1,0 +1,80 @@
+/* styles.css - estética del dashboard */
+body {
+  font-family: Inter, 'Segoe UI', Roboto, Arial, sans-serif;
+  margin: 18px;
+  background: linear-gradient(180deg, #f6f8fb 0%, #f1f3f6 100%);
+  color: #222;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0;
+  color: #111827;
+}
+
+.muted {
+  color: #6b7280;
+  margin: 0 0 8px 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: #fff;
+  padding: 14px;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.03);
+}
+
+.chart-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #0f172a;
+}
+
+.download-area {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.btn {
+  display: inline-block;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, #2563eb 0%, #1e40af 100%);
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.18);
+}
+
+.small-note {
+  font-size: 12px;
+  color: #374151;
+}
+
+.footer-note {
+  margin-top: 16px;
+  font-size: 12px;
+  color: #6b7280;
+}

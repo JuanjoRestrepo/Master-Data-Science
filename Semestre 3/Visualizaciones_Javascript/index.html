@@ -1,70 +1,43 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <title>Android Games - Google Charts Dashboard</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <style>
-      body {
-        font-family: Arial, Helvetica, sans-serif;
-        margin: 18px;
-        background: #f7f7f7;
-      }
-      h1 {
-        font-size: 20px;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-        gap: 16px;
-      }
-      .card {
-        background: #fff;
-        padding: 12px;
-        border-radius: 8px;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-      }
-      .chart-title {
-        font-weight: 600;
-        margin-bottom: 8px;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Android Games — Google Charts (local CSV)</h1>
-    <p>
-      6 example visualizations generated from
-      <code>data/android_games_sales.csv</code>.
-    </p>
-    <div class="grid">
-      <div class="card">
-        <div class="chart-title">Figure A — Top 10 by Global Sales</div>
-        <div id="chart_top10" style="height: 360px"></div>
-      </div>
-      <div class="card">
-        <div class="chart-title">Figure B — Regional sales share (sum)</div>
-        <div id="chart_pie_regions" style="height: 360px"></div>
-      </div>
-      <div class="card">
-        <div class="chart-title">Figure C — Avg User Rating by Category</div>
-        <div id="chart_bar_rating" style="height: 360px"></div>
-      </div>
-      <div class="card">
-        <div class="chart-title">Figure D — Installs vs Price (scatter)</div>
-        <div id="chart_scatter" style="height: 360px"></div>
-      </div>
-      <div class="card">
-        <div class="chart-title">
-          Figure E — Growth 30 vs 60 (avg) top categories
-        </div>
-        <div id="chart_line_growth" style="height: 360px"></div>
-      </div>
-      <div class="card">
-        <div class="chart-title">Figure F — Top-rated games table</div>
-        <div id="chart_table" style="height: 360px"></div>
-      </div>
+<head>
+  ...
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Android Games — Google Charts (local CSV)</h1>
+      <p class="muted">
+        6 visualizaciones generadas desde
+        <code>data/android_games_sales.csv</code>
+      </p>
     </div>
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
-    <script src="js/charts-main.js"></script>
-  </body>
-</html>
+    <div class="small-note">Live Server · Local</div>
+  </div>
+
+  <!-- contenedor para mostrar mensaje / botón de descarga creado por el script -->
+  <div id="download_area"></div>
+
+  <div class="grid">
+    <!-- tus cards -->
+  </div>
+
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="js/charts-main.js"></script>
+  <!-- Panel de estado para debugging (mantenlo visible mientras depuramos) -->
+  <div
+    id="debugStatus"
+    style="
+      margin: 12px 0;
+      padding: 10px;
+      background: #fff6;
+      border-radius: 8px;
+      border: 1px dashed #cbd5e1;
+    "
+  >
+    <strong>Debug status</strong>
+    <ul
+      id="statusList"
+      style="margin: 6px 0 0 18px; padding: 0; list-style: decimal"
+    ></ul>
+  </div>
+</body>
