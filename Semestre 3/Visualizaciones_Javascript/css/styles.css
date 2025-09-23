@@ -1,22 +1,226 @@
-/* Controles (category, topN) */
-#controlsArea {
+/* styles.css - Modern dashboard theme (replace file) */
+:root {
+  --bg-1: linear-gradient(180deg, #f3f6fb 0%, #eef2f8 100%);
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --text: #0f172a;
+  --accent-1: #2563eb;
+  --accent-2: #1e40af;
+  --accent-3: #10b981;
+  --glass: rgba(255, 255, 255, 0.6);
+  --shadow-1: 0 8px 30px rgba(15, 23, 42, 0.06);
+  --radius: 12px;
+}
+
+/* Global */
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+  background: var(--bg-1);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 20px;
+}
+
+/* Center container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Header */
+.header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.header-left {
+}
+h1 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+.header-sub {
+  color: var(--muted);
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+/* Small note */
+.small-note {
+  font-size: 12px;
+  color: var(--muted);
+  align-self: center;
+}
+
+/* Controls container */
+#controlsArea.card {
+  display: flex;
+  gap: 12px;
   align-items: center;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.9),
+    rgba(255, 255, 255, 0.85)
+  );
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: var(--shadow-1);
+  margin-bottom: 16px;
+  border: 1px solid rgba(15, 23, 42, 0.04);
+  flex-wrap: wrap;
+}
+
+/* Inputs and select */
+#controlsArea select,
+#controlsArea input[type='search'] {
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  min-width: 140px;
   background: #fff;
+}
+#controlsArea input[type='range'] {
+  width: 140px;
+}
+#controlsArea .small {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-1), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.12);
+}
+.btn-ghost {
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  background: #fff;
+  color: var(--text);
+}
+
+/* Layout grid */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+/* Card */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 12px;
+  box-shadow: var(--shadow-1);
+  border: 1px solid rgba(15, 23, 42, 0.03);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+}
+
+/* Chart title */
+.chart-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+/* Chart containers */
+.card > div[id^='chart_'] {
+  min-height: 300px;
+}
+
+/* Download area */
+.download-area {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.download-area .muted {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Table styling placeholder */
+.google-visualization-table-td {
+  font-size: 13px;
+}
+
+/* Category chips (when present) */
+.chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.chip {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid rgba(15, 23, 42, 0.03);
+}
+.chip.active {
+  background: linear-gradient(90deg, var(--accent-1), var(--accent-2));
+  color: #fff;
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.12);
+}
+
+/* debug area */
+#debugStatus {
+  margin-top: 16px;
   padding: 10px;
   border-radius: 8px;
-  margin-bottom: 12px;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px dashed rgba(15, 23, 42, 0.06);
 }
-#controlsArea select,
-#controlsArea input[type='range'] {
-  height: 34px;
-  padding: 4px 8px;
-  border-radius: 8px;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+#debugStatus ul {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--muted);
+  font-size: 13px;
 }
-#controlsArea button.btn {
-  height: 36px;
+
+/* Responsive tweak */
+@media (max-width: 640px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  #controlsArea.card {
+    gap: 8px;
+  }
 }
