@@ -1,0 +1,26 @@
+El presente proyecto permitió el diseño, implementación y validación de un sistema de diagnóstico asistido por computadora basado en el paradigma de Aprendizaje de Instancias Múltiples (MIL) para la clasificación de cáncer de próstata. Tras la culminación de las fases experimentales, se derivan las siguientes conclusiones:
+
+\section{Conclusiones}
+\begin{itemize}
+    \item \textbf{Eficacia de la Supervisión Débil y Desempeño Clínico:} Se demostró que es posible entrenar modelos con alta capacidad discriminativa utilizando únicamente etiquetas a nivel de lámina. El sistema alcanzó un \textbf{PR AUC de 0.917} y un acuerdo casi perfecto con el estándar de oro médico. Estos resultados confirman que el modelo no solo identifica tejido tumoral, sino que es capaz de estratificar la agresividad del adenocarcinoma con una precisión comparable a la de expertos.
+
+    \item \textbf{Importancia de la Curaduría de Datos y el Preprocesamiento:} Los ajustes técnicos realizados en las fases iniciales, específicamente el filtrado basado en el espacio de color HSV y el umbral de cobertura tisular del 50\%, fueron determinantes. Estos pasos redujeron el ruido computacional, asegurando que el extractor de características se centrara exclusivamente en áreas con relevancia biológica y glandular.
+
+    \item \textbf{Rigor Metodológico y Capacidad de Generalización:} La implementación de la validación cruzada mediante \textit{GroupKFold} garantizó la integridad científica al prevenir la fuga de datos (\textit{data leakage}). Al asegurar que ningún paciente fuera compartido entre los conjuntos de entrenamiento y prueba, se obtuvo una medida real de la capacidad de generalización del modelo, requisito indispensable para su potencial despliegue en entornos clínicos reales.
+
+    \item \textbf{Interpretabilidad y Transparencia (XAI):} A diferencia de los modelos de "caja negra", el uso de mecanismos de atención (\textit{Gated Attention}) aportó una capa de interpretabilidad crucial. Los pesos de atención permitieron identificar visualmente parches con desorganización glandular y alta densidad celular, alineándose con los criterios arquitectónicos de la escala de Gleason y fortaleciendo la confianza diagnóstica.
+\end{itemize}
+
+\section{Trabajo Futuro}
+
+Para expandir el alcance y la robustez del sistema en futuras iteraciones, se proponen las siguientes líneas de investigación:
+
+\begin{itemize}
+    \item \textbf{Aprendizaje Auto-Supervisado (SSL) y Arquitecturas Transformer:} Explorar el uso de extractores de características entrenados mediante SSL (como DINO) y \textit{Vision Transformers} (ViT). Esto permitiría obtener \textit{embeddings} más específicos para la morfología celular que los actuales basados en ImageNet, capturando mejores relaciones espaciales globales.
+
+    \item \textbf{Análisis Multi-Resolución:} Implementar una estrategia MIL multi-escala que procese simultáneamente parches a $10\times$, $20\times$ y $40\times$. Esto replicaría el flujo de trabajo del patólogo al microscopio, donde los aumentos bajos capturan la arquitectura y los altos permiten observar detalles nucleares.
+
+    \item \textbf{Integración Multimodal y Generalización:} Fusionar la información de las imágenes con metadatos clínicos (PSA, edad, RM) y validar el sistema en \textit{datasets} externos (como el PANDA Challenge). Esto elevaría la precisión pronóstica y evaluaría la robustez ante variaciones de tinción de diferentes laboratorios globales.
+
+    \item \textbf{Herramientas de Apoyo en Tiempo Real:} Desarrollar integraciones para visores de WSI de código abierto (como QuPath). Esto permitiría que el modelo funcione como una "segunda opinión" en tiempo real, resaltando áreas sospechosas para que el patólogo pueda optimizar el tiempo de diagnóstico por caso.
+\end{itemize}

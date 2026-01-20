@@ -1,0 +1,13 @@
+\begin{enumerate}
+    \item \textbf{Bag e Instancia:} En el paradigma de Aprendizaje de Instancias Múltiples (MIL), un \emph{bag} corresponde a un conjunto de instancias, mientras que cada instancia representa una unidad elemental de información. En el contexto de la histopatología digital, una Whole Slide Image (WSI) se modela como un bag, y los parches extraídos de dicha imagen constituyen las instancias. El bag posee una etiqueta global, mientras que las instancias individuales carecen de anotación explícita \cite{carbonneau2018multiple}.
+
+    \item \textbf{Técnicas de agregación:} Son mecanismos utilizados para combinar la información de múltiples instancias y producir una predicción a nivel de bag. Entre las técnicas más comunes se encuentran el \emph{pooling}  (máximo, promedio), el pooling jerárquico y los mecanismos de atención, los cuales asignan pesos diferenciales a cada instancia según su relevancia para la predicción final \cite{ilse2018attention}.
+
+    \item \textbf{Supervisión débil:} Hace referencia a escenarios de aprendizaje en los que las etiquetas disponibles son incompletas, imprecisas o de baja resolución. En histopatología digital, esto se traduce en la disponibilidad de etiquetas a nivel de lámina completa (\textit{slide-level}) sin anotaciones detalladas a nivel de parche, lo que motiva el uso de enfoques como MIL para entrenar modelos bajo este tipo de supervisión  \cite{campanella2019clinical} \cite{zhou2018brief}.
+
+    \item \textbf{Mecanismo de atención}: Estrategia de agregación que asigna pesos diferenciados a las instancias dentro de un bag según su relevancia para la predicción global. En MIL, los mecanismos de atención permiten modelar la contribución relativa de cada parche, capturando la heterogeneidad del tejido y proporcionando una base para la interpretabilidad post-hoc del modelo \cite{ilse2018attention} \cite{lu2021data}.
+
+
+    \item \textbf{Escala Gleason:} Sistema de gradación histopatológica utilizado para evaluar la agresividad del cáncer de próstata a partir de los patrones arquitecturales glandulares observados en tinciones hematoxilina-eosina (H\&E). La puntuación final se obtiene combinando los patrones primario y secundario y constituye un elemento central en la estratificación del riesgo clínico  \cite{SILVARODRIGUEZ2020105637} \cite{epstein2016gleason}.
+\end{enumerate}
+

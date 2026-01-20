@@ -1,0 +1,52 @@
+La investigación en aprendizaje débilmente supervisado sobre Whole Slide Images (WSI) ha avanzado rápidamente en los últimos años, motivada por la necesidad de reducir la carga de anotación experta y por el potencial clínico de modelos reproducibles y explicables. Varios trabajos han propuesto arquitecturas y estrategias que permiten agregar evidencia local (parches) en predicciones a nivel de muestra (bag), y han explorado alternativas para incorporar contexto espacial, medidas de incertidumbre y visualizaciones de interpretabilidad. \newline
+
+Para contextualizar la presente investigación, a continuación se revisan los antecedentes más relevantes que abordan estas problemáticas. Dichos estudios justifican las decisiones metodológicas de este proyecto al ilustrar las principales tendencias y desafíos en el campo, sirviendo como base teórica para el diseño de la solución propuesta:
+
+\subsection{CAMIL: channel attention-based multiple instance learning 
+for whole slide image classification}
+En este trabajo, los autores proponen una arquitectura denominada FA-MILNet (Feature Aggregation Multiple Instance Learning Network), orientada a abordar los desafíos del aprendizaje débilmente supervisado en la clasificación de Whole Slide Images (WSI). La propuesta surge como respuesta a las limitaciones de los enfoques MIL tradicionales, los cuales suelen perder información discriminativa al emplear estrategias de agregación simples como el max pooling y no modelan adecuadamente la heterogeneidad intralaminar.\newline
+
+FA-MILNet introduce un esquema de agregación jerárquica asistida por atención, integrando información local y global mediante tres componentes principales: extracción de características basada en CNN, un módulo de atención para ponderar la relevancia de los parches y una rama dual de agregación. Esta arquitectura permite mejorar simultáneamente el desempeño predictivo y la interpretabilidad del modelo \cite{Mao2025_CAMIL}.\newline
+
+Evaluado en conjuntos de datos de cáncer de colon, mama y ganglios linfáticos (Camelyon16, BACH y CRC), el modelo supera enfoques como ABMIL, CLAM y DSMIL en métricas como AUC y F1-score. Si bien el estudio no se enfoca en cáncer de próstata, su diseño modular y su capacidad para operar sin anotaciones patch-level lo convierten en un antecedente altamente pertinente para este proyecto, al validar el uso de mecanismos de atención como estrategia central para la agregación de información en escenarios de supervisión débil \cite{Mao2025_CAMIL}.\newline
+
+
+% --------------------------------------------------------------------------
+
+\subsection{A Probabilistic MIL Model with Spatial Regularization for Weakly Supervised Histopathology Image Analysis}
+Este trabajo presenta un modelo de Aprendizaje de Instancias Múltiples probabilístico, basado en procesos gaussianos e integrado con un término de regularización espacial inspirado en el modelo de Ising. Se parte de la premisa de que los parches histológicamente cercanos presentan una alta correlación diagnóstica, por lo que modelar explícitamente estas dependencias espaciales puede mejorar la robustez del aprendizaje bajo supervisión débil \cite{MoralesAlvarez2024}.\newline
+
+A diferencia de los modelos MIL determinísticos, esta propuesta permite estimar distribuciones de probabilidad sobre las etiquetas de las instancias, proporcionando una cuantificación explícita de la incertidumbre asociada a las predicciones. Esta característica resulta particularmente relevante en contextos clínicos, donde la fiabilidad del modelo y la identificación de casos ambiguos son aspectos críticos.\newline
+
+A diferencia de los modelos MIL determinísticos, esta propuesta permite estimar distribuciones de probabilidad sobre las etiquetas de las instancias, proporcionando una cuantificación explícita de la incertidumbre asociada a las predicciones. Esta característica resulta particularmente relevante en contextos clínicos, donde la fiabilidad del modelo y la identificación de casos ambiguos son aspectos críticos \cite{MoralesAlvarez2024}.
+% --------------------------------------------------------------------------
+
+\subsection{Graph-based Multiple Instance Learning for Whole Slide Image Classification}
+Aunque este enfoque ofrece ventajas claras en términos de interpretabilidad y robustez, su complejidad computacional y los requerimientos asociados a la modelación probabilística exceden el alcance experimental del presente proyecto. No obstante, el trabajo constituye un antecedente fundamental al evidenciar la importancia de incorporar información espacial y estimación de incertidumbre en modelos MIL aplicados a histopatología digital. \cite{Fourkioti2023}. \newline
+
+En este estudio se propone una variante de MIL basada en grafos, donde cada parche de una WSI se modela como un nodo y las relaciones espaciales entre parches se representan mediante aristas en un grafo no dirigido. Sobre esta estructura se emplea una Graph Neural Network (GNN) que permite propagar información contextual entre regiones del tejido, fortaleciendo la capacidad del modelo para capturar patrones arquitectónicos globales. \newline
+
+No obstante, a diferencia de los mecanismos de atención utilizados en el presente proyecto, los enfoques basados en grafos introducen una complejidad adicional tanto en la construcción de la representación como en el entrenamiento del modelo, lo que motivó la elección de arquitecturas más ligeras y directamente interpretables \cite{Fourkioti2023}.
+
+% --------------------------------------------------------------------------
+
+\subsection{Deep Recurrent Attention MIL for Histopathological Image Analysis}
+El enfoque planteado en este artículo se distingue por combinar mecanismos de atención con redes neuronales recurrentes (RNN) dentro del marco de MIL. En lugar de tratar los parches como elementos independientes, los autores introducen una secuencia ordenada basada en la posición espacial de cada uno, la cual es procesada por una RNN con atención. Este diseño permite capturar no solo las características locales, sino también las relaciones de largo alcance y las dependencias contextuales más profundas a lo largo de toda la WSI \cite{Qu_Yang_Huang_Guo_Luo_Zhang_Wang_2024}. \newline
+
+Gracias a esta arquitectura secuencial, el modelo demuestra un mejor rendimiento en la identificación de estructuras glandulares complejas, un desafío particular en escenarios con gran variabilidad morfológica entre pacientes. Además, el mecanismo de atención adaptativa complementa este diseño, facilitando interpretaciones más precisas del modelo al resaltar de forma dinámica las regiones más relevantes. La principal lección de este trabajo es que la secuencia y el orden de los parches, y no solo su presencia, pueden aportar información crucial. A diferencia de los enfoques basados en grafos que modelan la vecindad de forma explícita, este método explora una representación secuencial, lo que invita a considerar cómo la estructura de los datos de entrada puede ser modificada para extraer de manera más efectiva la información contextual \cite{Qu_Yang_Huang_Guo_Luo_Zhang_Wang_2024}.
+
+% --------------------------------------------------------------------------
+
+\subsection{Hierarchical Pooling in MIL for Histopathological Subtype Classification}
+Este trabajo propone un esquema de agregación jerárquica dentro del paradigma MIL, en el cual los parches primero se agrupan en regiones intermedias según su proximidad o similitud morfológica. Posteriormente, se aplica un segundo nivel de pooling que combina la información de estas regiones para obtener la predicción final del bag. Esta estructura multinivel permite capturar patrones de organización tisular más amplios, que son clave en el diagnóstico de ciertos subtipos de cáncer. La metodología incorpora tanto técnicas de agrupamiento automático como atención regional, y ha mostrado un desempeño superior en conjuntos de datos con alta heterogeneidad intratumoral, al mantener el balance entre granularidad local y contexto estructural \cite{waqas2024survey}. \newline
+
+Este antecedente es relevante porque, al igual que FA-MILNet, enfatiza la importancia de una agregación multinivel. Sin embargo, se distingue por su énfasis en la creación de ''grupos'' lógicos de parches antes de la agregación final, lo que es una estrategia diferente a la simple ponderación por atención. Por otro lado. la idea de agrupar parches basándose en la morfología o la proximidad podría ser una técnica poderosa a considerar para proyectos que buscan capturar la complejidad de la heterogeneidad tumoral \cite{waqas2024survey}.
+
+
+\subsection{Síntesis crítica y posicionamiento del presente trabajo}
+Propuesta de Redacción Académica (Nivel Maestría)
+"La revisión del estado del arte evidencia que el Aprendizaje de Instancias Múltiples (MIL) aplicado a Whole Slide Images ha experimentado una evolución significativa, integrando mecanismos de atención, modelado espacial explícito y esquemas de agregación jerárquica. Estos avances han derivado en mejoras sustanciales tanto en el rendimiento predictivo como en la capacidad interpretativa, demostrando una eficacia particular en escenarios caracterizados por una supervisión débil y una elevada heterogeneidad morfológica..\newline
+
+No obstante, la sofisticación de muchas de estas aproximaciones conlleva una complejidad computacional onerosa o depende de supuestos restrictivos sobre la estructura espacial de los datos, factores que suelen obstaculizar su adopción en entornos clínicos reales y comprometer su evaluación reproducible. Bajo esta premisa, el presente trabajo se sitúa en un punto de convergencia estratégico, priorizando un equilibrio sinérgico entre la precisión diagnóstica, la interpretabilidad post-hoc y la viabilidad experimental.\newline
+
+En concreto, se adopta un marco de trabajo fundamentado en MIL con mecanismos de atención, el cual permite ponderar la contribución relativa de múltiples regiones de interés sin incurrir en la necesidad de anotaciones locales ni en la imposición de estructuras espaciales explícitas. Esta elección metodológica responde a la imperativa de desarrollar un pipeline reproducible y escalable, alineado con las restricciones de disponibilidad de datos en histopatología digital, y establece un cimiento robusto para futuras extensiones que busquen incorporar información topológica o modelos probabilísticos de mayor complejidad.

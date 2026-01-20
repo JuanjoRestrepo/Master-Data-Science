@@ -1,0 +1,49 @@
+El \textbf{Aprendizaje de Instancias Múltiples (MIL)} se presenta como una solución para escenarios en los que las etiquetas están disponibles únicamente a nivel de muestra completa, o \textbf{“bag”}. En este contexto, una WSI es interpretada como un \textit{bag} de parches, y la tarea del modelo consiste en inferir la etiqueta global a partir de las características de las instancias locales. Si bien las primeras formulaciones se basaban en estrategias de agregación simples, como el \textit{max pooling}, bajo la premisa de que la presencia de un solo parche positivo determinaba el diagnóstico, este enfoque ignoraba la heterogeneidad del tejido y las cruciales relaciones espaciales entre parches \cite{carbonneau2018multiple} \cite{ilse2018attention}.
+\\
+\\
+Para clarificar este planteamiento, la Figura~\ref{fig:wsi_patches} muestra un esquema de una WSI dividida en parches (instancias). En MIL las etiquetas se asignan exclusivamente a nivel de \emph{bag} (WSI) y no a cada parche individual; esa es la diferencia clave frente al aprendizaje supervisado a nivel de instancia.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/Esquema_Ejemplo_MIL.png}
+    \caption{Esquema: WSI dividida en parches (instancias). En MIL la etiqueta se proporciona a nivel de bag (WSI) y no a nivel de instancia (parche).}
+    \label{fig:wsi_patches}
+\end{figure}
+
+La investigación reciente ha impulsado variantes más sofisticadas del Aprendizaje de Instancias Múltiples que buscan superar las limitaciones de las estrategias de agregación simples. Entre ellas destacan los \textbf{mecanismos de atención}, que asignan pesos diferenciados a cada parche según su relevancia para la predicción global \cite{ilse2018attention} \cite{campanella2019clinical}; el \textbf{pooling jerárquico}, orientado a capturar información en múltiples escalas y niveles de representación \cite{li2021dual} \cite{pinckaers2020streaming}; y los \textbf{modelos probabilísticos con regularización espacial}, diseñados para modelar la correlación entre parches vecinos y estimar la incertidumbre asociada a la predicción \cite{lu2021data} \cite{queiroz2021spatial}.\newline 
+
+Estos avances no solo han mejorado la precisión diagnóstica del MIL, sino que también han potenciado su \textbf{explicabilidad clínica}, al permitir la identificación visual de las regiones histológicas más relevantes para el diagnóstico final.
+
+\subsection{MIL con mecanismos de atención e interpretabilidad}
+Los mecanismos de atención representan una evolución clave dentro del paradigma de Aprendizaje de Instancias Múltiples (MIL), al permitir que el modelo asigne pesos diferenciados a cada instancia en función de su contribución a la predicción global. A diferencia de las estrategias de agregación tradicionales, como el max o mean pooling, los modelos basados en atención aprenden de manera explícita qué regiones del tejido son más informativas para la tarea de clasificación \cite{campanella2019clinical} \cite{ilse2018attention} .\newline
+
+Desde el punto de vista metodológico, la atención permite modelar la heterogeneidad intratumoral presente en las imágenes histopatológicas, capturando la contribución relativa de múltiples parches relevantes en lugar de depender de una única instancia dominante. Este enfoque resulta particularmente adecuado en escenarios de supervisión débil, donde únicamente se dispone de etiquetas a nivel de lámina completa (WSI) \cite{lu2021data}.\newline
+
+Además de mejorar el rendimiento predictivo, los mecanismos de atención aportan una forma de interpretabilidad post-hoc al facilitar la identificación y visualización de las instancias que influyen de manera más significativa en la decisión del modelo. Esta propiedad es especialmente valiosa en el contexto clínico, donde la transparencia, la trazabilidad y la posibilidad de inspeccionar visualmente las regiones relevantes son factores críticos para la confianza y adopción de sistemas de apoyo al diagnóstico \cite{campanella2019clinical} \cite{rudin2019stop}.
+
+
+% \begin{itemize}
+%     \item Mecanismos de atención, que asignan pesos distintos a los parches según su relevancia. \newline
+    
+%     \item Pooling jerárquico, que captura información en múltiples escalas. \newline
+    
+%     \item Modelos probabilísticos con regularización espacial, que incorporan correlación entre parches vecinos y estiman la incertidumbre del modelo. 
+% \end{itemize}
+
+% Estos desarrollos permiten que MIL no solo mejore la precisión diagnóstica, sino también la explicabilidad clínica, al resaltar las regiones histológicas más relevantes.
+
+
+\begin{comment}
+El aprendizaje de instancias múltiples (MIL) surge como una extensión del aprendizaje supervisado, ideal para el análisis de imágenes de diapositivas completas (WSI) donde las anotaciones solo existen a nivel de la muestra (slide), y no de parche. En este paradigma, una bag (la WSI) se considera un conjunto de instancias (los parches). La formulación clásica establece que un bag se clasifica como positivo si contiene al menos una instancia positiva. Sin embargo, en histopatología esta asunción simple puede ser insuficiente, ya que ignora el contexto espacial y la heterogeneidad inherente a la muestra \cite{carbonneau2018multiple} \cite{ilse2018attention}. \newline
+
+A diferencia de los enfoques tradicionales, los modelos de MIL han evolucionado significativamente para abordar estas limitaciones. Si bien se emplearon inicialmente esquemas de agregación simples como el max pooling, desarrollos más recientes han incorporado mecanismos de atención que ponderan la relevancia de cada parche y estructuras de pooling jerárquico que capturan información a diferentes escalas. De manera similar, los modelos probabilísticos con regularización espacial, como el propuesto en \cite{MoralesAlvarez2024}, modelan la dependencia entre los parches para estimar la incertidumbre del modelo y mejorar la interpretabilidad de las predicciones. Este enfoque es crucial, ya que estas arquitecturas buscan integrar la evidencia local y el contexto global para mejorar tanto la precisión como la confiabilidad de los resultados clínicos \cite{waqas2024survey}. \newline
+
+En este contexto, las Redes Neuronales Convolucionales (CNN) operan como potentes extractores de características de cada parche, y sus representaciones vectoriales son posteriormente agregadas por el módulo MIL. Este pipeline conjunto consolida una metodología robusta que elimina la necesidad de un etiquetado exhaustivo a nivel de instancia, optimizando el flujo de trabajo en la patología digital. Un ejemplo de este esquema, enfocado en el mecanismo de atención, se ilustra en la Figura \ref{fig:mil_attention}.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/Esquema_Ejemplo_MIL.png}
+    \caption{Esquema general del aprendizaje de instancias múltiples con mecanismo de atención \cite{ilse2018attention}.}
+    \label{fig:mil_attention}
+\end{figure}
+\end{comment}

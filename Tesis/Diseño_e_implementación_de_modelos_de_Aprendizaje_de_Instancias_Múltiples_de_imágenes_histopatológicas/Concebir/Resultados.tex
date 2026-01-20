@@ -1,0 +1,262 @@
+
+
+Este capítulo describe de manera detallada la metodología experimental empleada en el desarrollo del proyecto, así como el diseño del pipeline computacional utilizado para el análisis de imágenes histopatológicas prostáticas. El objetivo principal es garantizar la trazabilidad entre los requisitos definidos previamente, las decisiones metodológicas adoptadas y los resultados obtenidos, proporcionando un marco reproducible y coherente para la evaluación del modelo propuesto.\newline
+
+La estructura del capítulo sigue una progresión lógica desde la descripción general del pipeline hasta el detalle de cada una de sus etapas, incluyendo la preparación de los datos, la extracción de características, el modelado mediante Aprendizaje de Instancias Múltiples (MIL) y la estrategia de evaluación experimental.
+
+\section{Visión general del pipeline experimental}
+El \textit{pipeline} desarrollado se fundamenta en un diseño modular, desacoplado y determinista, concebido tanto para gestionar la complejidad computacional de las imágenes de gigapíxeles como para garantizar la trazabilidad diagnóstica y el rigor científico. Para cumplir con estos estándares, el sistema fue implementado bajo principios de modularidad donde cada etapa se estructura como un módulo independiente con interfaces funcionales claras. Asimismo, se estableció un control estricto de la aleatoriedad mediante la fijación de semillas globales, asegurando que la inicialización de los modelos y la división de los datos (\textit{folds}) produzcan resultados consistentes y reproducibles en ejecuciones sucesivas.\\
+
+Como se ilustra en la Figura~\ref{fig:pipeline1} y ~\ref{fig:pipeline2}, este flujo de trabajo se organiza en siete fases:
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/PipelineDiag1.png}
+    \caption{Diagrama integral del \textit{pipeline} experimental propuesto: desde la ingesta de WSIs hasta la validación clínica mediante MIL con atención.}
+    \label{fig:pipeline1}
+\end{figure}
+
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.65\textwidth]{images/PipelineDiag2.png}
+    \caption{Diagrama integral del \textit{pipeline} experimental propuesto: desde la ingesta de WSIs hasta la validación clínica mediante MIL con atención.}
+    \label{fig:pipeline2}
+\end{figure}
+
+\begin{enumerate}
+    \item \textbf{Modelado de la entrada y supervisión débil:} El proceso inicia con la conceptualización de la \textit{Whole Slide Image} (WSI) como una entidad compuesta por múltiples instancias locales. Bajo este paradigma, la etiqueta diagnóstica (basada en el \textit{Gleason Grade Group}) se asocia exclusivamente al nivel global de la lámina. Esta configuración es fundamental, ya que evita el sesgo introducido por anotaciones manuales a nivel de parche, las cuales son costosas y propensas a la variabilidad inter-observador, alineando el sistema con las condiciones reales de la práctica clínica.
+
+    \item \textbf{Segmentación, filtrado y generación de parches:} Utilizando el conjunto de datos SICAPv2, las láminas se descomponen en parches de hematoxilina y eosina (H\&E) de tamaño fijo mediante un proceso de \textit{tiling}. Un componente crítico es el filtrado por contenido tisular, cuya función es descartar automáticamente el fondo y artefactos de preparación. Esto asegura que el modelo procese exclusivamente regiones con morfología celular relevante, optimizando la relación señal-ruido del sistema.
+
+    \item \textbf{Codificación semántica mediante transferencia de aprendizaje:} Cada parche filtrado es transformado en un vector de características de dimensión fija ($2048$) empleando una CNN preentrenada (ResNet-50) como extractor de representaciones semánticas. En esta etapa no se realiza clasificación local; en su lugar, la CNN captura patrones visuales de alto nivel que sirven como insumo denso para el modelo de agregación posterior, mitigando la necesidad de una supervisión fuerte.
+
+    \item \textbf{Estructuración de bolsas MIL y separación clínica:} Los \textit{embeddings} generados se agrupan mediante el identificador de la lámina (\texttt{slide\_id}) para conformar las bolsas (\textit{bags}) MIL. Se aplica un control estricto de tamaño y se garantiza la separación por paciente para la validación cruzada. Esta organización es el cimiento de una evaluación fidedigna, impidiendo que el modelo aprenda identidades específicas de sujetos en lugar de patrones patológicos generales.
+
+    \item \textbf{Modelado MIL con mecanismos de atención:} El núcleo predictivo reside en un modelo \textit{Attention-based MIL}. Este componente aprende de manera autónoma una función de ponderación que asigna un peso de importancia ($\alpha_i$) a cada instancia. Las regiones identificadas como patológicamente significativas contribuyen en mayor medida a la representación sintetizada de la lámina, permitiendo un aprendizaje \textit{end-to-end} y proporcionando un mecanismo intrínseco de interpretabilidad.
+
+    \item \textbf{Inferencia diagnóstica a nivel de slide:} La representación agregada de la WSI se proyecta a través de una capa completamente conectada (\textit{Fully Connected}) y una función \textit{Softmax}. Este bloque realiza el mapeo hacia las categorías del grado de Gleason, entregando una distribución de probabilidad por cada clase clínica considerada en el estudio.
+
+    \item \textbf{Validación robusta y evaluación del desempeño:} Finalmente, la robustez del sistema se evalúa exclusivamente a nivel de WSI. Se emplea un esquema de validación cruzada por paciente (\textit{GroupKFold}) para reportar métricas de \textit{Accuracy}, \textit{F1-Score} y \textit{Balanced Accuracy}. Los resultados reflejan un desempeño operativo realista, capaz de generalizar ante la heterogeneidad morfológica del cáncer de próstata sin depender de anotaciones ruidosas a nivel de parche.
+\end{enumerate}
+
+%-------------------------------------------------------------
+
+\section{Descripción del conjunto de datos}
+El desarrollo experimental de este trabajo se sustenta en la base de datos pública \textbf{SICAPv2}, un referente en el estudio del adenocarcinoma de próstata mediante patología digital. Este conjunto de datos integra imágenes histopatológicas digitales de biopsias prostáticas capturadas mediante escáneres de alta resolución y preservadas bajo el estándar de \textit{Whole Slide Images} (WSI). Las muestras, procesadas con la tinción convencional de Hematoxilina y Eosina (H\&E), representan el estándar de oro para la graduación de Gleason. En términos de magnitud y composición, el \textit{dataset} comprende un total de $155$ biopsias (WSI) provenientes de $95$ pacientes únicos, lo que representa un escenario de validación realista y desafiante debido a la variabilidad morfológica intrínseca del tejido y a las diversas condiciones técnicas de adquisición.\newline
+
+Originalmente, las muestras se categorizan en cinco niveles basados en el puntaje de Gleason (NC, G3, G4, G5). No obstante, para los fines de este proyecto, los datos han sido \textbf{dicotomizados} en clases benignas y malignas. Esta simplificación diagnóstica permite evaluar la capacidad del modelo para discernir la presencia de malignidad bajo condiciones de desbalance de clases, una característica común en la práctica clínica donde la prevalencia de tejido benigno suele ser superior a las muestras patológicas. Desde la perspectiva del aprendizaje automático, cada WSI se asocia únicamente a esta etiqueta diagnóstica global. La ausencia de anotaciones granulares a nivel de región o parche define un escenario de \textbf{supervisión débil}, factor determinante que motiva la adopción de arquitecturas basadas en Aprendizaje de Instancias Múltiples (MIL), capaces de inferir patrones a partir de información agregada.\newline
+
+Estructuralmente, SICAPv2 mantiene una jerarquía de datos que vincula estrictamente cada lámina con su paciente de origen. Esta organización es vital para garantizar la integridad metodológica del estudio; en consecuencia, las particiones experimentales se ejecutaron respetando dicha jerarquía para mitigar el riesgo de fuga de información (\textit{data leakage}). Al asegurar que los datos de un mismo individuo no se distribuyan simultáneamente en los conjuntos de entrenamiento y evaluación, se garantiza que las métricas de rendimiento reflejen la capacidad de generalización del modelo ante sujetos no observados, reforzando la necesidad de la validación por grupos (\textit{GroupKFold}) detallada posteriormente.\newline
+
+Finalmente, la naturaleza de las WSIs impone desafíos computacionales significativos debido a sus resoluciones en el orden de gigapíxeles. A la magnitud de los archivos se suman factores disruptivos como extensas áreas de fondo, artefactos de preparación y discrepancias cromáticas derivadas de los protocolos de tinción. Estas particularidades no solo exigen un preprocesamiento riguroso para optimizar la relación señal-ruido, sino que validan la estrategia de subdivisión en parches (\textit{tiling}) implementada en este trabajo para hacer viable el procesamiento profundo del tejido prostático.
+
+%El conjunto de datos empleado en este proyecto corresponde a la base de datos pública \textbf{SICAPv2}, la cual consiste en imágenes histopatológicas digitales de biopsias de próstata capturadas mediante escáneres de alta resolución y preservadas en formato \textit{Whole Slide Images} (WSI). Estas muestras, teñidas con hematoxilina y eosina (H\&E), representan el estándar de oro en el diagnóstico oncológico prostático. No obstante, el corpus de imágenes exhibe una notable variabilidad, derivada tanto de la heterogeneidad morfológica intrínseca del tejido como de las diversas condiciones técnicas de adquisición.\newline
+
+%Cada WSI integra una muestra completa de tejido asociada a una etiqueta diagnóstica global emanada de la evaluación clínica previa. La ausencia de anotaciones granulares a nivel de región o parche en el flujo de entrenamiento define la naturaleza del problema como un escenario de aprendizaje débilmente supervisado; esta restricción técnica es, precisamente, la que fundamenta la adopción de arquitecturas basadas en Aprendizaje de Instancias Múltiples (MIL), capaces de inferir patrones a partir de información agregada.\newline
+
+%Estructuralmente, los datos se organizan bajo una jerarquía que vincula pacientes y láminas, factor determinante para garantizar la integridad metodológica. En este sentido, las particiones experimentales se ejecutaron respetando estrictamente dicha jerarquía, mitigando el riesgo de fuga de información (\textit{data leakage}) al asegurar que las muestras de un mismo individuo no se distribuyan simultáneamente en los conjuntos de entrenamiento y evaluación.\newline
+
+%Debido a que las resoluciones en el orden de gigapíxeles imposibilitan el procesamiento directo mediante redes profundas convencionales, el conjunto de datos impone desafíos computacionales significativos. A la magnitud de los archivos se suman factores disruptivos como extensas áreas de fondo, artefactos de preparación y discrepancias cromáticas derivadas de los protocolos de tinción. Estas particularidades no solo exigen un preprocesamiento riguroso, sino que validan la estrategia de subdivisión en parches (\textit{tiling}) implementada en este trabajo.\newline
+
+%Finalmente, el conjunto de datos refleja fielmente la complejidad del tejido prostático, donde la coexistencia de focos malignos y regiones benignas dentro de una misma lámina es frecuente. Si bien esta variabilidad arquitectural incrementa la dificultad de la clasificación, proporciona un entorno de validación realista y de alto valor clínico para evaluar la robustez y la capacidad de discernimiento del enfoque MIL propuesto.
+
+%\subsection{Composición y distribución de las muestras}
+%El conjunto de datos \textbf{SICAPv2} representa un escenario desafiante debido a la distribución intrínseca de sus clases. El \textit{dataset} comprende un total de $155$ biopsias (WSI) provenientes de $95$ pacientes únicos, lo que subraya la importancia de la validación por grupos (\textit{GroupKFold}) implementada en este trabajo.\newline
+
+%Desde una perspectiva diagnóstica, las muestras se distribuyen en cinco categorías basadas en el puntaje de Gleason (NC, G3, G4, G5), las cuales han sido dicotomizadas para los fines de este proyecto en clases benignas y malignas. Esta partición no solo permite evaluar el desempeño binario del modelo, sino que también pone a prueba su resiliencia ante el desbalance de clases, una característica común en la práctica clínica donde la prevalencia de tejido benigno suele ser superior a las muestras con patologías específicas.
+
+%-------------------------------------------------------------
+
+% Tabla convertida a no-flotante para evitar problemas con el entorno de floats
+\begin{center}
+    \captionof{table}{Configuración de hiperparámetros y entorno de entrenamiento.}
+    \label{tab:hiperparametros}
+    \vspace{2mm}
+    \begin{tabular}{ll}
+        \hline
+        \textbf{Parámetro} & \textbf{Valor / Configuración} \\
+        \hline
+        Optimizador & Adam \\
+        Tasa de aprendizaje (\textit{Learning Rate}) & $1 \times 10^{-4}$ \\
+        Función de pérdida & \texttt{BCEWithLogitsLoss} \\
+        Tamaño de lote (\textit{Batch size}) & 1 (Nivel de bolsa) \\
+        Número de épocas & 20 \\
+        Entorno de cómputo & PyTorch / GPU (NVIDIA T4) \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\section{Preparación y organización de los datos}
+La preparación de los datos constituye una etapa crítica del \textit{pipeline} experimental, especialmente en el contexto de imágenes histopatológicas digitales caracterizadas por su resolución de gigapíxeles, heterogeneidad morfológica y presencia de regiones no informativas. Un preprocesamiento riguroso en este dominio es imperativo para mitigar la introducción de ruido y asegurar la estabilidad de los modelos de aprendizaje profundo durante la fase de convergencia.\newline
+
+En este proyecto, las \textit{Whole Slide Images} (WSI) del conjunto SICAPv2 se estructuraron respetando estrictamente la separación jerárquica a nivel de paciente. Esta decisión metodológica es fundamental para evitar la fuga de información (\textit{data leakage}) y garantizar que las métricas obtenidas constituyan una estimación fidedigna de la capacidad de generalización del sistema ante muestras clínicas no observadas durante el entrenamiento.\newline
+
+Debido a que las dimensiones de las WSIs imposibilitan su procesamiento directo, cada lámina fue subdividida mediante una técnica de \textit{tiling} en parches de tamaño fijo ($224 \times 224$ píxeles). Este proceso permite extraer la información arquitectural necesaria para la graduación de Gleason sin comprometer la memoria de video de las unidades de procesamiento gráfico. Posteriormente, se aplicaron criterios de filtrado basados en umbrales de contenido tisular para descartar parches con predominio de fondo o artefactos. Esta depuración no solo optimiza el uso de recursos computacionales, sino que asegura que el modelo MIL se concentre exclusivamente en instancias con valor diagnóstico.\newline
+
+Esta estrategia de organización permite representar cada WSI como una ``bolsa'' (\textit{bag}) de instancias visuales relevantes. La estructura de datos resultante se alinea de manera natural con el paradigma de Aprendizaje de Instancias Múltiples, donde la relación entre la multiplicidad de parches y la etiqueta única a nivel de lámina permite capturar la esencia del diagnóstico débilmente supervisado.
+
+%-------------------------------------------------------------
+
+\section{Extracción de características profundas}
+Una vez generados y filtrados los parches tisulares, se procedió a la fase de codificación semántica. En esta etapa, cada parche $x_i$ es procesado de forma independiente mediante una Red Neuronal Convolucional (CNN) para transformar la información visual de alta dimensionalidad (imágenes RGB de $224 \times 224$ píxeles) en representaciones vectoriales compactas que capturen los patrones morfológicos del tejido prostático.\newline
+
+Para este propósito, se seleccionó la arquitectura **ResNet-50**. Bajo el paradigma de aprendizaje por transferencia (\textit{Transfer Learning}), se utilizaron los pesos preentrenados en el conjunto de datos \textbf{ImageNet} (versión V2). Esta estrategia permite aprovechar la capacidad de la red para detectar características visuales fundamentales (bordes, texturas y formas complejas) aprendidas en un dominio general, mitigando la necesidad de entrenar una red profunda desde cero en un escenario con etiquetas limitadas como el actual.\newline
+
+Las representaciones obtenidas, comúnmente denominadas \textit{embeddings}, se almacenaron como vectores numéricos asociados a cada parche. Este diseño desacopla explícitamente la etapa de aprendizaje visual del proceso de agregación MIL, lo que reduce significativamente el costo computacional del entrenamiento y facilita la experimentación sistemática con distintos esquemas de agregación sin necesidad de reprocesar las imágenes originales.
+
+\section{Modelado mediante Aprendizaje de Instancias Múltiples}
+El núcleo arquitectural del sistema propuesto se fundamenta en el paradigma de Aprendizaje de Instancias Múltiples (\textit{Multiple Instance Learning}, MIL) potenciado por mecanismos de atención. Bajo esta estructura, cada \textit{Whole Slide Image} (WSI) se conceptualiza como una ``bolsa'' $\mathcal{B} = \{h_1, h_2, ..., h_n\}$ integrada por un conjunto de \textit{embeddings} vectoriales $h_i \in \mathbb{R}^{2048}$ que representan sus parches constituyentes. El modelo asume la tarea de inferir una etiqueta diagnóstica global mediante la agregación de estas instancias en un descriptor único que condense la arquitectura tisular de toda la lámina.\newline
+
+Para ejecutar esta integración, se implementó una red de atención que proyecta inicialmente los vectores de características de alta dimensionalidad hacia un espacio latente de menor tamaño ($256$ dimensiones) mediante una capa lineal. Posteriormente, el mecanismo de atención calcula un coeficiente de importancia $\alpha_i$ para cada instancia utilizando una red neuronal de dos capas con una función de activación \textit{tanh}. A diferencia de las heurísticas de agregación convencionales —tales como el \textit{max-pooling} o el \textit{mean-pooling}—, este enfoque faculta al modelo para ejecutar una ponderación adaptativa, aprendiendo autónomamente a discernir qué regiones del tejido poseen la relevancia morfológica necesaria para determinar la predicción final.
+
+\newpage
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/DiagTeoricoArqMIL.png}
+    \caption{Arquitectura del mecanismo de atención MIL propuesto. Se observa el flujo desde los embeddings de entrada hasta la agregación pesada por los coeficientes $\alpha_i$.}
+    \label{fig:arquitectura_mil}
+\end{figure}
+
+Este marco de trabajo resulta particularmente idóneo para escenarios de supervisión débil, donde el \textit{ground truth} se restringe al nivel de lámina completa debido a la ausencia de anotaciones granulares. Al asignar pesos diferenciales, el sistema evita que las señales tumorales focales —a menudo presentes en una fracción mínima de la muestra— se diluyan en el volumen total de tejido benigno, optimizando la capacidad de detección en casos de baja carga tumoral.\newline
+
+Por último, el empleo de pesos de atención proporciona una base rigurosa para la interpretabilidad \textit{post-hoc}. Al proyectar estos valores sobre la muestra histológica original, es posible identificar con precisión las regiones que ejercen la influencia más significativa en la toma de decisiones. Esta trazabilidad diagnóstica constituye un atributo crítico en el dominio biomédico, pues no solo valida la coherencia del modelo frente al conocimiento experto, sino que también facilita la auditoría clínica y fortalece la confiabilidad de los resultados obtenidos.
+
+
+\section{Configuración experimental y protocolo de entrenamiento}
+La configuración experimental se definió con el objetivo de evaluar de manera rigurosa el desempeño del modelo MIL con mecanismos de atención. El diseño garantiza la reproducibilidad, la independencia clínica entre conjuntos de datos y la coherencia metodológica con los requisitos de diagnóstico asistido por computadora planteados previamente.
+
+\subsection{Estrategia de validación cruzada}
+Dada la jerarquía de los datos (parches $\rightarrow$ láminas $\rightarrow$ pacientes), se implementó una estrategia de validación cruzada \textit{GroupKFold} con $k=5$ particiones. El agrupamiento se ejecutó estrictamente a nivel de paciente, garantizando que la totalidad de las WSIs vinculadas a un mismo individuo se ubiquen exclusivamente en un único \textit{fold}.\newline 
+
+Este esquema neutraliza cualquier riesgo de fuga de información (\textit{data leakage}) y asegura que las métricas de desempeño reflejen la capacidad de generalización del modelo ante sujetos no observados previamente. Para cada iteración, el modelo se optimizó únicamente con los datos del conjunto de entrenamiento correspondiente y se evaluó sobre el pliegue de validación, permitiendo obtener métricas robustas mediante la agregación de los resultados de los cinco procesos independientes.
+
+\subsection{Hiperparámetros y entorno de ejecución}
+El entrenamiento se realizó utilizando una configuración de hiperparámetros constante para todos los experimentos, resumida en la Tabla \ref{tab:hiperparametros}. La elección de un tamaño de lote unitario (\textit{batch size} = 1) responde a la naturaleza del paradigma MIL; dado que cada WSI genera un número variable de instancias (parches), el procesamiento individualizado permite gestionar la heterogeneidad dimensional de las muestras sin necesidad de recurrir a técnicas de relleno (\textit{padding}) que podrían alterar la distribución de los datos.
+
+
+
+\subsection{Variantes de implementación}
+Con el propósito de evaluar la estabilidad del entrenamiento, se desarrollaron dos implementaciones del esquema de optimización:
+
+\begin{itemize}
+    \item \textbf{Versión A (Control Granular):} Caracterizada por un manejo explícito de las dimensiones tensoriales durante la agregación y el cálculo de la pérdida. Esta versión prioriza la trazabilidad matemática y la transparencia en la propagación de gradientes.
+    \item \textbf{Versión B (Formulación Directa):} Emplea abstracciones de mayor nivel del \textit{framework} para simplificar el flujo computacional, introduciendo una mayor dependencia de los mecanismos internos de PyTorch.
+\end{itemize}
+
+Tras una evaluación preliminar, la \textbf{Versión A} fue seleccionada como la configuración de referencia (\textit{baseline}) debido a su mayor estabilidad \textit{inter-fold} y claridad en la gestión de operaciones. Las decisiones metodológicas aquí consolidadas establecen la base sobre la cual se analizan, en la siguiente sección, los resultados cuantitativos y la capacidad discriminativa del sistema.
+
+\section{Métricas de evaluación del desempeño}
+Para cuantificar la eficacia del modelo propuesto en la tarea de clasificación diagnóstica, se seleccionó un conjunto de métricas robustas que permiten evaluar tanto la exactitud puntual como el comportamiento probabilístico del sistema. Dado el contexto médico del proyecto, donde el desbalance de clases es frecuente y el costo de los falsos negativos es crítico, se adoptaron los siguientes indicadores:
+
+\begin{itemize}
+    \item \textbf{F1-Score:} Se utiliza como la métrica principal de equilibrio, proporcionando una media armónica entre la precisión y la sensibilidad (\textit{recall}). Esta métrica es esencial para garantizar que el modelo no favorezca sesgadamente a la clase mayoritaria (tejido benigno).
+    \item \textbf{ROC AUC (Área bajo la curva ROC):} Evalúa la capacidad de discriminación del modelo a través de distintos umbrales de decisión, midiendo qué tan bien logra separar las distribuciones de probabilidad entre las clases benigna y maligna.
+    \item \textbf{PR AUC (Área bajo la curva Precision-Recall):} También denominada \textit{Average Precision}, esta métrica es de vital importancia en este estudio. A diferencia de la curva ROC, la curva PR es más sensible al desempeño del modelo sobre la clase positiva (cáncer), resultando fundamental para evaluar la confiabilidad del sistema ante la presencia de focos tumorales pequeños.
+\end{itemize}
+
+Bajo este marco evaluativo, las decisiones metodológicas y la configuración experimental descritas en este capítulo establecen una base sólida y reproducible. El rigor en la separación de datos y la elección de métricas orientadas al dominio clínico permiten transitar hacia la fase de análisis de resultados, los cuales se presentan y discuten detalladamente en el siguiente capítulo.
+
+
+
+
+
+
+
+%-------------------------------------------------------------
+
+\begin{comment}
+
+
+\section{Resultados cuantitativos}
+En esta sección se presentan y analizan los resultados cuantitativos obtenidos a partir de la implementación y validación de un modelo base de Aprendizaje de Instancias Múltiples (MIL) con mecanismo de atención para clasificación binaria a nivel de Whole Slide Image (WSI). El objetivo del experimento consiste en discriminar entre tejido benigno (Gleason 0) y tejido cancerígeno (Gleason $\geq$ 3), bajo un esquema de supervisión débil, en el cual únicamente se dispone de etiquetas a nivel de lámina completa.\newline
+
+El modelo fue evaluado mediante validación cruzada estratificada por paciente utilizando GroupKFold, garantizando una independencia clínica estricta entre los conjuntos de entrenamiento y validación. En todos los experimentos se empleó un umbral fijo de decisión de $0.5$ sobre la probabilidad estimada, sin calibración posterior ni técnicas explícitas de compensación del desbalance de clases, con el fin de obtener una evaluación del desempeño real del modelo en un escenario clínico realista.\newline
+
+Las métricas reportadas incluyen el \textit{F1-score}, junto con el área bajo la curva ROC (\textit{ROC AUC}) y el área bajo la curva Precision--Recall (\textit{PR AUC}), siendo esta última particularmente relevante en contextos médicos caracterizados por desbalance de clases y alta penalización de falsos negativos.
+
+
+\subsection{Resultados individuales por versión}
+Para un tratamiento detallado de los resultados por versión (métricas por fold, resúmenes y comparativa A vs. B), véase la Sección "Comparativa de Rendimiento: Versión A vs. Versión B" del Capítulo "Análisis de Resultados" (archivo \texttt{Concebir/Analisis_Resultados.tex}).
+
+% Tabla de métricas por fold para Versión A consolidada en `Concebir/Analisis_Resultados.tex`
+
+Se observa una variabilidad apreciable entre folds, particularmente en la métrica ROC AUC. Este comportamiento es esperado en el contexto de WSIs histopatológicas, donde la heterogeneidad inter-paciente, la variabilidad morfológica del tejido y la distribución desigual de regiones tumorales dentro de cada bolsa pueden afectar de forma significativa la dificultad del problema.\newline
+
+No obstante, ningún fold presenta un colapso de rendimiento ni métricas cercanas al azar, lo cual sugiere que el modelo mantiene una capacidad discriminativa consistente frente a distintas particiones clínicas. Cabe destacar que los valores elevados de PR AUC observados en la mayoría de los folds reflejan una habilidad robusta para priorizar correctamente la clase positiva, incluso cuando el poder de ranking global presenta fluctuaciones.
+
+\paragraph{Resultados agregados}
+Con el fin de obtener una estimación global del desempeño del modelo, se calcularon la media y la desviación estándar de las métricas a través de los cinco folds de validación cruzada. Los resultados se resumen en la Tabla~\ref{tab:summary_metrics_A}.
+
+% Tabla resumen estadístico (Versión A) consolidada en `Concebir/Analisis_Resultados.tex`
+
+El \textit{F1-score} promedio cercano a $0.88$ indica un equilibrio adecuado entre precisión y sensibilidad sin necesidad de ajustes adicionales del umbral de decisión. El valor elevado de PR AUC (superior a $0.90$) resulta especialmente relevante desde una perspectiva clínica, ya que sugiere que el modelo mantiene altos niveles de precisión incluso cuando se incrementa el recall, minimizando así la probabilidad de falsos negativos.\newline
+
+Por otro lado, el \textit{ROC AUC} moderado observado es consistente con la formulación MIL del problema, dado que la señal discriminativa suele concentrarse en un subconjunto reducido de instancias dentro de cada bolsa. En este contexto, el ranking global puede verse afectado aun cuando la decisión final a nivel de WSI sea correcta.
+
+%-------------------------------------------------------------
+
+\subsubsection{Resultados Versión B}
+\paragraph{Desempeño por fold:}
+La Tabla~\ref{tab:metrics_per_fold_B} presenta las métricas obtenidas por fold para la Versión B del entrenamiento, la cual implementa una formulación más directa del cálculo de la pérdida, sin manipulaciones explícitas de dimensiones intermedias.
+
+% Tabla de métricas por fold para Versión B consolidada en `Concebir/Analisis_Resultados.tex`
+
+Al igual que en la Versión A, se observa una variabilidad natural entre folds. Sin embargo, en esta versión se evidencian oscilaciones ligeramente más pronunciadas en las métricas de ranking, lo cual sugiere una mayor sensibilidad del proceso de entrenamiento a la composición específica de cada partición.
+
+\paragraph{Resultados agregados:}
+El resumen estadístico de las métricas para la Versión B se presenta en la Tabla~\ref{tab:summary_metrics_B}.
+
+% Tabla resumen estadístico (Versión B) consolidada en `Concebir/Analisis_Resultados.tex`
+
+Los resultados agregados muestran que la Versión B alcanza un desempeño comparable al de la Versión A en términos de métricas promedio. No obstante, la combinación de variabilidad inter-fold y comportamiento observado en las curvas de evaluación sugiere diferencias relevantes en términos de estabilidad y robustez, las cuales se analizan en la siguiente subsección.
+
+%-------------------------------------------------------------
+
+\subsection{Análisis comparativo entre Versiones A y B}
+\subsubsection{Curvas ROC y Precision--Recall}
+Para las curvas ROC y Precision--Recall consulte la Sección "Curvas ROC y Precision--Recall" del Capítulo "Análisis de Resultados" (archivo \texttt{Concebir/Analisis_Resultados.tex}).
+
+Teniendo en cuenta los resultados de las anteriores gráficas, se puede apreciar que la Versión A exhibe una región operativa más estable, manteniendo valores de precisión elevados hasta niveles de recall medio-altos. En contraste, la Versión B muestra una caída más temprana de la precisión al incrementar el recall, lo cual implica un aumento en la tasa de falsos positivos cuando se intenta capturar la totalidad de los casos positivos.
+
+\subsubsection{Distribución de probabilidades}
+Las Figuras~\ref{fig:prob_dist_A} y~\ref{fig:prob_dist_B} ilustran la distribución de las probabilidades estimadas por el modelo para cada clase. En la Versión A se observa una separación más definida entre clases, con una concentración marcada de probabilidades cercanas a $0$ y $1$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/prob_dist_A.png}
+    \caption{Distribución de probabilidades estimadas por clase — Versión A.}
+    \label{fig:prob_dist_A}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.48\textwidth]{images/prob_dist_B.png}
+    \caption{Distribución de probabilidades estimadas por clase — Versión B.}
+    \label{fig:prob_dist_B}
+\end{figure}
+
+Este comportamiento es consistente con modelos MIL aplicados a histopatología, donde la presencia de focos tumorales localizados induce predicciones altamente confiadas a nivel de bolsa.
+
+% ------------------------------------------------------
+
+\subsubsection{Análisis de estabilidad y variabilidad}
+A pesar de la rápida convergencia observada durante el entrenamiento, no se detectaron indicios de sobreajuste significativo en ninguna de las versiones. En particular:
+\begin{itemize}
+    \item Las métricas presentan variabilidad inter-fold, reflejando diferencias clínicas reales entre pacientes.
+    \item Las curvas ROC y Precision--Recall muestran transiciones progresivas y no comportamientos idealizados.
+    \item Las diferencias sistemáticas entre Versiones A y B evidencian sensibilidad a detalles de implementación, lo cual sugiere que el modelo aprende patrones discriminativos genuinos y no memoriza las bolsas de entrenamiento.
+\end{itemize}
+
+En conjunto, aunque ambas versiones alcanzan desempeños comparables en términos agregados, la Versión A demuestra una mayor estabilidad inter-fold y un comportamiento más favorable en la curva Precision--Recall.
+
+La Tabla~\ref{tab:comparison_A_B} resume el desempeño promedio de ambas versiones del entrenamiento a través de las métricas evaluadas.
+
+% Tabla comparativa consolidada en `Concebir/Analisis_Resultados.tex` (Sección "Comparativa de Rendimiento")
+Estas características resultan especialmente relevantes en un contexto clínico, donde el control simultáneo de falsos positivos y falsos negativos es crítico. En consecuencia, la Versión A se adopta como línea base para los sprints posteriores.
+
+% ------------------------------------------------------
+
+% (Bloque duplicado eliminado: la comparativa cuantitativa y su tabla fueron consolidadas en la sección anterior)
+
+\end{comment}

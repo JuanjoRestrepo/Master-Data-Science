@@ -1,0 +1,18 @@
+% ===== introduccion.tex =====
+Las técnicas de diagnóstico asistido por inteligencia artificial en histopatología digital han demostrado un notable potencial para mejorar la precisión, reproducibilidad y eficiencia del análisis de tejido, contribuyendo a la reducción de la variabilidad interobservador y de los tiempos de informe clínico \cite{litjens2017survey}. En el caso del cáncer de próstata, una de las neoplasias más prevalentes a nivel mundial, el análisis histopatológico se mantiene como el procedimiento de referencia estándar para determinar la presencia y agresividad tumoral mediante la escala de Gleason. Sin embargo, este proceso depende en gran medida de la experiencia del patólogo, lo que puede introducir subjetividad y variabilidad diagnóstica \cite{campanella2019clinical}.\newline
+
+La digitalización de láminas histológicas completas en imágenes de alta resolución, conocidas como \textit{Whole Slide Images} (WSI), ha abierto nuevas oportunidades para el uso de modelos de aprendizaje profundo en patología computacional. No obstante, estas imágenes suelen estar etiquetadas únicamente a nivel de muestra (\textit{slide-level}) y no a nivel de parche o región (instancia), lo que dificulta la aplicación directa de enfoques completamente supervisados que requieren anotaciones finas \cite{carbonneau2018multiple}. Frente a esta limitación, el paradigma de aprendizaje de instancias múltiples (\textit{Multiple Instance Learning}, MIL) surge como una alternativa práctica y eficiente, debido a que permite entrenar modelos utilizando etiquetas globales por WSI, reduciendo significativamente la carga de anotación experta sin renunciar a un rendimiento clínicamente relevante \cite{ilse2018attention}\cite{lu2021data}.\newline
+
+En este contexto, el presente proyecto propone el diseño de un pipeline modular y reproducible para la aplicación de técnicas MIL sobre imágenes histopatológicas de cáncer de próstata, utilizando el dataset público SICAPv2 \cite{SilvaRodriguez_2020Data}. El pipeline integra etapas de preprocesamiento y extracción de parches, extracción de representaciones mediante redes neuronales convolucionales preentrenadas y módulos de agregación débilmente supervisados basados en mecanismos de atención. Se pone especial énfasis en la reproducibilidad experimental, el versionado de datos y la validación cruzada estratificada por paciente, siguiendo recomendaciones ampliamente aceptadas en patología computacional \cite{ciompi2017standardized} \cite{MoralesAlvarez2024}.\newline
+
+La evaluación del sistema se realiza mediante métricas estándar como AUC, precisión, \textit{recall} y F1-score, complementadas con análisis estadísticos que permiten comparar distintas variantes del modelo más allá de cifras puntuales. Adicionalmente, se estudia en profundidad el comportamiento del mecanismo de atención, con el objetivo de aportar interpretabilidad y analizar si las instancias con mayor peso de atención corresponden a regiones histopatológicamente relevantes, un aspecto crítico para la confianza y la posible adopción clínica de este tipo de modelos.\newline
+
+Como resultado de esta investigación, se espera obtener un conjunto de parches reproducible y versionado derivado del dataset SICAPv2, implementaciones de código abierto de distintas variantes de MIL y extractores de características, así como un estudio comparativo riguroso que analice los compromisos entre desempeño, generalización e interpretabilidad. En conjunto, estos aportes buscan proporcionar evidencia técnica y clínica sólida que respalde el uso de herramientas de apoyo al diagnóstico basadas en aprendizaje profundo en el ámbito de la histopatología digital.
+
+
+
+
+
+
+
+

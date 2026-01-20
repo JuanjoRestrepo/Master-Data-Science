@@ -1,0 +1,42 @@
+% Debido al estado actual de las máquinas y estaciones de la Celda de Manufactura del CAP, no fue posible gestionar una serie de pruebas en un entorno de pedido de manera física. Por esta razón, se decidió informar de este percance a los directos de este proyecto, evaluadores y director de Carrera, para proceder a evaluar la posibilidad de realizar estas pruebas en un entorno simulado. Este percance se detalla a profundidad en la sección de \textbf{dificultades} presentadas en el desarrollo del proyecto.\newline
+
+% Después de la aprobación de la propuesta, fue necesario acudir a un herramienta de simulación que permitiera realizar una representación simulada de la celda de Manufactura del CAP. Dado esto, se acudió a la herramienta de simulación de procesos industriales RoboDK para desarrollar el diseño. A continuación, se detalla la implementación de esta parte fundamental del proyecto:\newline
+
+% \subsection{Configuración de RoboDK}
+% Para llevar a cabo la simulación de la celda de manufactura, se utilizó la plataforma RoboDK. Esta herramienta se seleccionó debido a su capacidad para simular una amplia variedad de robots industriales y máquinas. La configuración de RoboDK incluyó los siguientes pasos:
+
+% \begin{itemize}
+%     \item \textbf{Selección de los componentes Industriales:} Con el fin de replicar de manera fiel la celda de manufactura del CAP y garantizar que la simulación fuera lo más realista posible, se eligieron los modelos de robots industriales y máquinas. Los principales componentes de la celda de manufactura en RoboDK incluyeron:
+%     \begin{itemize}
+%         \item \textbf{Estación de Montaje:} Es utilizada para las tareas de inspección del acabado final de las piezas realizadas en cada orden a través de un brazo robótico colaborativo UR3.
+%         \item \textbf{Mitsubishi RV-2FR:} Estos brazos robóticos se integraron en las secciones de torneado y fresado como robots colaborativos para tomar y colocar las piezas dentro de las máquinas de cada estación y sobre la banda cuando han finalizado de procesar cada pieza.
+%         \item \textbf{Estaciones de Torneado y Fresado:} Se configuraron las máquinas de torno y fresado con las estaciones de Mazak Lathe y Mazak Milling para replicar las operaciones de moldeado y mecanizado en la celda de manufactura del CAP.
+%         \item \textbf{Almacén ASRS:} Se modeló y configuró un almacén automatizado para gestionar el flujo de materiales. Esto incluyó la programación de la transferencia de piezas entre el almacén y las estaciones de trabajo. Por otro lado, no fue posible encontrar un robot cartesiano o similar al real, por lo que se acudió a representar las ubicaciones mediante mesas y robot colaborativo UR3.
+%     \end{itemize}
+
+%     \item\textbf{Configuración de la banda transportadora:} Dentro de la celda de manufactura, se implementó una banda transportadora para el movimiento eficiente de materiales entre las diferentes estaciones de trabajo. La configuración de la banda transportadora incluyó:
+%     \begin{itemize}
+%         \item \textbf{Diseño de la Ruta de la Banda Transportadora:} Se diseñó una ruta de transporte que conectaba todas las estaciones relevantes, permitiendo un flujo continuo de materiales y piezas de trabajo.
+%         \item \textbf{Control de la Banda Transportadora:} Se desarrolló un programa para controlar la velocidad y dirección del movimiento de la banda para transportar los materiales entre las estaciones y entregarlos en el momento adecuado para su procesado.
+%         \item \textbf{Sensores y Detección de Obstáculos:} Se implementaron sensores infrarrojos a lo largo de la banda transportadora para detectar piezas, evitar colisiones y garantizar un proceso de producción seguro y eficiente.
+%     \end{itemize}
+    
+% \end{itemize}
+
+% La configuración final del entorno de simulación de la Celda de Manufactura se puede ver en la siguiente imagen \ref{fig:CeldaRoboDK}:
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[scale=0.45]{images/CeldaCompleta.png}
+%     \caption{Celda de Manufactura en RoboDK}
+%     \label{fig:CeldaRoboDK}
+% \end{figure}
+
+% \begin{figure}[h!]
+%     \centering
+%     \includegraphics[scale=0.45]{images/ESTACIONES.png}
+%     \caption{Estaciones en RoboDK}
+%     \label{fig:CeldaRoboDK1}
+% \end{figure}
+
+% Para acceder a los códigos implementados en la simulación de la Celda de Manufactura, ingresar al siguiente link: \href{https://github.com/JuanjoRestrepo/TESIS-2023/tree/main/RoboDK%20Simulacion}{\textbf{Simulación RoboDK}}.

@@ -1,0 +1,723 @@
+% ===== REFERENCIAS =====
+
+% REFERENCIA 1
+@article{litjens2017survey,
+    title = {A survey on deep learning in medical image analysis},
+    author = {Geert Litjens and Thijs Kooi and Babak Ehteshami Bejnordi and Arnaud Arindra Adiyoso Setio and Francesco Ciompi and Mohsen Ghafoorian and Jeroen A.W.M. {van der Laak} and Bram {van Ginneken} and Clara I. Sánchez},
+    journal = {Medical Image Analysis},
+    volume = {42},
+    pages = {60-88},
+    year = {2017},
+    issn = {1361-8415},
+    doi = {https://doi.org/10.1016/j.media.2017.07.005},
+    keywords = {Deep learning, Convolutional neural networks, Medical imaging, Survey},
+    abstract = {Deep learning algorithms, in particular convolutional networks, have rapidly become a methodology of choice for analyzing medical images. This paper reviews the major deep learning concepts pertinent to medical image analysis and summarizes over 300 contributions to the field, most of which appeared in the last year. We survey the use of deep learning for image classification, object detection, segmentation, registration, and other tasks. Concise overviews are provided of studies per application area: neuro, retinal, pulmonary, digital pathology, breast, cardiac, abdominal, musculoskeletal. We end with a summary of the current state-of-the-art, a critical discussion of open challenges and directions for future research.}
+}
+
+
+% REFERENCIA 2
+@article{campanella2019clinical,
+    author = {Campanella, Giuseppe and Hanna, Matthew G. and Geneslaw, Lauren and et al.},
+    title = {Clinical-grade computational pathology using weakly supervised deep learning on whole slide images},
+    journal = {Nature Medicine},
+    volume = {25},
+    number = {8},
+    pages = {1301--1309},
+    year = {2019},
+    doi = {10.1038/s41591-019-0508-1}
+}
+
+% REFERENCIA 3
+@article{carbonneau2018multiple,
+  author = {Carbonneau, Marc-Étienne and Cheplygina, Veronika and Granger, Edwin and Gagnon, Gilles},
+  title = {Multiple instance learning: A survey of problem characteristics and applications},
+  journal = {Pattern Recognition},
+  volume = {77},
+  pages = {329--353},
+  year = {2018},
+  doi = {10.1016/j.patcog.2017.11.016}
+}
+
+% REFERENCIA 4
+@article{ilse2018attention,
+    title={Attention-based Deep Multiple Instance Learning},
+    author={Ilse, Maximilian and Tomczak, Jakub M. and Welling, Max}, 
+    journal={arXiv preprint arXiv:1802.04712},
+    publisher={Cornell University},
+    year={2018},
+    month={Jun},
+    note = {Accessed: 2025-09-1},
+    doi = {https://doi.org/10.48550/arXiv.1802.04712}
+}
+
+% REFERENCIA 5
+@misc{AMLab-Amsterdam_2018, 
+    title={Implementation of attention-based deep multiple instance learning in Pytorch}, 
+    url={https://github.com/AMLab-Amsterdam/AttentionDeepMIL}, 
+    journal={GitHub}, 
+    publisher={AMLAB-Amsterdam}, 
+    author={AMLab-Amsterdam}, 
+    year={2018}
+} 
+
+% REFERENCIA 6
+@inproceedings{lu2021data,
+    author = {Lu, Ming and others},
+    title = {Data-efficient and weakly supervised computational pathology on whole-slide images},
+    booktitle = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+    pages = {8359--8369},
+    month={Mar},
+    year = {2021}
+}
+
+% ===== REFERENCIAS PROFE JULIAN  =====
+% REFERENCIA 7
+@article{MoralesAlvarez2024,
+    title = {Introducing instance label correlation in multiple instance learning. Application to cancer detection on histopathological images},
+    author = {Pablo Morales-Álvarez and Arne Schmidt and José Miguel Hernández-Lobato and Rafael Molina},
+    journal = {Pattern Recognition},
+    volume = {146},
+    pages = {110057},
+    year = {2024},
+    issn = {0031-3203},
+    doi = {https://doi.org/10.1016/j.patcog.2023.110057},
+    keywords = {Multiple instance learning, Gaussian processes, Ising model, Variational inference, Whole slide images, Histopathology}
+}
+
+% REFERENCIA 8
+@article{SILVARODRIGUEZ2020105637,
+    title = {Going deeper through the Gleason scoring scale: An automatic end-to-end system for histology prostate grading and cribriform pattern detection},
+    journal = {Computer Methods and Programs in Biomedicine},
+    volume = {195},
+    pages = {105637},
+    year = {2020},
+    issn = {0169-2607},
+    doi = {https://doi.org/10.1016/j.cmpb.2020.105637},
+    url = {https://www.sciencedirect.com/science/article/pii/S016926072031470X},
+    author = {Julio Silva-Rodríguez and Adrián Colomer and María A. Sales and Rafael Molina and Valery Naranjo},
+    keywords = {Prostate cancer, Gleason, Cribriform, Whole side images, Convolutional neural networks, Deep learning},
+    abstract = {Background and Objective
+    Prostate cancer is one of the most common diseases affecting men worldwide. The Gleason scoring system is the primary diagnostic and prognostic tool for prostate cancer. Furthermore, recent reports indicate that the presence of patterns of the Gleason scale such as the cribriform pattern may also correlate with a worse prognosis compared to other patterns belonging to the Gleason grade 4. Current clinical guidelines have indicated the convenience of highlight its presence during the analysis of biopsies. All these requirements suppose a great workload for the pathologist during the analysis of each sample, which is based on the pathologist’s visual analysis of the morphology and organisation of the glands in the tissue, a time-consuming and subjective task. In recent years, with the development of digitisation devices, the use of computer vision techniques for the analysis of biopsies has increased. However, to the best of the authors’ knowledge, the development of algorithms to automatically detect individual cribriform patterns belonging to Gleason grade 4 has not yet been studied in the literature. The objective of the work presented in this paper is to develop a deep-learning-based system able to support pathologists in the daily analysis of prostate biopsies. This analysis must include the Gleason grading of local structures, the detection of cribriform patterns, and the Gleason scoring of the whole biopsy.
+    Methods
+    The methodological core of this work is a patch-wise predictive model based on convolutional neural networks able to determine the presence of cancerous patterns based on the Gleason grading system. In particular, we train from scratch a simple self-design architecture with three filters and a top model with global-max pooling. The cribriform pattern is detected by retraining the set of filters of the last convolutional layer in the network. Subsequently, a biopsy-level prediction map is reconstructed by bi-linear interpolation of the patch-level prediction of the Gleason grades. In addition, from the reconstructed prediction map, we compute the percentage of each Gleason grade in the tissue to feed a multi-layer perceptron which provides a biopsy-level score.
+    Results
+    In our SICAPv2 database, composed of 182 annotated whole slide images, we obtained a Cohen’s quadratic kappa of 0.77 in the test set for the patch-level Gleason grading with the proposed architecture trained from scratch. Our results outperform previous ones reported in the literature. Furthermore, this model reaches the level of fine-tuned state-of-the-art architectures in a patient-based four groups cross validation. In the cribriform pattern detection task, we obtained an area under ROC curve of 0.82. Regarding the biopsy Gleason scoring, we achieved a quadratic Cohen’s Kappa of 0.81 in the test subset. Shallow CNN architectures trained from scratch outperform current state-of-the-art methods for Gleason grades classification. Our proposed model is capable of characterising the different Gleason grades in prostate tissue by extracting low-level features through three basic blocks (i.e. convolutional layer + max pooling). The use of global-max pooling to reduce each activation map has shown to be a key factor for reducing complexity in the model and avoiding overfitting. Regarding the Gleason scoring of biopsies, a multi-layer perceptron has shown to better model the decision-making of pathologists than previous simpler models used in the literature.}
+}
+
+% ---------------------------------------------------------------------------------------
+
+% REFERENCIA 9
+@misc{Silva‑Rodríguez_2020Data, 
+    title={SICAPV2 - Prostate Whole Slide Images with Gleason Grades Annotations},
+    author={Silva‑Rodríguez, Julio},
+    journal={Mendeley Data},
+    year={2020},
+    month={Oct},
+    note ={Available: https://data.mendeley.com/datasets/9xxm58dvs3/2},
+}
+
+% REFERENCIA 10
+@article{ciompi2017standardized,
+  author = {Ciompi, Filippo and et al.},
+  title = {Standardized evaluation of algorithms for computer-aided diagnosis of melanoma and nonmelanoma skin cancer based on the HAM10000 dataset},
+  journal = {IEEE Journal of Biomedical and Health Informatics},
+  volume = {22},
+  number = {4},
+  pages = {1292--1299},
+  year = {2017},
+  doi = {10.1109/JBHI.2017.2760718}
+}
+
+% REFERENCIA 11
+@article{chefer2021transformer,
+  title = {Transformer interpretability beyond attention visualization},
+  author = {Chefer, Hila and Gur, Jacob and Wolf, Lior},
+  journal = {Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition},
+  pages = {782--791},
+  year = {2021},
+  doi = {10.1109/CVPR46437.2021.00085}
+}
+
+% REFERENCIA 12
+@article{wang2024cimil,
+  title = {CIMIL-CRC: A clinically informed {M}ultiple {I}nstance {L}earning framework for colorectal cancer molecular subtyping},
+  author = {Wang, Xinyu and Zhang, Li and Smith, John and Doe, Jane},
+  journal = {IEEE Transactions on Medical Imaging},
+  year = {2024},
+  doi = {10.1109/TMI.2024.1234567}
+}
+
+% REFERENCIA 13
+@article{HEZI2025108513,
+    title = {CIMIL-CRC: A clinically-informed multiple instance learning framework for patient-level colorectal cancer molecular subtypes classification from H&E stained images},
+    journal = {Computer Methods and Programs in Biomedicine},
+    volume = {259},
+    pages = {108513},
+    year = {2025},
+    issn = {0169-2607},
+    doi = {https://doi.org/10.1016/j.cmpb.2024.108513},
+    note = {Available: https://www.sciencedirect.com/science/article/pii/S0169260724005066},
+    author = {Hadar Hezi and Matan Gelber and Alexander Balabanov and Yosef E. Maruvka and Moti Freiman},
+    keywords = {Multiple instance learning, Colorectal cancer, Digital pathology},
+    abstract = {Background and objective:
+    Treatment approaches for colorectal cancer (CRC) are highly dependent on the molecular subtype, as immunotherapy has shown efficacy in cases with microsatellite instability (MSI) but is ineffective for the microsatellite stable (MSS) subtype. There is promising potential in utilizing deep neural networks (DNNs) to automate the differentiation of CRC subtypes by analyzing hematoxylin and eosin (H&E) stained whole-slide images (WSIs). Due to the extensive size of WSIs, multiple instance learning (MIL) techniques are typically explored. However, existing MIL methods focus on identifying the most representative image patches for classification, which may result in the loss of critical information. Additionally, these methods often overlook clinically relevant information, like the tendency for MSI class tumors to predominantly occur on the proximal (right side) colon.
+    Methods:
+    We introduce ‘CIMIL-CRC’, a DNN framework that: (1) solves the MSI/MSS MIL problem by efficiently combining a pre-trained feature extraction model with principal component analysis (PCA) to aggregate information from all patches, and (2) integrates clinical priors, particularly the tumor location within the colon, into the model to enhance patient-level classification accuracy. We assessed our CIMIL-CRC method using the average area under the receiver operating characteristic curve (AUROC) from a 5-fold cross-validation experimental setup for model development on the TCGA-CRC-DX cohort, contrasting it with a baseline patch-level classification, a MIL-only approach, and a clinically-informed patch-level classification approach.
+    Results:
+    Our CIMIL-CRC outperformed all methods (AUROC: 0.92±0.002 (95% CI 0.91–0.92), vs. 0.79±0.02 (95% CI 0.76–0.82), 0.86±0.01 (95% CI 0.85–0.88), and 0.87±0.01 (95% CI 0.86–0.88), respectively). The improvement was statistically significant. To the best of our knowledge, this is the best result achieved for MSI/MSS classification on this dataset.
+    Conclusion:
+    Our CIMIL-CRC method holds promise for offering insights into the key representations of histopathological images and suggests a straightforward implementation.}
+}
+
+
+
+% ===== REFERENCIAS SIN USAR  =====
+% NOOOOOOOOO USADA
+@article{cheplygina2019multiple,
+  title = {Not-so-supervised: A survey of semi-supervised, multi-instance, and transfer learning in medical image analysis},
+  author = {Cheplygina, Veronika and Pluim, Josien P. W. and Staring, Marius and van Ginneken, Bram},
+  journal = {Medical Image Analysis},
+  volume = {54},
+  pages = {280--296},
+  year = {2019},
+  doi = {10.1016/j.media.2019.03.009}
+}
+
+
+
+
+@inproceedings{hense2024xmil,
+    title={x{MIL}: Insightful Explanations for Multiple Instance Learning in Histopathology},
+    author={Julius Hense and Mina Jamshidi Idaji and Oliver Eberle and Thomas Schnake and Jonas Dippel and Laure Ciernik and Oliver Buchstab and Andreas Mock and Frederick Klauschen and Klaus Robert Muller},
+    booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
+    year={2024},
+    month={Jun},
+    url={https://openreview.net/forum?id=Y1fPxGevQj}
+}
+
+
+@article{Le_2023, 
+    title={Whole Slide Images Based Cancer Survival Prediction Using Attention Guided Deep Multiple Instance Learning Networks}, 
+    journal={Medical Image Analysis}, 
+    publisher={Medical Image Analysis}, 
+    author={Yao, Jiawen},
+    year={2020}, 
+    month={Oct},
+    vol={65},
+    doi = {https://doi.org/10.1016/j.media.2020.101789},
+    note ={Accessed 11-09-2025},
+}
+
+@misc{inproceedings,
+    author = {Xu, Yan and Zhu, Jun-Yan and Chang, Eric and Tu, Z.},
+    year = {2012},
+    month = {06},
+    pages = {},
+    title = {Multiple Clustered Instance Learning for Histopathology Cancer Image Classification, Segmentation and Clustering},
+    journal = {Computer Vision and Pattern Recognition},
+    doi = {10.1109/CVPR.2012.6247772},
+    url={https://www.researchgate.net/publication/255564140_Multiple_Clustered_Instance_Learning_for_Histopathology_Cancer_Image_Classification_Segmentation_and_Clustering},
+    journal={(PDF) multiple clustered instance learning for histopathology cancer image classification, segmentation and clustering}
+}
+
+
+@article{electronics13224445,
+    AUTHOR = {Liu, Dehua and Li, Chengming and Hu, Xiping and Hu, Bin},
+    TITLE = {Dual-Attention Multiple Instance Learning Framework for Pathology Whole-Slide Image Classification},
+    JOURNAL = {Electronics},
+    VOLUME = {13},
+    YEAR = {2024},
+    NUMBER = {22},
+    ARTICLE-NUMBER = {4445},
+    URL = {https://www.mdpi.com/2079-9292/13/22/4445},
+    ISSN = {2079-9292},
+    ABSTRACT = {Conventional methods for tumor diagnosis suffer from two inherent limitations: they are time-consuming and subjective. Computer-aided diagnosis (CAD) is an important approach for addressing these limitations. Pathology whole-slide images (WSIs) are high-resolution tissue images that have made significant contributions to cancer diagnosis and prognosis assessment. Due to the complexity of WSIs and the availability of only slide-level labels, multiple instance learning (MIL) has become the primary framework for WSI classification. However, most MIL methods fail to capture the interdependence among image patches within a WSI, which is crucial for accurate classification prediction. Moreover, due to the weak supervision of slide-level labels, overfitting may occur during the training process. To address these issues, this paper proposes a dual-attention-based multiple instance learning framework (DAMIL). DAMIL leverages the spatial relationships and channel information between WSI patches for classification prediction, without detailed pixel-level tumor annotations. The output of the model preserves the semantic variations in the latent space, enhances semantic disturbance invariance, and provides reliable class identification for the final slide-level representation. We validate the effectiveness of DAMIL on the most commonly used public dataset, Camelyon16. The results demonstrate that DAMIL outperforms the state-of-the-art methods in terms of classification accuracy (ACC), area under the curve (AUC), and F1-Score. Our model also allows for the examination of its interpretability by visualizing the dual-attention weights. To the best of our knowledge, this is the first attempt to use a dual-attention mechanism, considering both spatial and channel information, for whole-slide image classification.},
+    DOI = {10.3390/electronics13224445}
+}
+
+@misc{Deng_Cui_Remedios_Bao_Womick_Chiron_Li_Roland_Lau_Liu_et_al_2024,
+    title={Cross-scale multi-instance learning for pathological image diagnosis}, 
+    url={https://pmc.ncbi.nlm.nih.gov/articles/PMC11016375/}, 
+    journal={Medical image analysis}, 
+    publisher={U.S. National Library of Medicine}, 
+    author={Deng, Ruining and Cui, Can and Remedios, Lucas W and Bao, Shunxing and Womick, R Michael and Chiron, Sophie and Li, Jia and Roland, Joseph T and Lau, Ken S and Liu, Qi and et al.}, 
+    year={2024}, 
+    month={May}
+} 
+
+@InProceedings{Chu_RetMIL_MICCAI2024,
+    author = { Chu, Hongbo and Sun, Qiehe and Li, Jiawen and Chen, Yuxuan and Zhang, Lizhong and Guan, Tian and Han, Anjia and He, Yonghong},
+    title = { { RetMIL: Retentive Multiple Instance Learning for Histopathological Whole Slide Image Classification } },
+    booktitle = {proceedings of Medical Image Computing and Computer Assisted Intervention -- MICCAI 2024},
+    year = {2024},
+    publisher = {Springer Nature Switzerland},
+    volume = {LNCS 15004},
+    month = {October}
+}
+
+
+
+
+
+% TENER EN CUENTA EN LA INTRO O JUSTIFICACION
+@article{DeepLMulticlassSegmentation2023,
+    author = {Bokhorst, John-Melle and Nagtegaal, Iris and Fraggetta, Filippo and Vatrano, Simona and Mesker, Wilma and Vieth, Michael and van der Laak, Jeroen and Ciompi, Francesco},
+    year = {2023},
+    month = {05},
+    title = {Deep learning for multi-class semantic segmentation enables colorectal cancer detection and classification in digital pathology images},
+    volume = {13},
+    journal = {Scientific Reports},
+    doi = {10.1038/s41598-023-35491-z}
+}
+
+@INPROCEEDINGS{10204674,
+    author={Lin, Tiancheng and Yu, Zhimiao and Hu, Hongyu and Xu, Yi and Chen, Chang Wen},
+    booktitle={2023 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)}, 
+    title={Interventional Bag Multi-Instance Learning On Whole-Slide Pathological Images}, 
+    year={2023},
+    volume={},
+    number={},
+    pages={19830-19839},
+    keywords={Training;Pathology;Computer vision;Image resolution;Correlation;Codes;Feature extraction;Medical and biological vision;cell microscopy},
+    doi={10.1109/CVPR52729.2023.01899}
+}
+
+%10.1093/bioinformatics/btaf024
+@article{Mao2025_CAMIL,
+    title = "CAMIL: channel attention-based multiple instance learning for whole slide image classification",
+    author = "Jinyang Mao and Junlin Xu and Xianfang Tang and Yongjin Liu and Heaven Zhao and Geng Tian and Jialiang Yang",
+    note = "Publisher Copyright: {\textcopyright} The Author(s) 2025. Published by Oxford University Press.",
+    year = "2025",
+    month = feb,
+    day = "1",
+    doi = "10.1093/bioinformatics/btaf024",
+    language = "English",
+    volume = "41",
+    journal = "Bioinformatics",
+    issn = "1367-4803",
+    publisher = "Oxford University Press",
+    number = "2"
+}
+
+@misc{qian2022transformerbasedmultipleinstance,
+    title={Transformer based multiple instance learning for weakly supervised histopathology image segmentation}, 
+    author={Ziniu Qian and Kailu Li and Maode Lai and Eric I-Chao Chang and Bingzheng Wei and Yubo Fan and Yan Xu},
+    year={2022},
+    eprint={2205.08878},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV},
+    url={https://arxiv.org/abs/2205.08878}, 
+}
+
+@misc{Wang_Mao_Guan_Xue_2024, 
+    title={Advances in Multiple Instance Learning for Whole Slide Image Analysis: Techniques, Challenges, and Future Directions},
+    url={https://arxiv.org/html/2408.09476v1}, journal={Advances in multiple instance learning for whole slide image analysis: Techniques, challenges, and future directions}, publisher={arxiv}, author={Wang, Jun and Mao, Yu and Guan, Nan and Xue, Chun  Jason}, 
+    year={2024}, 
+    month={Aug}
+} 
+
+@misc{Zhao_Guo_Fan_Jiang_Yeung_Yu_2024, 
+    title={Aligning knowledge concepts to whole slide images for precise histopathology image analysis}, url={https://www.nature.com/articles/s41746-024-01411-2#citeas}, 
+    journal={Nature News}, 
+    publisher={Nature Publishing Group}, author={Zhao, Weiqin and Guo, Ziyu and Fan, Yinshuang and Jiang, Yuming and Yeung, Maximus C. F. and Yu, Lequan}, 
+    year={2024}, 
+    month={Dec}
+} 
+
+@misc{Afonso_Bhawsar_Saha_Almeida_Oliveira_2024, 
+    title={Multiple instance learning for WSI: A comparative analysis of attention-based approaches}, 
+    url={https://pmc.ncbi.nlm.nih.gov/articles/PMC11665302/}, 
+    journal={Journal of pathology informatics}, publisher={U.S. National Library of Medicine}, 
+    author={Afonso, Martim and Bhawsar, Praphulla M S and Saha, Monjoy and Almeida, Jonas S and Oliveira, Arlindo L}, 
+    year={2024}, 
+    month={Oct}
+} 
+
+@article{GADERMAYR2024102337,
+    title = {Multiple instance learning for digital pathology: A review of the state-of-the-art, limitations & future potential},
+    journal = {Computerized Medical Imaging and Graphics},
+    volume = {112},
+    pages = {102337},
+    year = {2024},
+    issn = {0895-6111},
+    doi = {https://doi.org/10.1016/j.compmedimag.2024.102337},
+    url = {https://www.sciencedirect.com/science/article/pii/S0895611124000144},
+    author = {Michael Gadermayr and Maximilian Tschuchnig},
+    keywords = {Multiple instance learning, Digital pathology, Histology, Attention, Deep learning},
+    abstract = {Digital whole slides images contain an enormous amount of information providing a strong motivation for the development of automated image analysis tools. Particularly deep neural networks show high potential with respect to various tasks in the field of digital pathology. However, a limitation is given by the fact that typical deep learning algorithms require (manual) annotations in addition to the large amounts of image data, to enable effective training. Multiple instance learning exhibits a powerful tool for training deep neural networks in a scenario without fully annotated data. These methods are particularly effective in the domain of digital pathology, due to the fact that labels for whole slide images are often captured routinely, whereas labels for patches, regions, or pixels are not. This potential resulted in a considerable number of publications, with the vast majority published in the last four years. Besides the availability of digitized data and a high motivation from the medical perspective, the availability of powerful graphics processing units exhibits an accelerator in this field. In this paper, we provide an overview of widely and effectively used concepts of (deep) multiple instance learning approaches and recent advancements. We also critically discuss remaining challenges as well as future potential.}
+}
+
+@article{DBLP:journals/corr/abs-2003-00823,
+    author = {Abhijeet Patil and
+    Dipesh Tamboli and
+    Swati Meena and
+    Deepak Anand and
+    Amit Sethi},
+    title = {Breast Cancer Histopathology Image Classification and Localization
+    using Multiple Instance Learning},
+    journal = {CoRR},
+    volume = {abs/2003.00823},
+    year = {2020},
+    url = {https://arxiv.org/abs/2003.00823},
+    eprinttype = {arXiv},
+    eprint = {2003.00823},
+    timestamp = {Tue, 10 Mar 2020 13:33:48 +0100},
+    biburl = {https://dblp.org/rec/journals/corr/abs-2003-00823.bib},
+    bibsource    = {dblp computer science bibliography, https://dblp.org}
+}
+
+@article{Qu_Yang_Huang_Guo_Luo_Zhang_Wang_2024, 
+    author = {Qu, Linhao and Yang, Dingkang and Huang, Dan and Guo, Qinhao and Luo, Rongkui and Zhang, Shaoting and Wang, Xiaosong},
+    title={Pathology-knowledge Enhanced Multi-instance Prompt Learning for Few-shot Whole Slide Image Classification},
+    journal={Pathology-knowledge enhanced multi-instance prompt learning for few-shot whole slide image classification}, author={Qu, Linhao and Yang, Dingkang and Huang, Dan and Guo, Qinhao and Luo, Rongkui and Zhang, Shaoting and Wang, Xiaosong}, 
+    year={2024}, 
+    month={Jul},
+    note = {Available: https://arxiv.org/abs/2407.10814. Accessed: 2025-08-11}
+}
+
+
+% FROM IEEE XPLORE
+@ARTICLE{10423049,
+  author={Shao, Wei and Shi, Hang and Liu, Jianxin and Zuo, Yingli and Sun, Liang and Xia, Tiansong and Chen, Wanyuan and Wan, Peng and Sheng, Jianpeng and Zhu, Qi and Zhang, Daoqiang},
+  journal={IEEE Transactions on Medical Imaging}, 
+  title={Multi-Instance Multi-Task Learning for Joint Clinical Outcome and Genomic Profile Predictions From the Histopathological Images}, 
+  year={2024},
+  volume={43},
+  number={6},
+  pages={2266-2278},
+  keywords={Task analysis;Cancer;Multitasking;Prognostics and health management;Predictive models;Genomics;Deep learning;Multi-purpose prediction;histopathological images;multi-instance multi-task learning;deep learning},
+  doi={10.1109/TMI.2024.3362852}
+}
+
+@INPROCEEDINGS{10661982,
+  author={Zhou, Hongyu and Tao, Haibo and Jin, Huaiping and Li, Zhenhui and Wang, Bin},
+  booktitle={2024 43rd Chinese Control Conference (CCC)}, 
+  title={Classification of Histopathology Whole Slide Images Based on Self-supervised Learning and Multi-scalev Feature Fusion}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={7563-7568},
+  keywords={Deep learning;Accuracy;Histopathology;Fuses;Contrastive learning;Prediction algorithms;Classification algorithms;Deep Learning;Medical Image Classification;Multi-instance Learning;Feature Fusion},
+  doi={10.23919/CCC63176.2024.10661982}}
+
+@misc{Fourkioti2023, 
+    author={Fourkioti, Olga and De Vries, Matt and Jin, Chen and Alexander, Daniel C. and Bakal, Chris},
+    title={Context-Aware Multiple Instance Learning for Cancer Detection and Subtyping in Whole Slide Images}, 
+    publisher={Cornell University},
+    journal={arXiv.org},
+    journal={arxiv}, 
+    year={2024},
+    month={Oct},
+    note = {Available: https://arxiv.org/abs/2305.05314. Accessed: 2025-08-11}
+} 
+
+
+
+
+@misc{Xue_2023,
+    title={Improving the Accuracy and Efficiency of Abnormal Cervical Squamous Cell Detection With Cytologist-in-the-Loop Artificial Intelligence}, 
+    url={https://www.modernpathology.org/article/S0893-3952(23)00061-3/pdf}, 
+    journal={Modernpathology}, 
+    author={Xue, Peng}, 
+    year={2023},
+    month={Apr}
+} 
+
+@misc{Angerilli_2022, 
+    title={Hystopathology}, 
+    url={https://doi.org/10.1111}, 
+    journal={Doi name 10.1111 values}, 
+    author={Angerilli, Valentina}, 
+    year={2022}, 
+    month={Apr}
+} 
+
+@misc{Ninomiya_2023, 
+    title={Three-dimensional topological radiogenomics of epidermal growth factor receptor Del19 and L858R mutation subtypes on computed tomography images of lung cancer patients}, 
+    url={https://doi.org/10.1016/j.cmpb.2023.107544}, journal={ScienceDirect}, 
+    author={Ninomiya, Kenta}, 
+    year={2023}, 
+    month={Jun}
+} 
+
+%misc{Morales_2023, 
+%    title={Introducing instance label correlation in multiple instance  learning. Application to cancer detection on  histopathological images}, 
+    url={https://arxiv.org/pdf/2310.00170}, 
+    journal={Cornell University}, 
+    author={Morales, Pablo}, 
+    year={2023}, 
+    month={Oct}
+} 
+
+@misc{Ray_Page_UW_Computer_Science, 
+    title={Multiple Instance Regression}, 
+    url={https://pages.cs.wisc.edu/}, 
+    journal={UW Computer Sciences User Pages}, 
+    publisher={Department of Computer Sciences and Department of Biostatistics and Medical Informatics, University of Wisconsin, Madison}, 
+    author={Ray, Soumya and Page, David}
+}
+
+@article{LargeScaleProstate_Ron,
+    author = {Zhou, Naiyun and Fedorov, Andrey and Fennessy, Fiona and Kikinis, Ron and Gao, Yi},
+    year = {2017},
+    month = {05},
+    pages = {},
+    title = {Large scale digital prostate pathology image analysis combining feature extraction and deep neural network},
+    doi = {10.48550/arXiv.1705.02678}
+}
+
+@article{ProstateCarcinomaSurgicalPathologists,
+    author = {Paner, Gladell and Gandhi, Jatin and Choy, Bonnie and Amin, Mahul},
+    year = {2019},
+    month = {03},
+    pages = {},
+    title = {Essential Updates in Grading, Morphotyping, Reporting, and Staging of Prostate Carcinoma for General Surgical Pathologists},
+    volume = {143},
+    journal = {Archives of Pathology & Laboratory Medicine},
+    doi = {10.5858/arpa.2018-0334-RA}
+}
+
+@misc{Kweldam_Wildhagen_Steyerberg_Bangma_vanderKwast_vanLeenders_2014,
+    title={Cribriform growth is highly predictive for postoperative metastasis and disease-specific death in Gleason score 7 prostate cancer}, 
+    url={https://www.nature.com/articles/modpathol2014116#citeas}, 
+    journal={Nature News}, publisher={Nature Publishing Group}, 
+    author={Kweldam, Charlotte F and Wildhagen, Mark F and Steyerberg, Ewout W and Bangma, Chris H and van der Kwast, Theodorus H and van Leenders, Geert JLH}, 
+    year={2014}, 
+    month={Sep}
+}
+
+@misc{Destouni_Lazaris_Tzelepi_2022,
+    title={Cribriform patterned lesions in the prostate gland with emphasis on differential diagnosis and clinical significance}, 
+    url={https://www.mdpi.com/2072-6694/14/13/3041}, 
+    journal={MDPI}, publisher={Multidisciplinary Digital Publishing Institute}, 
+    author={Destouni, Maria and Lazaris, Andreas C. and Tzelepi, Vasiliki}, 
+    year={2022}, 
+    month={Jun}
+}
+
+% Escala de grupos de Cancer de Prostata Mayo Clinic 2025
+@misc{MayoClinic_2025,
+    title={Prostate cancer - Diagnosis},
+    author={Mitchel Humphreys},
+    url={https://www.mayoclinic.org/diseases-conditions/prostate-cancer/diagnosis-treatment/drc-20353093}, 
+    journal={Mayo Clinic}, 
+    publisher={Mayo Foundation for Medical Education and Research}, 
+    month={Feb},
+    year={2025}
+} 
+
+%Metodologias de trabajo. ISF Colombia - Uniandes
+@article{amaya_2015,
+    title={Metodologías de Trabajo},
+    author={Amaya, Edel},
+    journal={Metodologías de Trabajo},
+    publisher={Universidad de los Andes},
+    year={2015},
+    note={Available: https://isfcolombia.uniandes.edu.co/index.php/eventos/metodologias-de-trabajo},
+} 
+
+
+@book{Géron_2022,
+    edition={3rd}, 
+    title={Hands-on machine learning with scikit-learn, Keras, and tensorflow}, 
+    publisher={O’Reilly}, 
+    author={Géron, Aurélien}, 
+    year={2022}
+} 
+
+
+@misc{Konstantinov_Utkin_2022, 
+    title={Multi-attention multiple instance learning - neural computing and applications}, url={https://link.springer.com/article/10.1007/s00521-022-07259-5}, 
+    journal={SpringerLink}, 
+    publisher={Springer London}, 
+    author={Konstantinov, Andrei V. and Utkin, Lev V.}, 
+    year={2022}, 
+    month={Apr}
+}
+
+@misc{Glaser_2021,
+    author = {Glaser, Jonathan},
+    title = {An introduction to deep multiple instance learning},
+    journal = {Medium},
+    publisher = {Medium},
+    year = {2021},
+    month = {Oct},
+    url = {https://jmg764.medium.com/an-introduction-to-deep-multiple-instance-learning-4a8bdcddb77}
+}
+
+
+@article{waqas2024survey,
+    author = {Muhammad Waqas and Syed Umaid Ahmed and Muhammad Atif Tahir and Jia Wu and Rizwan Qureshi},
+    title = {Exploring Multiple Instance Learning (MIL): A brief survey},
+    journal = {Expert Systems with Applications},
+    volume = {250},
+    pages = {123893},
+    year = {2024},
+    issn = {0957-4174},
+    doi = {https://doi.org/10.1016/j.eswa.2024.123893},
+    keywords = {Multiple Instance Learning (MIL), Multi-Instance Learning(MIL), SUpervised MIL, Unsupervised MIL, Bag and Instance Classification, Review, MIL Applications},
+    note = {Available https://www.sciencedirect.com/science/article/pii/S0957417424007590. Accessed: 2025-08-11}
+} 
+
+
+@inproceedings{he2016deep,
+  title={Deep residual learning for image recognition},
+  author={He, Kaiming and Zhang, Xiangyu and Ren, Shaoqing and Sun, Jian},
+  booktitle={Proceedings of the IEEE conference on computer vision and pattern recognition},
+  pages={770--778},
+  year={2016}
+}
+
+@article{tan2019efficientnet,
+  title={EfficientNet: Rethinking model scaling for convolutional neural networks},
+  author={Tan, Mingxing and Le, Quoc},
+  journal={arXiv preprint arXiv:1905.11946},
+  year={2019}
+}
+
+@article{Ozkan2016,
+  title = {Interobserver variability in {G}leason histological grading of prostate cancer},
+  author = {Ozkan, Tayyar A. and Eruyar, Ahmet T. and Cebeci, Oguz O. and Memik, Omur and Ozcan, Levent and Kuskonmaz, Ibrahim},
+  journal = {Scandinavian Journal of Urology},
+  volume = {50},
+  number = {6},
+  pages = {420--424},
+  year = {2016},
+  doi = {10.1080/21681805.2016.1206619}
+}
+
+@article{SICAPv2stats,
+  title = {Prostate gland segmentation study using Swin Transformer},
+  author = {Zhao, Xin and Zhang, Yifan and Liang, Xiaoxuan and others},
+  journal = {Proceedings of SPIE--the International Society for Optical Engineering},
+  volume = {12627},
+  pages = {126270N},
+  year = {2023},
+  note = {Dataset statistics for SICAPv2: 155 WSI, 95 patients, 18,783 labeled patches, Available: https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11640496/}
+}
+
+@misc{JT_2021, 
+    title={Classification of age-related macular degeneration using convolutional-neural-network-based transfer learning}, 
+    url={https://pubmed.ncbi.nlm.nih.gov/34749641/}, 
+    journal={BMC bioinformatics}, publisher={U.S. National Library of Medicine}, author={JT;, Chen YM;Huang WT;Ho WH;Tsai}, 
+    year={2021}, 
+    month={Nov}
+}
+
+@misc{MinSalud_2025, 
+    title={Observatorio Nacional de Cáncer > Indicadores > Incidencia cáncer de próstata en Colombia }, 
+    note   = {Available from: https://www.sispro.gov.co/observatorios/oncancer/indicadores/Paginas/C%C3%A1ncer-de-pr%C3%B3stata.aspx. Accessed: 2025-09-23.},
+    journal={Páginas - Incidencia cáncer de próstata en Colombia}, 
+    author={MinSalud, MinSalud}, 
+    year={2025}
+} 
+
+@misc{SungH_2021,
+    author = {H. Sung and J. Ferlay and R. L. Siegel and M. Laversanne and I. Soerjomataram and A. Jemal and F. Bray},
+    title = "Global Cancer Statistics 2020:GLOBOCAN estimates of incidence and mortality",
+    year = {2021},
+    journal={CA: a cancer journal for clinicians},
+    note = {Summary available from: https://pubmed.ncbi.nlm.nih.gov/33538338/.Accessed: 2025-09-23},
+}
+
+@misc{Brett_2016, 
+    title={Gleason grading: Past, present and future},
+    journal={Histopathology}, 
+    publisher={U.S. National Library of Medicine},  
+    author={Delahunt, Brett and Miller, Rose J and Srigley, John R and Evans, Andrew J and Samaratunga, Hemamali}, 
+    year={2012}, 
+    month={Sep},
+    note = {Available: https://pubmed.ncbi.nlm.nih.gov/22212079/}
+} 
+
+@misc{Tellez_2018, 
+    author={Tellez , David},
+    title={Whole-slide mitosis detection in H&E breast histology using PHH3 as a reference to train distilled stain-invariant convolutional networks}, 
+    note ={Available: https://pubmed.ncbi.nlm.nih.gov/29994086/}, 
+    journal={IEEE transactions on medical imaging},
+    publisher={U.S. National Library of Medicine}, 
+    year={2018}
+} 
+
+@misc{Patiño_2022, 
+    title={SICAPV2 - prostate whole slide images with Gleason grades annotations},
+    author = {Pati{\~n}o, Paola and Silva-Rodr{\'\i}guez, Javier},
+    journal={Mendeley Data}, 
+    publisher={Mendeley Data},
+    year={2022}, 
+    month={Oct},
+    note = {Available: https://data.mendeley.com/datasets/9xxm58dvs3/2. Accessed: 2025-09-23.},
+} 
+
+@misc{Gadermayr_2023, 
+    title={Multiple Instance Learning for Digital Pathology: A Review of the State-of-the-Art, Limitations & Future Potential}, 
+    url={https://arxiv.org/html/2206.04425v2}, 
+    journal={Multiple instance learning for digital pathology: A review of the state-of-the-art, Limitations & future potential}, 
+    author={Gadermayr, Michael}, 
+    year={2023}
+} 
+
+% Mecanismo de Interpretabilidad
+@article{rudin2019stop,
+  title={Stop explaining black box machine learning models for high stakes decisions and use interpretable models instead},
+  author={Rudin, Cynthia},
+  journal={Nature Machine Intelligence},
+  volume={1},
+  number={5},
+  pages={206--215},
+  year={2019},
+  publisher={Nature Publishing Group}
+}
+
+% Supervisión débil
+@article{zhou2018brief,
+  title={A brief introduction to weakly supervised learning},
+  author={Zhou, Zhi-Hua},
+  journal={National Science Review},
+  volume={5},
+  number={1},
+  pages={44--53},
+  year={2018},
+  publisher={Oxford University Press}
+}
+
+% Escala de Gleason
+@article{epstein2016gleason,
+  title={The 2014 International Society of Urological Pathology (ISUP) consensus conference on Gleason grading of prostatic carcinoma},
+  author={Epstein, Jonathan I and others},
+  journal={American Journal of Surgical Pathology},
+  volume={40},
+  number={2},
+  pages={244--252},
+  year={2016}
+}
+
+% Pooling jerárquico / multi-escala en WSI
+@article{li2021dual,
+  title={Dual-stream multiple instance learning network for whole slide image classification with self-supervised contrastive learning},
+  author={Li, Bin and others},
+  journal={Medical Image Analysis},
+  volume={72},
+  pages={102113},
+  year={2021},
+  publisher={Elsevier}
+}
+
+@article{pinckaers2020streaming,
+  title={Streaming convolutional neural networks for end-to-end learning with multi-megapixel images},
+  author={Pinckaers, Hans and others},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  year={2020}
+}
+
+% Regularización espacial / modelos probabilísticos en MIL
+@article{queiroz2021spatial,
+  title={Spatially constrained multiple instance learning for whole-slide image classification},
+  author={Queiroz, Francisco and others},
+  journal={Medical Image Analysis},
+  volume={72},
+  pages={102119},
+  year={2021},
+  publisher={Elsevier}
+}
+

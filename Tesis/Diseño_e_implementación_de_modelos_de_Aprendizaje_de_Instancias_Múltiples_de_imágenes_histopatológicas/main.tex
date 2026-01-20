@@ -1,0 +1,165 @@
+%%
+%% This is file `monografia.tex'
+%%
+
+%%%%%%%%%%%%%%%%
+%% Plantilla para la presentaci\'on de monograf\'ias de trabajo de grado
+%% Carrera de Ingenier\'ia Electr\'onica
+%% Pontificia Universidad Javeriana - Cali
+%% Mayo 2020
+%%%%%%%%%%%%%%%%
+
+%\documentclass[11pt,twoside]{thesis-tg-ie-pujc}
+\documentclass{thesis-tg-ie-pujc} % Se utiliza la nueva clase
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{enumerate}
+\usepackage{longtable}
+\usepackage{xurl}
+\usepackage[breaklinks]{hyperref}
+\usepackage{makeidx}
+\usepackage{multicol}
+\usepackage{graphics}
+\usepackage{pdflscape} % provides the landscape environment
+\usepackage{ragged2e} % provides \RaggedLeft
+\usepackage[intoc, spanish]{nomencl}
+\usepackage[spanish]{babel}
+% Nota: la clase/paquetes ya proporcionan \captionof; se eliminó \usepackage{capt-of} para evitar conflicto
+
+%%%%%%%%%%%%%%%%%%
+\include{author_data}
+\include{thesis-tg-ie-pujc}
+\makeindex
+
+%%%%%%%%%%%%%%%%%%
+% INICIO DEL DOCUMENTO
+%%%%%%%%%%%%%%%%%%
+\begin{document}
+
+\maketitle
+\makecoverletter
+
+%%%%%%%%%%%%%%%%%% DEDICATORIA %%%%%%%%%%%%%%%%%%
+\chapter*{Dedicatoria}
+\input{Presentacion proyecto/Dedicatoria}
+
+%%%%%%%%%%%% AGRADECIMIENTOS %%%%%%%%%%%%%%%%%
+\chapter*{Agradecimientos }
+\input{Presentacion proyecto/agradecimientos}
+
+%%%%%%%%%%%%%%%%%%
+% ABSTRACT
+%%%%%%%%%%%%%%%%%%
+\chapter*{Resumen}
+\input{Presentacion proyecto/resumen}
+
+\chapter*{Abstract}
+\input{Presentacion proyecto/abstract}
+
+%%%%%%%%%%%%%%%%%
+%%%% TABLE OF CONTENTS
+%%%% AND PREAMBLE
+%%%%%%%%%%%%%%%%%
+
+\tableofcontents
+\listoffigures
+
+%%%%%%%%%%%%%%%%%
+%%%% MAIN MATTER
+%%%%%%%%%%%%%%%%%
+
+\cleardoublepage
+\dominitoc
+\mainmatter
+
+%%%%%%% INTRODUCCION %%%%%%%%%%%%%%%%%%b 
+\chapter{Introducción}
+\input{Antecedentes/introduccion}
+
+%%%%%%%%%%%%%%%%%% PLANTEAMIENTO DEL PROBLEMA %%%%%%%%%%%%%%%%%%%%
+\chapter{Descripción del Problema}
+\input{Problema/planteamiento}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% OBJETIVOS
+%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Objetivos}
+\input{Objetivos/objetivos}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% MARCO TEORICO
+%%%%%%%%%%%%%%%%%%%%%%
+\chapter{Marco Teórico}
+\section{Términos clave}
+\input{Marco Teórico/terminos_clave}
+
+\section{Cáncer de próstata y escala de Gleason}
+\input{Marco Teórico/cancer_prostata_escala_gleason}
+
+\section{Histopatología digital y Whole Slide Images (WSI)}
+\input{Marco Teórico/hispatologia_WSI}
+
+\section{Redes neuronales convolucionales como extractores de características}
+\input{Marco Teórico/redes_neuronales}
+
+\section{Aprendizaje de Instancias Múltiples (MIL)}
+\input{Marco Teórico/aprendizaje_MIL}
+
+\section{Métricas de evaluación y análisis}
+\input{Marco Teórico/metricas}
+
+%%%%%%%%%%%%%%%%%%%%%%
+% ESTADO DEL ARTE
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Estado del Arte}
+\input{Marco Teórico/estado_del_arte}
+
+%%%%%%% Definición de Requisitos %%%%%%%%%%%%%
+\chapter{Definición de Requisitos}
+\input{Requisitos/requisitos}
+
+\chapter{Diseño del Pipeline}
+\input{Requisitos/diseño_pipeline}
+
+%%%%%%% CONCEBIR %%%%%%%%%%%%%
+\chapter{Metodología Experimental y Resultados}
+\input{Concebir/Resultados}
+
+%%%%%%% MECANISMO DE ATENCIÓN %%%%%%%
+\chapter{Análisis de Resultados y Mecanismo de Atención}
+\input{Concebir/Analisis_Resultados}
+
+%%%%%%% DIFICULTADES y CONCLUSIONES %%%%%%%%%%%%%
+\chapter{Dificultades}
+\input{Dificultades y Conclusiones/dificultades}
+\chapter{Conclusiones y Trabajo Futuro}
+\input{Dificultades y Conclusiones/conclusiones}
+
+%%%%%%% CRONOGRAMA %%%%%%%%%%%%%
+%\chapter{Cronograma}
+%\input{Cronograma/cronograma}
+
+%%%%%% ANEXOS %%%%%%%%%%%%%
+\chapter{Anexos}
+\input{Anexos/anexos}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BIBLIOGRAFIA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{biblio}
+
+%%%%%%%%%%%%%%%%
+% GENERAL INDEX
+%%%%%%%%%%%%%%%%
+\printindex
+
+\end{document}
+\endinput
+
+%%
+%% End of file `main.tex'.
+
+
+

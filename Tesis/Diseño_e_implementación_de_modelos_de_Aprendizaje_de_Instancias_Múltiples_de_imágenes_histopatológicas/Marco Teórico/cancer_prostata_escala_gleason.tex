@@ -1,0 +1,17 @@
+El cáncer de próstata representa una de las principales causas de morbilidad y mortalidad en la población masculina a nivel global, lo que sitúa a su diagnóstico y pronóstico como prioridades críticas en la salud pública. En la práctica clínica actual, estas tareas dependen fundamentalmente de la evaluación histopatológica, donde el examen de biopsias mediante tinciones convencionales de hematoxilina y eosina (H\&E) permite la aplicación de la escala de Gleason. Este sistema de gradación, basado en el análisis de los patrones arquitecturales de las glándulas prostáticas, constituye el referente para clasificar la agresividad tumoral y definir el riesgo clínico del paciente \cite{litjens2017survey} \cite{Brett_2016}.\newline
+
+Sin embargo, la transición hacia una medicina de precisión exige integrar este dominio clínico con las capacidades de la ciencia de datos. Debido a que la interpretación de estas muestras genera grandes volúmenes de información visual de alta complejidad, se hace indispensable el uso de técnicas computacionales avanzadas. En este sentido, la presente sección revisa los conceptos fundamentales y los marcos metodológicos de aprendizaje profundo que permiten modelar estos datos provenientes de imágenes digitales, facilitando así una transición coherente desde la observación patológica tradicional hacia soluciones de diagnóstico asistido por computadora.\newline
+
+Ahora bien, la asignación del puntaje de Gleason presenta una variabilidad interobservador significativa. Esta subjetividad resulta particularmente crítica en la diferenciación entre patrones limítrofes, como Gleason 3 y Gleason 4, al igual que en la identificación de subtipos histológicos asociados a peor pronóstico, entre ellos el patrón cribiforme \cite{SILVARODRIGUEZ2020105637}. Dicho patrón se caracteriza por estructuras glandulares con arquitectura tipo criba y se asocia a mayor agresividad tumoral y riesgo de recurrencia, lo que tiene implicaciones clínicas directas en la toma de decisiones terapéuticas.\newline
+
+Esta variabilidad diagnóstica resalta la necesidad de herramientas computacionales que contribuyan a mejorar la reproducibilidad y consistencia de la evaluación histopatológica, constituyendo así un punto de partida natural para la aplicación de metodologías de aprendizaje automático sobre imágenes histológicas digitalizadas.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/Four-basic-architectural-patterns-of-Gleason-pattern-4-A-Cribriform-glands-B-Fused_W640.jpg}
+    % \includegraphics[width=0.30\textwidth]{images/Example-of-a-cribriform-pattern_W640.jpg}
+    % \includegraphics[width=0.35\textwidth]{images/Gleason grade 4 patterns and intraductal carcinoma.jpg}
+    % \includegraphics[width=0.35\textwidth]{images/cancers-14-03041-g001.png}
+    \caption{Ejemplos representativos de patrones cribiformes (Gleason 4) en tejido prostático \cite{SILVARODRIGUEZ2020105637}.}
+    \label{fig:cribriform_patterns}
+\end{figure}

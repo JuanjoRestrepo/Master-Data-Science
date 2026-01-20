@@ -1,0 +1,182 @@
+\section{Recursos}
+
+Para la ejecución del proyecto se identifican y detallan a continuación los recursos humanos, equipos, software, datos y servicios necesarios. Se indica la titularidad o el origen de cada recurso (Javeriana = aportado por la universidad; Recursos propios = aportado por los integrantes o laboratorio) y la disponibilidad o mecanismo para su acceso. No se incluyen tablas de presupuesto monetario en cumplimiento de la observación del evaluador; la estimación económica podrá entregarse por separado si se requiere.
+
+\subsection{Participantes}
+\begin{itemize}
+    \item \textbf{María Valentina Belalcázar Perdomo:} Ingeniera Ambiental con especialización en Seguridad y Salud en el Trabajo, analítica de datos y sólida trayectoria en auditoría interna, implementación y mejora continua de Sistemas Integrados de Gestión (SIG) bajo estándares de calidad, medio ambiente, seguridad y salud ocupacional.
+    
+    \item \textbf{Juan José Restrepo Rosero:} Ingeniero Electrónico, con experiencia en desarrollo de software DevOps. Competencias técnicas en Python, PyTorch y despliegue de pipelines locales.
+    
+    \item \textbf{Dr. Julián Gil González:} Director del proyecto, profesor catedrático de la Pontificia Universidad Javeriana - Cali. Doctor en Ingenierías y Magíster en Ingeniería Eléctrica, con especialización en Reconocimiento de Patrones y Aprendizaje Automático por la Universidad Tecnológica de Pereira. Cuenta con más de diez años de experiencia en el desarrollo de modelos de Aprendizaje Automático. Posee una sólida trayectoria en visión por computadora y procesamiento del lenguaje natural. Ha diseñado e implementado modelos de AA utilizando TensorFlow y PyTorch, y ha participado en proyectos colaborativos relacionados con aplicaciones de inteligencia artificial en ámbitos como la bioingeniería y los sistemas de transporte masivo.
+\end{itemize}
+
+\subsection{Descripción general de recursos materiales y su disponibilidad}
+A continuación se listan los recursos materiales y su origen. Se especifica la forma de acceso y una nota sobre disponibilidad.
+
+\begin{itemize}
+    \item \textbf{Equipos de cómputo:}
+    \begin{itemize}
+        \item 2 estaciones de trabajo Asus TUF equipadas para entrenamiento local (GPU compatible). \textit{Origen: Recursos propios. Disponibilidad: confirmada por los integrantes para desarrollo y pruebas iniciales.}
+        \item Infraestructura de cómputo de la Facultad / Laboratorio (acceso a servidores y/o GPUs según políticas de la universidad). \textit{Origen: Javeriana. Disponibilidad sujeta a coordinación con la Facultad.}
+        \item Opción de instancias en la nube (AWS/GCP/Azure) para entrenamientos a gran escala — a cotizar y utilizar sólo si las pruebas locales indican necesidad. \textit{Origen: externo / por contratar si aplica.}
+    \end{itemize}
+
+    \item \textbf{Software y herramientas:}
+    \begin{itemize}
+        \item Lenguajes y bibliotecas: Python, PyTorch, TensorFlow, scikit-learn, OpenSlide, tifffile, OpenCV, pandas, matplotlib, etc. \textit{Origen: Software libre / provisto por la universidad.}
+        \item Gestión y reproducibilidad: Git (repositorio en GitHub), environment.yml / requirements.txt, scripts de ejecución y notebooks reproducibles. \textit{Origen: Recursos propios.}
+        \item Servicios para seguimiento y registro (opcional): Weights \& Biases, TensorBoard. \textit{Origen: externos; uso según disponibilidad y presupuesto.}
+    \end{itemize}
+
+    \item \textbf{Datos:}
+    \begin{itemize}
+        \item \textbf{SICAPv2} — Prostate Whole Slide Images with Gleason grades (dataset público). Contiene WSI y metadatos (155 WSI, ~95 pacientes, \textasciitilde18,783 parches etiquetados). \textit{Origen: público; licencia académica/uso para investigación.} Se adjunta referencia y enlace en la bibliografía.
+        \item (Si aplica) Datos clínicos adicionales o colaboraciones con instituciones: se documentarán y se presentarán autorizaciones/consentimientos según la normativa ética vigente antes de su uso.
+    \end{itemize}
+
+    \item \textbf{Otros servicios y apoyo:}
+    \begin{itemize}
+        \item Acceso a bibliotecas científicas y bases de datos institucionales (PUJC). \textit{Origen: Javeriana.}
+        \item Soporte de TI para instalación de software y acceso a recursos de la Facultad (según proceda). \textit{Origen: Javeriana.}
+    \end{itemize}
+\end{itemize}
+
+\subsection{Aseguramiento de acceso y validación de disponibilidad}
+\begin{itemize}
+    \item \textbf{Acceso a datos:} SICAPv2 es público y se dispone del enlace oficial para descarga; se documentará el procedimiento de obtención y la fecha de descarga en los metadatos del repositorio del proyecto.
+    \item \textbf{Acceso a cómputo:} Las estaciones de trabajo propias permitirán las pruebas iniciales y el desarrollo del pipeline. Para experimentos que requieran mayor capacidad se solicitará acceso a recursos de la Facultad y/o uso controlado de instancias en la nube (previa justificación técnica y, en caso de requerir financiación, cotización).
+    \item \textbf{Documentación y reproducibilidad:} Se mantendrá un repositorio Git con control de versiones, scripts automatizados para generación de parches, preprocesamiento, entrenamiento y evaluación, además de ficheros de entorno (environment.yml / requirements.txt) y semillas de aleatoriedad para garantizar trazabilidad.
+\end{itemize}
+
+\subsection{Entregables relacionados con recursos}
+\begin{itemize}
+    \item Pipeline de preprocesamiento y extracción de parches (documentado).
+    \item Repositorio de código con implementaciones reproducibles y checkpoints de modelos (si aplicable).
+    \item Registro de metadatos: splits por paciente, rutas de parches y versiones de datasets.
+    \item Informe de disponibilidad y validación de recursos (incluye confirmación de acceso a la infraestructura universitaria cuando sea necesario).
+\end{itemize}
+
+
+
+% Para la ejecución del proyecto se identifican y detallan a continuación los recursos humanos, equipos, software y servicios necesarios. Se presentan estimaciones de costos y origen de los recursos (propios/externos). Las cifras indicadas son estimadas y deberán ajustarse cuando se encuentren confirmadas las cantidades exactas y las cotizaciones finales.
+
+% \section{Participantes}
+% \begin{itemize}
+%     \item \textbf{María Valentina Belalcázar Perdomo}: Ingeniera Ambiental con especialización en Seguridad y Salud en el Trabajo, analítica de datos y sólida trayectoria en auditoría interna, implementación y mejora continua de Sistemas Integrados de Gestión (SIG) bajo estándares de calidad, medio ambiente, seguridad y salud ocupacional. 
+    
+%     \item \textbf{Juan José Restrepo Rosero}: Ingeniero Electrónico, con experiencia como desarrollador de software DevOps. Competencias técnicas en Python, PyTorch y despliegue de pipelines locales.
+    
+%     \item \textbf{Dr. Julián Gil González}: Director del proyecto; Profesor Catedrático, Pontificia Universidad Javeriana - Cali. Doctor en Ingenierías y Magíster en Ingeniería Eléctrica, con especialización en Reconocimiento de Patrones y Aprendizaje Automático por la Universidad Tecnológica de Pereira. Cuenta con más de diez años de experiencia en el desarrollo de modelos de Aprendizaje Automático. Posee una sólida trayectoria en visión por computadora y procesamiento del lenguaje natural. Ha diseñado e implementado modelos de AA utilizando TensorFlow y PyTorch, y ha participado en proyectos colaborativos relacionados con aplicaciones de inteligencia artificial en ámbitos como la bioingeniería y los sistemas de transporte masivo.
+% \end{itemize}
+
+
+% \section{Descripción general}
+% A continuación se desglosan los recursos por categoría y un resumen del presupuesto requerido. Se indica el origen del recurso (Javeriana = aportado por la universidad; Recursos propios = aportado por los integrantes o laboratorio) y si corresponde un desembolso en efectivo.
+
+% \subsection{Recursos humanos}
+% Los recursos humanos del proyecto están conformados por las personas listadas en la sección anterior, quienes realizarán las labores de investigación, diseño, implementación y análisis. A continuación se muestra una estimación de costos asociados:
+
+% \begin{table}[htb]
+%     \centering
+%     \resizebox{\textwidth}{!}{
+%     \begin{tabular}{|p{4.2cm}|c|c|c|c|c|c|c|}
+%     \hline 
+%     \multirow{2}{*}{Nombre} & \multirow{2}{*}{Valor Hora} & \multirow{2}{*}{Número Horas} & \multicolumn{2}{c|}{Javeriana} & \multicolumn{2}{c|}{Recursos propios} & \multirow{2}{*}{Total} \\
+%     \cline{4-7}
+%     & & & Especie & Efectivo & Especie & Efectivo & \\
+%     \hline
+%     Dr. Julián Gil González (dirección) & \$36,500 & 1 & \$0 & \$730,000 & \$0 & \$0 & \$730,000 \\
+%     \hline
+%     María Valentina Belalcázar Perdomo & \$10,000 & 1 & \$0 & \$0 & \$200,000 & \$0 & \$200,000 \\
+%     \hline
+%     Juan José Restrepo Rosero & \$10,000 & 1 & \$0 & \$0 & \$200,000 & \$0 & \$200,000 \\
+%     \hline
+%     \multicolumn{3}{|r|}{\textbf{TOTAL}} & \textbf{\$0} & \textbf{\$730,000} & \textbf{\$400,000} & \textbf{\$0} & \textbf{\$1,130,000} \\
+%     \hline
+%     \end{tabular}
+%     }
+%     \caption{Precio estimado de los recursos humanos del proyecto (valores en \$COP).}
+%     \label{tab:recursos_humanos}
+% \end{table}
+
+% \subsection{Equipos}
+% Los equipos a utilizar a lo largo del desarrollo de este proyecto pertenecen principalmente a los recursos propios del grupo. Se detallan los que requieren consideración presupuestal:
+
+% \begin{table}[htb]
+%     \centering
+%     \resizebox{\textwidth}{!}{
+%     \begin{tabular}{|p{4.2cm}|c|c|c|c|c|c|c|}
+%     \hline 
+%     \multirow{2}{*}{Nombre} & \multirow{2}{*}{Valor} & \multirow{2}{*}{Cantidad} & \multicolumn{2}{c|}{Javeriana} & \multicolumn{2}{c|}{Recursos propios} & \multirow{2}{*}{Total} \\
+%     \cline{4-7}
+%     & & & Especie & Efectivo & Especie & Efectivo & \\
+%     \hline
+%     Computador Asus TUF (estación de trabajo para entrenamiento local) & \$6,400,000 & 1 & \$0 & \$0 & \$6,400,000 & \$0 & \$6,400,000 \\
+%     \hline
+%     Computador Asus TUF (estación de trabajo para entrenamiento local) & \$6,400,000 & 1 & \$0 & \$0 & \$6,400,000 & \$0 & \$6,400,000 \\
+%     \hline
+%     % Si deseas añadir más equipos, descomenta y añade filas aquí.
+%     \multicolumn{3}{|r|}{\textbf{TOTAL}} & \textbf{\$0} & \textbf{\$0} & \textbf{\$12,800,000} & \textbf{\$0} & \textbf{\$12,800,000} \\
+%     \hline
+%     \end{tabular}
+%     }
+%     \caption{Precio estimado de los equipos a emplear (valores en \$COP).}
+%     \label{tab:equipos}
+% \end{table}
+
+% \subsection{Software}
+% Los paquetes y herramientas de software utilizados son de carácter preferentemente libre y/o provistos por la universidad. No se estiman costos de licencia en el presupuesto base:
+
+% \begin{table}[htb]
+%     \centering
+%     \begin{tabular}{|p{5.5cm}|c|c|c|c|c|c|c|}
+%     \hline 
+%     \multirow{2}{*}{Nombre} & \multirow{2}{*}{Valor} & \multirow{2}{*}{Cantidad} & \multicolumn{2}{c|}{Javeriana} & \multicolumn{2}{c|}{Recursos propios} & \multirow{2}{*}{Total} \\
+%     \cline{4-7}
+%     & & & Especie & Efectivo & Especie & Efectivo & \\
+%     \hline
+%     Python, PyTorch, TensorFlow, scikit-learn, herramientas de visualización & \$0 & 1 & \$0 & \$0 & \$0 & \$0 & \$0 \\
+%     \hline
+%     \textbf{TOTAL} & & & \textbf{\$0} & \textbf{\$0} & \textbf{\$0} & \textbf{\$0} & \textbf{\$0} \\
+%     \hline
+%     \end{tabular}
+%     \caption{Software principal a emplear (valores en \$COP).}
+%     \label{tab:software}
+% \end{table}
+
+% \subsection{Resumen final del presupuesto}
+% De acuerdo a las tablas de recursos técnicos y humanos, la siguiente tabla resume los montos finales de cada categoría y el origen de los recursos:
+% \newpage
+
+% \begin{table}[htb]
+%     \centering
+%     \begin{tabular}{|l|c|c|c|c|c|}
+%     \hline 
+%     \multirow{2}{*}{Rubro} & \multicolumn{2}{c|}{Javeriana} & \multicolumn{2}{c|}{Recursos propios} & \multirow{2}{*}{Total} \\
+%     \cline{2-5}
+%     & Especie & Efectivo & Especie & Efectivo & \\
+%     \hline
+%     Recurso humano & \$0 & \$730,000 & \$400,000 & \$0 & \$1,130,000 \\
+%     \hline
+%     Equipos & \$0 & \$0 & \$12,800,000 & \$0 & \$12,800,000 \\
+%     \hline
+%     Software & \$0 & \$0 & \$0 & \$0 & \$0 \\
+%     \hline
+%     \textbf{TOTAL GENERAL} & \textbf{\$0} & \textbf{\$730,000} & \textbf{\$13,200,000} & \textbf{\$0} & \textbf{\$13,930,000} \\
+%     \hline
+%     \end{tabular}
+%     \caption{Resumen final de presupuesto por rubro (valores en \$COP).}
+%     \label{tab:resumen_presupuesto}
+% \end{table}
+
+% \subsection{Notas y observaciones}
+% \begin{itemize}
+%     \item Las cifras presentadas son estimativas y deberán validarse con cotizaciones oficiales y confirmación de disponibilidad de recursos (equipos y horas de personal).
+%     \item Se considera que la universidad aporta infraestructura de cómputo básica; sin embargo, para entrenamientos a gran escala podría requerirse acceso a instancias en la nube (costo adicional no incluido en la tabla y a cotizar según necesidad).
+%     \item El desglose presenta el origen de los recursos (Javeriana = aportados por la universidad; Recursos propios = aportados por el equipo o laboratorio).
+% \end{itemize}
+
+
+
+

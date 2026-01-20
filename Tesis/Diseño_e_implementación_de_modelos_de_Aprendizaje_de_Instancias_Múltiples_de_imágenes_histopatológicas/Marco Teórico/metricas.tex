@@ -1,0 +1,16 @@
+La validación rigurosa de modelos en histopatología digital va más allá del simple desempeño numérico, requiriendo métricas que reflejen tanto la utilidad técnica como la relevancia clínica del sistema \cite{Géron_2022}. En este contexto, la evaluación se basa en un conjunto de indicadores clave, cada uno de los cuales ofrece una perspectiva diferente sobre el comportamiento del modelo:
+
+\begin{itemize}
+    \item \textbf{AUC (Área bajo la curva ROC):} evalúa la capacidad de discriminación del modelo para distinguir entre las clases positivas y negativas a través de todos los posibles umbrales de clasificación. Un valor de AUC cercano a 1 indica una excelente capacidad para rankear correctamente los casos.
+    
+    \item \textbf{Precisión:} mide la proporción de diagnósticos positivos correctos sobre el total de casos clasificados como positivos. En un escenario clínico, una alta precisión es crucial, ya que minimiza los falsos positivos que podrían llevar a tratamientos innecesarios.
+    
+    \item \textbf{Recall o sensibilidad:} cuantifica la proporción de casos positivos que el modelo identificó correctamente. Una alta sensibilidad es vital para evitar los falsos negativos, que representan el riesgo de no detectar una enfermedad en su etapa inicial.
+    
+    \item \textbf{F1-score:} representa la media armónica entre precisión y recall. Esta métrica es especialmente útil en conjuntos de datos desbalanceados, ya que proporciona un solo valor que resume el equilibrio entre evitar falsos positivos y falsos negativos.
+    
+    \item \textbf{Coeficiente Kappa de Cohen:} permite cuantificar el grado de acuerdo entre las predicciones del modelo y las etiquetas reales, corrigiendo el acuerdo que podría ocurrir por azar. A diferencia de la precisión simple, el coeficiente Kappa es particularmente relevante para comparar el desempeño del modelo con el grado de acuerdo interobservador entre especialistas humanos.
+    
+\end{itemize}
+    
+Más allá de las métricas numéricas, la interpretabilidad se erige como un pilar fundamental para la integración de estos sistemas en la práctica clínica. En este sentido, el uso de mecanismos de atención permite trascender la naturaleza de 'caja negra' de los modelos de aprendizaje profundo al identificar explícitamente las regiones histológicas que fundamentan la predicción. Complementariamente, la cuantificación de la incertidumbre actúa como un mecanismo de seguridad, permitiendo discriminar entre inferencias de alta confianza y casos ambiguos que exigen la intervención de un patólogo experto.\cite{Géron_2022}.

@@ -1,0 +1,35 @@
+El desarrollo de este proyecto conllevó una serie de retos técnicos y metodológicos derivados de la naturaleza de las imágenes histopatológicas y las restricciones de los entornos de cómputo. En esta sección se documentan las principales dificultades encontradas y las estrategias de mitigación implementadas para garantizar la viabilidad del sistema.
+
+\section{Dificultades Relacionadas con los Datos}
+
+\subsection{Gestión de Imágenes Gigapíxel y Volumen de Datos}
+El dataset SICAPv2, aunque constituye una versión procesada, proviene de imágenes de ultra-alta resolución (WSI). La principal dificultad radicó en el volumen de información: procesar más de 18,000 archivos individuales para la extracción de características superó inicialmente las capacidades de transferencia de datos de los entornos en la nube.\newline
+
+\textbf{Mitigación:} Se implementó un sistema de extracción de características por lotes (\textit{batch processing}) y se serializaron los vectores resultantes en formato binario (\texttt{.npy}). Esta estrategia redujo el tiempo de lectura en un 80\% para las fases de entrenamiento subsiguientes.
+
+\subsection{Variabilidad Cromática (Tinción H\&E)}
+Las láminas presentan variaciones significativas en la intensidad de los tintes de Hematoxilina y Eosina dependiendo del laboratorio y el tiempo de exposición. Esta falta de estandarización es un factor de ruido que puede inducir al modelo a aprender patrones de color en lugar de estructuras biológicas.\newline
+
+\textbf{Mitigación:} Se aplicaron algoritmos de filtrado en el espacio de color HSV para descartar regiones no informativas y se aseguró que el extractor de características (\textit{ResNet-50}) operara sobre parches con una normalización estadística consistente, centrando el aprendizaje en la morfología glandular.
+
+\section{Desafíos Computacionales y de Infraestructura}
+
+\subsection{Limitaciones de Memoria en GPU}
+El modelo \textit{Attention-based MIL} requiere cargar "bolsas" de parches en la memoria de video (VRAM). Debido a que algunas láminas contienen cientos de instancias, el entrenamiento generaba errores de desbordamiento (\textit{Out of Memory}) en las GPUs estándar (NVIDIA T4).\newline
+
+\textbf{Mitigación:} Se ajustó la lógica de carga para procesar bolsas de tamaño variable y se optimizó el uso de tensores mediante el vaciado de caché de PyTorch, permitiendo gestionar la heterogeneidad dimensional de las muestras sin degradar el rendimiento del modelo.
+
+\subsection{Conflictos de Dependencias}
+El manejo de archivos de patología digital requiere librerías como \textit{OpenSlide}, cuya integración en entornos de Python en la nube suele presentar conflictos de compatibilidad con los controladores del sistema. Se resolvieron mediante la configuración de entornos virtuales específicos y la gestión de dependencias basada en contenedores lógicos.
+
+\section{Dificultades Metodológicas}
+
+\subsection{El Riesgo de Fuga de Datos (\textit{Data Leakage})}
+Uno de los desafíos más críticos fue el riesgo de que parches de un mismo paciente estuvieran presentes simultáneamente en los conjuntos de entrenamiento y prueba. Debido a la similitud visual de las regiones de una misma lámina, esto inflaba artificialmente la exactitud del modelo.\newline
+
+\textbf{Mitigación:} Se descartó el uso de divisiones aleatorias convencionales y se implementó \textit{GroupKFold}. Esta técnica obliga a que la partición se realice estrictamente por \texttt{Patient\_ID}, garantizando que el modelo sea evaluado con sujetos completamente desconocidos, cumpliendo con el rigor científico exigido.
+
+\subsection{Desbalance de Clases y Subjetividad Clínica}
+La prevalencia de tejido benigno es superior a las muestras patológicas, y existe una "zona gris" de subjetividad en la graduación de Gleason.\newline
+
+\textbf{Mitigación:} Se optó por la dicotomización diagnóstica para la línea base y el uso de métricas robustas como la Exactitud Balanceada y el PR AUC, las cuales no se ven distorsionadas por la clase predominante y reflejan el desempeño real en la detección de malignidad.

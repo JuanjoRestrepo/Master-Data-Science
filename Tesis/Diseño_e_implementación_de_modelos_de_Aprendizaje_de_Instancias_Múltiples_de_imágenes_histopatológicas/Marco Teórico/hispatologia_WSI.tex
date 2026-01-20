@@ -1,0 +1,12 @@
+La histopatología digital, impulsada por el escaneo de muestras histológicas, ha revolucionado el análisis de tejidos al permitir la generación Whole Slide Images (WSI). Estas imágenes de resolución gigapíxel, como se puede apreciar en la figura \ref{fig:EjemploSuperResolucionWSI}, conservan la arquitectura tisular completa y posibilitan el análisis computacional a gran escala, prometiendo asistir a los patólogos al reducir el error humano y estandarizar los criterios de evaluación \cite{campanella2019clinical} \cite{lu2021data}.\newline
+
+No obstante, el uso de las WSI plantea desafíos técnicos significativos debido a su tamaño extremo y la heterogeneidad visual inherente al tejido. Para hacer viable su procesamiento, estas imágenes se dividen en pequeños bloques o parches. Esta segmentación, sin embargo, introduce nuevos retos, como la variabilidad de tinción entre laboratorios, la presencia de artefactos de preparación y la complejidad morfológica intra e interpaciente \cite{Tellez_2018}.\newline
+
+Ante esta restricción, el Aprendizaje de Instancias Múltiples surge como una alternativa particularmente atractiva, la cual permite entrenar modelos con etiquetas globales a nivel de la imagen (slide-level), reduciendo la dependencia de anotaciones exhaustivas por parte de expertos. Por lo tanto, cualquier pipeline reproducible bajo este esquema debe considerar cuidadosamente las decisiones de preprocesamiento, como la normalización de tinción y el filtrado por porcentaje de tejido, asegurando estrategias de muestreo que se adapten a la heterogeneidad del WSI. \cite{campanella2019clinical} \cite{lu2021data}.
+
+\begin{figure}[h]
+    \hspace*{4.5cm} % ajusta el valor según lo necesites (cm, mm, etc.)
+    \includegraphics[scale=0.2]{images/Ejemplo de Super-Resolucion WSI.png}
+    \caption{Ejemplo de imagen de super-resolución WSI \cite{Le_2023}}
+    \label{fig:EjemploSuperResolucionWSI}
+\end{figure}

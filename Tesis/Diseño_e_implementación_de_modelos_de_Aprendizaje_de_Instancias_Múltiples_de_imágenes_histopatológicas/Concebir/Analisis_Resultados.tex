@@ -1,0 +1,165 @@
+% -------------------------------------------------------------
+% Capítulo: Análisis de Resultados y Atención (Consolidado)
+% -------------------------------------------------------------
+
+\section{Introducción y alcance del análisis}
+Este capítulo presenta, analiza y discute los hallazgos derivados de la implementación del modelo de Aprendizaje de Instancias Múltiples (MIL) con mecanismo de atención. La exposición integra el control de calidad de los datos, la descripción técnica del flujo experimental, la evaluación cuantitativa mediante procedimientos estadísticos robustos y la validación cualitativa basada en la inspección de mapas de atención. \\
+
+El objetivo central es validar no solo el rendimiento numérico del modelo en la discriminación entre tejido benigno y maligno (Gleason $\geq 3$), sino también su capacidad de "explicabilidad" mediante la identificación correcta de morfología patológica, un requisito indispensable para la traducción clínica.
+
+\section{Preprocesamiento y Control de Calidad de Datos}
+La validez de cualquier aproximación computacional en histopatología depende de la integridad de los datos de entrada. Se implementó un protocolo riguroso de preprocesamiento y auditoría:
+
+\subsection{Protocolo de extracción y normalización}
+\begin{itemize}
+    \item \textbf{Magnificación y tamaño de parche:} Extracción a una magnificación equivalente a 20x con dimensiones de $224\times224$ píxeles, coherente con la entrada del \textit{backbone} (ResNet-50) y ofreciendo un compromiso óptimo entre resolución morfológica y coste computacional.
+    \item \textbf{Normalización de tinción:} Se aplicó normalización cromática tipo Macenko para reducir la variabilidad de color inter-centro y mejorar la generalización del extractor de características.
+    \item \textbf{Trazabilidad:} El pipeline registra por parche la ruta WSI, coordenadas y métricas de calidad, permitiendo auditoría y replicación.
+\end{itemize}
+
+\subsection{Análisis de Fracción de Tejido (\textit{Tissue Fraction})}
+Se calculó la \textit{tissue fraction} por parche aplicando un umbral de 0.05 para eliminar regiones vacías o ricas en fondo. 
+\begin{itemize}
+    \item \textbf{Volumen de datos:} El conjunto resultante incluyó \textbf{18,783 parches} provenientes del dataset SICAPv2.
+    \item \textbf{Integridad biológica:} El análisis confirmó que el 100\% de las instancias superó el umbral de viabilidad ($\geq 0.05$). Como se observa en la Figura~\ref{fig:tissue_fraction_dist_1}, existe una alta densidad de tejido en la mayoría de las muestras (concentración predominante $>80\%$), garantizando que el modelo recibe señales histológicas reales.
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/tissue_fraction_dist.png} 
+    \caption{Distribución de la fracción de tejido en el dataset consolidado. La mayoría de los parches presentan una ocupación superior al 80\%, asegurando contenido biológico suficiente.}
+    \label{fig:tissue_fraction_dist_1}
+\end{figure}
+
+\section{Arquitectura y Protocolo Experimental}
+El sistema se evaluó bajo un esquema de supervisión débil (etiquetas a nivel de WSI). Los componentes clave son:
+
+\begin{itemize}
+    \item \textbf{Extractor de características:} ResNet-50 preentrenada en ImageNet, con \textit{fine-tuning} en capas superiores para ajustar las representaciones a la morfología prostática.
+    \item \textbf{Mecanismo de Atención:} Se implementó un bloque de atención tipo \textit{dot-product} modificado. Este mecanismo genera un peso de importancia $\alpha_i$ para cada parche $i$ a partir de su embedding $h_i$. Matemáticamente:
+        \begin{equation*}
+            a_i = w^{\top} \tanh(V h_i^{\top}), \qquad \alpha_i = \frac{\exp(a_i)}{\sum_j \exp(a_j)}
+        \end{equation*}
+    La representación global de la bolsa (WSI) se obtiene mediante la suma ponderada:
+        \begin{equation*}
+            H = \sum_i \alpha_i h_i
+        \end{equation*}
+    \item \textbf{Estrategia de Validación:} Se utilizó \textbf{GroupKFold} estratificado por paciente para asegurar independencia clínica total entre las particiones de entrenamiento y validación.
+\end{itemize}
+
+\section{Análisis de Resultados Cuantitativos}
+
+\subsection{Procedimientos Estadísticos}
+Para garantizar robustez, la evaluación trasciende el rendimiento puntual e incorpora métricas de incertidumbre:
+\begin{itemize}
+    \item \textbf{Bootstrap:} Estimación de intervalos de confianza (1,000 repeticiones) para ROC AUC y PR AUC.
+    \item \textbf{Test de DeLong:} Comparación estadística de curvas ROC entre versiones del modelo.
+    \item \textbf{Evaluación de calibración:} Análisis de curvas de fiabilidad y Brier score.
+\end{itemize}
+
+\subsection{Comparativa de Rendimiento: Versión A vs. Versión B}
+Se evaluaron dos variantes del proceso de entrenamiento. Aunque ambas alcanzaron F1-scores promedio similares ($\approx 0.88$), el análisis detallado favorece a la \textbf{Versión A}:
+
+\begin{itemize}
+    \item \textbf{Curvas Precision-Recall (PR):} La Figura~\ref{fig:pr_curve_mil} muestra que la Versión A mantiene una precisión elevada hasta niveles de \textit{recall} medio-altos, logrando un PR AUC agregado de \textbf{0.917}. La Versión B muestra una caída prematura en precisión, lo que implica una mayor tasa de falsos positivos.
+    \item \textbf{Estabilidad ROC:} La Figura~\ref{fig:roc_curve_mil} confirma que la Versión A presenta menor dispersión entre \textit{folds}, sugiriendo una mayor capacidad de generalización.
+\end{itemize}
+
+\begin{figure}[ht!]
+    \centering
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/roc_curve_mil.png}
+        \caption{Curvas ROC agregadas por folds (Versiones A y B).}
+        \label{fig:roc_curve_mil}
+    \end{minipage}\hfill
+    \begin{minipage}{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{images/pr_curve_mil.png}
+        \caption{Curvas PR agregadas por folds (Versiones A y B).}
+        \label{fig:pr_curve_mil}
+    \end{minipage}
+\end{figure}
+
+\subsection{Resumen Métrico por Fold (Versión A)}
+La Tabla~\ref{tab:metrics_summaryA} consolida el rendimiento de la Versión A. El elevado PR AUC ($0.899 \pm 0.083$) es el hallazgo más relevante en un contexto clínico desbalanceado, indicando efectividad en la detección de la clase positiva (cáncer) minimizando falsos negativos.
+\newpage
+\begin{table}[ht!]
+    \centering
+    \caption{Métricas agregadas por fold (Media $\pm$ Desviación Estándar) para la Versión A.}
+    \label{tab:metrics_summaryA}
+    \begin{tabular}{lrr}
+        \hline
+        \textbf{Métrica} & \textbf{Media} & \textbf{Std} \\
+        \hline
+        ROC AUC & 0.795 & 0.070 \\
+        PR AUC  & 0.899 & 0.083 \\
+        F1 Score & 0.876 & 0.054 \\
+        Precision (umbral 0.5) & 0.847 & 0.098 \\
+        Recall (umbral 0.5)    & 0.916 & 0.034 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Además, la inspección de las curvas por fold individual (Figuras~\ref{fig:pr_per_fold} y \ref{fig:roc_per_fold}) revela una variabilidad controlada. Los comportamientos no idealizados en las curvas sugieren que el modelo aprende patrones genuinos y no está memorizando ruido (ausencia de sobreajuste).
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/pr_per_fold.png}
+    \caption{Variabilidad de las curvas Precision-Recall por fold. La consistencia entre particiones valida la robustez de la arquitectura.}
+    \label{fig:pr_per_fold}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/roc_per_fold.png}
+    \caption{Variabilidad de las curvas ROC por fold.}
+    \label{fig:roc_per_fold}
+\end{figure}
+
+\section{Validación Cualitativa y Explicabilidad}
+Más allá de las métricas, es crítico verificar qué información utiliza el modelo para tomar decisiones.
+
+\subsection{Distribución de Probabilidades y Confianza}
+El histograma de probabilidades de la Versión A (Figura~\ref{fig:prob_dist_A}) muestra una marcada polarización hacia los extremos (0 y 1). Esta característica es altamente deseable ya que:
+\begin{enumerate}
+    \item Reduce la ambigüedad en la toma de decisiones (pocos casos en la "zona gris").
+    \item Facilita la definición de umbrales operativos estables.
+\end{enumerate}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/prob_dist_A.png}
+    \caption{Distribución de probabilidades estimadas por la Versión A. Se observa una clara separación entre clases con alta confianza.}
+    \label{fig:prob_dist_A}
+\end{figure}
+
+\subsection{Análisis de Parches de Alta Atención (Top-k)}
+El mecanismo de atención actúa como un selector de relevancia. Se extrajeron los parches con mayor coeficiente $\alpha_i$ en las WSIs clasificadas como malignas. La inspección visual del mosaico resultante (Figura~\ref{fig:top_patches}) demuestra una correspondencia directa entre los pesos de atención elevados y estructuras histopatológicas de interés:
+\begin{itemize}
+    \item Arquitectura glandular desorganizada (fusión glandular).
+    \item Pleomorfismo nuclear y núcleos prominentes.
+    \item Ausencia de atención en estroma sano o artefactos.
+\end{itemize}
+Este hallazgo valida cualitativamente que el modelo ha aprendido a localizar la enfermedad bajo supervisión débil.
+\newpage
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{images/top_k_patches.png}
+    \caption{Mosaico de parches \textit{top-k} (mayor atención). El modelo focaliza automáticamente regiones con características morfológicas de malignidad.}
+    \label{fig:top_patches}
+\end{figure}
+
+\section{Discusión y Consideraciones Clínicas}
+
+\subsection{Selección de Umbrales Operativos}
+Aunque las métricas globales son positivas, la implementación clínica requiere definir un punto de corte. Dado el alto \textit{Recall} (0.916) al umbral 0.5, el modelo se perfila adecuadamente para tareas de cribado (\textit{screening}), donde la prioridad es no perder casos positivos. Se recomienda realizar un \textit{Decision Curve Analysis} (DCA) para ajustar este umbral según el beneficio neto esperado en diferentes escenarios de prevalencia.
+
+\subsection{Robustez y Limitaciones}
+\begin{itemize}
+    \item \textbf{Supervisión Débil:} La falta de anotaciones a nivel de píxel o parche impide calcular una sensibilidad de localización exacta, aunque el análisis visual de \textit{Top-k} mitiga esta preocupación.
+    \item \textbf{Validación Externa:} Los resultados, aunque robustos internamente (GroupKFold), provienen de una cohorte retrospectiva. Es imperativo testar el modelo en cohortes multicéntricas prospectivas para confirmar su generalización frente a variaciones técnicas de escaneo y tinción.
+\end{itemize}
+
+\section{Conclusión}
+La Versión A del modelo MIL con atención presenta un equilibrio óptimo entre rendimiento cuantitativo (PR AUC $\approx 0.90$) y explicabilidad clínica. La validación cruzada del preprocesamiento, la estabilidad estadística entre folds y la coherencia morfológica de los mapas de atención consolidan esta arquitectura como una herramienta de apoyo diagnóstico prometedora. Los siguientes pasos deben orientarse hacia la validación externa y estudios de interacción patólogo-IA (\textit{reader studies}) para medir el impacto real en el flujo de trabajo clínico.

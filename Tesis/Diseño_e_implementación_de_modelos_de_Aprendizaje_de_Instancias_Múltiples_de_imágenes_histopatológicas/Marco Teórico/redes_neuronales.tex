@@ -1,0 +1,16 @@
+Las redes neuronales convolucionales (CNN) se han establecido como el paradigma dominante en la visión por computadora debido a su capacidad intrínseca para aprender jerarquías de características espaciales y patrones visuales complejos \cite{Géron_2022}. En el contexto de la histopatología digital, las CNN se emplean fundamentalmente como extractores de características a nivel de parche, lo cual es vital para procesar las imágenes de diapositivas completas (WSI) dada su gran escala.\newline
+
+Cada parche es procesado individualmente por la CNN para generar una representación vectorial (embedding) que encapsula la información morfológica relevante, como las texturas, estructuras glandulares y patrones tisulares. Estas representaciones permiten reducir la subjetividad inherente a la interpretación visual humana y constituyen la entrada fundamental para los modelos MIL \cite{lu2021data} \cite{HEZI2025108513}.\newline
+
+A continuación, se presenta la figura \ref{fig:cnn_arch} que ilustra la arquitectura típica de una CNN.\newpage
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.3]{images/CNN_Typical_Arch.png}
+    \caption{Arquitectura típica de una red neuronal convolucional \cite{Géron_2022}}
+    \label{fig:cnn_arch}
+\end{figure}
+
+Una estrategia comúnmente adoptada es el uso de transfer learning con arquitecturas pre-entrenadas en grandes bases de datos como ImageNet. Modelos como ResNet o EfficientNet son adaptados para la tarea de clasificación histopatológica, lo cual acelera la convergencia del entrenamiento y mejora la generalización en conjuntos de datos de tamaño moderado \cite{lu2021data} \cite{he2016deep} \cite{tan2019efficientnet}. Para estabilizar el proceso de aprendizaje y mitigar el sobreajuste, es crucial incorporar técnicas de regularización y estrategias de aumentación de datos diseñadas específicamente para el dominio histopatológico.\newline
+
+En el marco del Aprendizaje de Instancias Múltiples (MIL), las características vectoriales extraídas por la CNN de cada parche son posteriormente agregadas por módulos especializados, como los mecanismos de atención o el pooling jerárquico. Esto permite generar una predicción a nivel de la lámina completa, eliminando la necesidad de un etiquetado exhaustivo de cada parche y consolidando el pipeline de análisis de WSI.

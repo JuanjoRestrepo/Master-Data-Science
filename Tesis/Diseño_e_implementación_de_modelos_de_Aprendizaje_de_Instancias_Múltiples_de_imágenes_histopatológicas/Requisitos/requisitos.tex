@@ -1,0 +1,64 @@
+La definición de requisitos constituye una etapa fundamental en el desarrollo del presente proyecto, ya que permite establecer de manera explícita las capacidades, restricciones y criterios de validación del sistema propuesto. Estos requisitos se derivan directamente del análisis del problema, los objetivos planteados y los antecedentes revisados en el estado del arte, funcionando como un marco de referencia para evaluar la coherencia y el alcance de la solución desarrollada.\newline
+
+Dado que el objetivo central de esta investigación es el diseño y evaluación de un modelo de MIL para el análisis de imágenes histopatológicas digitales de próstata bajo un esquema de supervisión débil, los requisitos se formulan desde una perspectiva metodológica y científica, y sirven como puente entre la fase de concepción del sistema y su posterior implementación y evaluación experimental.
+
+\section{Alcance del sistema propuesto}
+El sistema desarrollado en este proyecto tiene como finalidad analizar \textit{Whole Slide Images} (WSI) de biopsias de próstata mediante un enfoque de aprendizaje débilmente supervisado, con el objetivo de inferir etiquetas diagnósticas a nivel de muestra completa. En este contexto, cada WSI es modelada como un conjunto de parches (instancias), a partir de los cuales se extraen representaciones profundas que posteriormente son agregadas mediante un modelo MIL con mecanismos de atención.\newline
+
+El alcance del sistema se limita al análisis computacional de imágenes histopatológicas previamente digitalizadas y no contempla procesos clínicos como la adquisición de muestras, la digitalización de las láminas ni la validación clínica prospectiva de los resultados. Asimismo, el sistema está diseñado como una herramienta de apoyo a la investigación y no como un producto clínico listo para su despliegue en entornos hospitalarios.
+
+
+\section{Requisitos funcionales}
+Desde el punto de vista funcional, el sistema debe satisfacer las siguientes capacidades fundamentales:
+\begin{itemize}
+    \item \textbf{Procesamiento de imágenes de gran escala:} El sistema debe permitir el análisis eficiente de WSIs de alta resolución, descomponiéndolas en parches que capturen información morfológica relevante sin requerir anotaciones a nivel de instancia.
+
+    \item \textbf{Pipeline de preprocesamiento:} Se requiere una etapa de preprocesamiento orientada a la generación de parches homogéneos y filtrados, eliminando regiones no informativas como fondo, ruido o artefactos de preparación.
+
+    \item \textbf{Extracción de características:} El sistema debe incorporar un mecanismo basado en redes neuronales convolucionales (CNN) preentrenadas para obtener representaciones vectoriales (\textit{embeddings}) discriminativas de cada parche. Estas representaciones constituyen la entrada principal del modelo MIL encargado de inferir la predicción a nivel de WSI.
+
+    \item \textbf{Mecanismos de atención:} Es necesaria la integración de mecanismos de atención que asignen pesos diferenciales a las instancias en función de su relevancia diagnóstica, permitiendo identificar las regiones del tejido que contribuyen de manera dominante a la decisión del modelo.
+
+    \item \textbf{Generación de métricas y visualizaciones:} El sistema debe generar métricas de evaluación cuantitativas a nivel de lámina completa (slide), así como visualizaciones que reflejen la distribución de la atención sobre la WSI, facilitando el análisis posterior de los resultados.
+\end{itemize}
+
+
+
+\section{Requisitos no funcionales}
+En términos de atributos de calidad y operatividad, el sistema debe garantizar:
+\begin{itemize}
+    \item \textbf{Reproducibilidad:} Los experimentos deben ser replicables mediante el uso de semillas aleatorias controladas, configuraciones explícitas y una organización estructurada del código y los experimentos.
+    
+    \item \textbf{Escalabilidad:} El sistema debe poder manejar WSIs con un número elevado de parches, sin que ello implique un crecimiento prohibitivo en los tiempos de cómputo, mediante un diseño modular que desacople la extracción de características de la agregación MIL.
+    
+    \item \textbf{Interpretabilidad:} Dado el dominio clínico del problema, el sistema debe proporcionar mecanismos que permitan analizar y justificar las decisiones del modelo, evitando enfoques de tipo ``caja negra''. Si bien no se busca una interpretabilidad causal estricta, sí se requiere una interpretabilidad post-hoc basada en mecanismos de atención y visualización de regiones relevantes.
+    
+    \item \textbf{Compatibilidad:} El sistema debe ser compatible con infraestructuras estándar en investigación  de ciencia de datos, como entornos basados en GPU y \textit{frameworks} de aprendizaje profundo ampliamente adoptados.
+\end{itemize}
+
+
+\section{Restricciones del proyecto}
+El desarrollo del sistema se encuentra condicionado por diversas restricciones inherentes tanto al dominio clínico como al contexto académico de la investigación. Estas limitaciones se describen a continuación:
+\begin{enumerate}
+    \item \textbf{Supervisión débil:} La disponibilidad de etiquetas se limita al nivel de WSI, lo que impide el uso de enfoques supervisados a nivel de parche.
+    
+    \item \textbf{Heterogeneidad morfológica:} La alta variabilidad intratumoral en las biopsias de próstata dificulta la agregación simple de información y refuerza la necesidad de mecanismos de atención y modelos capaces de manejar dicha variabilidad.
+    
+    \item \textbf{Recursos computacionales:} El tamaño de las WSIs y la cantidad de parches generados imponen limitaciones en términos de memoria y tiempo de entrenamiento, lo que obliga a adoptar estrategias de muestreo, reducción de dimensionalidad o separación de etapas dentro del pipeline.
+    
+    \item \textbf{Validación clínica:} Al tratarse una investigación académica, el proyecto está limitado en términos de validación clínica directa, por lo que los resultados deben ser interpretados como evidencia experimental y no como conclusiones clínicas definitivas.
+\end{enumerate}
+
+
+
+
+\section{Criterios de validación}
+Los criterios para validar el sistema se definen bajo los siguientes parámetros:
+\begin{itemize}
+    \item \textbf{Evaluación cuantitativa:} El desempeño del modelo debe ser evaluado mediante métricas cuantitativas apropiadas para problemas de clasificación a nivel de WSI, tales como accuracy, AUC y F1-score, permitiendo una comparación objetiva entre diferentes configuraciones del modelo.
+    
+    \item \textbf{Estabilidad y generalización:} Se debe evaluar la consistencia del modelo frente a distintas particiones de los datos (validación cruzada) con el fin de analizar su capacidad de generalización. Este criterio es especialmente relevante dado el tamaño limitado de los conjuntos de datos histopatológicos y la alta variabilidad entre muestras.
+    
+    \item \textbf{Coherencia histopatológica:} Como criterio cualitativo, los mapas de atención generados deben ser coherentes desde un punto de vista histopatológico, es decir, que las regiones destacadas por el modelo correspondan a áreas con características morfológicas plausibles según el conocimiento experto. Este análisis no pretende sustituir la evaluación clínica, pero sí aportar evidencia sobre la consistencia y utilidad interpretativa del enfoque propuesto.
+
+\end{itemize}
