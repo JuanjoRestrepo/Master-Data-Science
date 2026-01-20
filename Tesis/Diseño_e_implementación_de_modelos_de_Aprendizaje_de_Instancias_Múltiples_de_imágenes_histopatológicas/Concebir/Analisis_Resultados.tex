@@ -5,9 +5,11 @@
 \section{Introducción y alcance del análisis}
 Este capítulo presenta, analiza y discute los hallazgos derivados de la implementación del modelo de Aprendizaje de Instancias Múltiples (MIL) con mecanismo de atención. La exposición integra el control de calidad de los datos, la descripción técnica del flujo experimental, la evaluación cuantitativa mediante procedimientos estadísticos robustos y la validación cualitativa basada en la inspección de mapas de atención. \\
 
-El objetivo central es validar no solo el rendimiento numérico del modelo en la discriminación entre tejido benigno y maligno (Gleason $\geq 3$), sino también su capacidad de "explicabilidad" mediante la identificación correcta de morfología patológica, un requisito indispensable para la traducción clínica.
+El objetivo central es validar no solo el rendimiento numérico del modelo en la discriminación entre tejido benigno y maligno (Gleason $\geq 3$), sino también su capacidad de explicabilidad mediante la identificación correcta de morfología patológica, un requisito indispensable para la traducción clínica.
 
-\section{Preprocesamiento y Control de Calidad de Datos}
+\section{Análisis de Resultados Cuantitativos}
+
+\subsection{Preprocesamiento y Control de Calidad de Datos}
 La validez de cualquier aproximación computacional en histopatología depende de la integridad de los datos de entrada. Se implementó un protocolo riguroso de preprocesamiento y auditoría:
 
 \subsection{Protocolo de extracción y normalización}
@@ -36,18 +38,23 @@ El sistema se evaluó bajo un esquema de supervisión débil (etiquetas a nivel 
 
 \begin{itemize}
     \item \textbf{Extractor de características:} ResNet-50 preentrenada en ImageNet, con \textit{fine-tuning} en capas superiores para ajustar las representaciones a la morfología prostática.
-    \item \textbf{Mecanismo de Atención:} Se implementó un bloque de atención tipo \textit{dot-product} modificado. Este mecanismo genera un peso de importancia $\alpha_i$ para cada parche $i$ a partir de su embedding $h_i$. Matemáticamente:
+    \item \textbf{Mecanismo de Atención:} Se implementó un bloque de atención tipo \textit{dot-product} modificado. Este mecanismo genera un peso de importancia $\alpha_i$ para cada parche $i$ a partir de su embedding $h_i$ (donde $h_i$ es el vector de características extraído por la CNN para el parche $i$). Matemáticamente:
         \begin{equation*}
             a_i = w^{\top} \tanh(V h_i^{\top}), \qquad \alpha_i = \frac{\exp(a_i)}{\sum_j \exp(a_j)}
         \end{equation*}
-    La representación global de la bolsa (WSI) se obtiene mediante la suma ponderada:
+    La representación global de la bolsa (WSI) se obtiene mediante la suma ponderada de todos los embeddings usando los coeficientes $\alpha_i$:
         \begin{equation*}
             H = \sum_i \alpha_i h_i
         \end{equation*}
     \item \textbf{Estrategia de Validación:} Se utilizó \textbf{GroupKFold} estratificado por paciente para asegurar independencia clínica total entre las particiones de entrenamiento y validación.
 \end{itemize}
 
-\section{Análisis de Resultados Cuantitativos}
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/DiagTeoricoArqMIL.png}
+    \caption{Arquitectura del mecanismo de atención MIL propuesto. Se observa el flujo desde los embeddings de entrada ($h_i$) hasta la agregación pesada por los coeficientes $\alpha_i$ que determinan la contribución de cada parche a la representación global de la WSI.}
+    \label{fig:arch_mil}
+\end{figure}
 
 \subsection{Procedimientos Estadísticos}
 Para garantizar robustez, la evaluación trasciende el rendimiento puntual e incorpora métricas de incertidumbre:
