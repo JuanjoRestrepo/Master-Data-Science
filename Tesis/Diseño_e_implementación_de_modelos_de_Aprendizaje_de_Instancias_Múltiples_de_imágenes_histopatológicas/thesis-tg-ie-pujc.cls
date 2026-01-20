@@ -82,7 +82,6 @@
 \ifthenelse{\equal{\versionvar}{DEFINITIVA}}
 {
 \thispagestyle{empty}
-\ \newpage
 \thispagestyle{empty}
 \begin{adjustwidth}{8cm}{0.5cm}
 \noindent Nota de Aceptación
@@ -121,9 +120,6 @@ Jurado & Jurado\\
 \end{tabular}
 \end{center}
 }
-
-\cleardoublepage
-
 
 %%%%%%%%%% 3th Letter - presentacion %%%%%%%%%%%%%
 
