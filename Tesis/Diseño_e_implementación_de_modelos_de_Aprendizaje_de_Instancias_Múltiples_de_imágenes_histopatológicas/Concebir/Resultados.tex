@@ -5,25 +5,23 @@ Este capítulo describe de manera detallada la metodología experimental emplead
 La estructura del capítulo sigue una progresión lógica desde la descripción general del pipeline hasta el detalle de cada una de sus etapas, incluyendo la preparación de los datos, la extracción de características, el modelado mediante Aprendizaje de Instancias Múltiples (MIL) y la estrategia de evaluación experimental.
 
 \section{Visión general del pipeline experimental}
-El \textit{pipeline} desarrollado se fundamenta en un diseño modular, desacoplado y determinista, concebido tanto para gestionar la complejidad computacional de las imágenes de gigapíxeles como para garantizar la trazabilidad diagnóstica y el rigor científico. Para cumplir con estos estándares, el sistema fue implementado bajo principios de modularidad donde cada etapa se estructura como un módulo independiente con interfaces funcionales claras. Asimismo, se estableció un control estricto de la aleatoriedad mediante la fijación de semillas globales, asegurando que la inicialización de los modelos y la división de los datos (\textit{folds}) produzcan resultados consistentes y reproducibles en ejecuciones sucesivas.\\
-
-Como se ilustra en la Figura~\ref{fig:pipeline1} y ~\ref{fig:pipeline2}, este flujo de trabajo se organiza en siete fases:
-
+El \textit{pipeline} desarrollado se fundamenta en un diseño modular, desacoplado y determinista, concebido tanto para gestionar la complejidad computacional de las imágenes de gigapíxeles como para garantizar la trazabilidad diagnóstica y el rigor científico. Para cumplir con estos estándares, el sistema fue implementado bajo principios de modularidad donde cada etapa se estructura como un módulo independiente con interfaces funcionales claras. Asimismo, se estableció un control estricto de la aleatoriedad mediante la fijación de semillas globales, asegurando que la inicialización de los modelos y la división de los datos (\textit{folds}) produzcan resultados consistentes y reproducibles en ejecuciones sucesivas. Como se ilustra en la Figura~\ref{fig:pipeline1} y ~\ref{fig:pipeline2}, este flujo de trabajo se organiza en siete fases:
+\newpage
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.65\textwidth]{images/PipelineDiag1.png}
+    \includegraphics[width=0.75\textwidth]{images/PipelineDiag1.png}
     \caption{Diagrama integral del \textit{pipeline} experimental propuesto: desde la ingesta de WSIs hasta la validación clínica mediante MIL con atención.}
     \label{fig:pipeline1}
 \end{figure}
 
-
-\begin{figure}[ht]
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=0.65\textwidth]{images/PipelineDiag2.png}
+    \includegraphics[width=0.75\textwidth]{images/PipelineDiag2.png}
     \caption{Diagrama integral del \textit{pipeline} experimental propuesto: desde la ingesta de WSIs hasta la validación clínica mediante MIL con atención.}
     \label{fig:pipeline2}
 \end{figure}
 
+\newpage
 \begin{enumerate}
     \item \textbf{Modelado de la entrada y supervisión débil:} El proceso inicia con la conceptualización de la \textit{Whole Slide Image} (WSI) como una entidad compuesta por múltiples instancias locales. Bajo este paradigma, la etiqueta diagnóstica (basada en el \textit{Gleason Grade Group}) se asocia exclusivamente al nivel global de la lámina. Esta configuración es fundamental, ya que evita el sesgo introducido por anotaciones manuales a nivel de parche, las cuales son costosas y propensas a la variabilidad inter-observador, alineando el sistema con las condiciones reales de la práctica clínica.
 
@@ -110,7 +108,6 @@ El núcleo arquitectural del sistema propuesto se fundamenta en el paradigma de 
 
 Para ejecutar esta integración, se implementó una red de atención que proyecta inicialmente los vectores de características de alta dimensionalidad hacia un espacio latente de menor tamaño ($256$ dimensiones) mediante una capa lineal. Posteriormente, el mecanismo de atención calcula un coeficiente de importancia $\alpha_i$ para cada instancia utilizando una red neuronal de dos capas con una función de activación \textit{tanh}. A diferencia de las heurísticas de agregación convencionales —tales como el \textit{max-pooling} o el \textit{mean-pooling}—, este enfoque faculta al modelo para ejecutar una ponderación adaptativa, aprendiendo autónomamente a discernir qué regiones del tejido poseen la relevancia morfológica necesaria para determinar la predicción final.
 
-\newpage
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.6\textwidth]{images/DiagTeoricoArqMIL.png}
@@ -133,8 +130,6 @@ Este esquema neutraliza cualquier riesgo de fuga de información (\textit{data l
 
 \subsection{Hiperparámetros y entorno de ejecución}
 El entrenamiento se realizó utilizando una configuración de hiperparámetros constante para todos los experimentos, resumida en la Tabla \ref{tab:hiperparametros}. La elección de un tamaño de lote unitario (\textit{batch size} = 1) responde a la naturaleza del paradigma MIL; dado que cada WSI genera un número variable de instancias (parches), el procesamiento individualizado permite gestionar la heterogeneidad dimensional de las muestras sin necesidad de recurrir a técnicas de relleno (\textit{padding}) que podrían alterar la distribución de los datos.
-
-
 
 \subsection{Variantes de implementación}
 Con el propósito de evaluar la estabilidad del entrenamiento, se desarrollaron dos implementaciones del esquema de optimización:
