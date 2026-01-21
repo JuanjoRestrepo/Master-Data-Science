@@ -12,14 +12,14 @@ Con el fin de mejorar la legibilidad del flujo de trabajo completo y resaltar la
 \newpage
 \begin{figure}[ht]
     \centering
-    \includegraphics[width=0.75\textwidth]{images/PipelineDiag1.png}
+    \includegraphics[width=0.8\textwidth]{images/PipelineDiag1.png}
     \caption{Diagrama integral del \textit{pipeline} experimental propuesto: procesamiento y extracción de representaciones.}
     \label{fig:pipelineProcesamiento}
 \end{figure}
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.75\textwidth]{images/PipelineDiag2.png}
+    \includegraphics[width=0.8\textwidth]{images/PipelineDiag2.png}
     \caption{Diagrama integral del \textit{pipeline} experimental propuesto: modelado MIL y evaluación.}
     \label{fig:pipelineModelado}
 \end{figure}
@@ -52,24 +52,6 @@ Estructuralmente, SICAPv2 mantiene una jerarquía de datos que vincula estrictam
 
 Finalmente, la naturaleza de las WSIs impone desafíos computacionales significativos debido a sus resoluciones en el orden de gigapíxeles. A la magnitud de los archivos se suman factores disruptivos como extensas áreas de fondo, artefactos de preparación y discrepancias cromáticas derivadas de los protocolos de tinción. Estas particularidades no solo exigen un preprocesamiento riguroso para optimizar la relación señal-ruido, sino que validan la estrategia de subdivisión en parches (\textit{tiling}) implementada en este trabajo para hacer viable el procesamiento profundo del tejido prostático.
 
-%El conjunto de datos empleado en este proyecto corresponde a la base de datos pública \textbf{SICAPv2}, la cual consiste en imágenes histopatológicas digitales de biopsias de próstata capturadas mediante escáneres de alta resolución y preservadas en formato \textit{Whole Slide Images} (WSI). Estas muestras, teñidas con hematoxilina y eosina (H\&E), representan el estándar de oro en el diagnóstico oncológico prostático. No obstante, el corpus de imágenes exhibe una notable variabilidad, derivada tanto de la heterogeneidad morfológica intrínseca del tejido como de las diversas condiciones técnicas de adquisición.\newline
-
-%Cada WSI integra una muestra completa de tejido asociada a una etiqueta diagnóstica global emanada de la evaluación clínica previa. La ausencia de anotaciones granulares a nivel de región o parche en el flujo de entrenamiento define la naturaleza del problema como un escenario de aprendizaje débilmente supervisado; esta restricción técnica es, precisamente, la que fundamenta la adopción de arquitecturas basadas en Aprendizaje de Instancias Múltiples (MIL), capaces de inferir patrones a partir de información agregada.\newline
-
-%Estructuralmente, los datos se organizan bajo una jerarquía que vincula pacientes y láminas, factor determinante para garantizar la integridad metodológica. En este sentido, las particiones experimentales se ejecutaron respetando estrictamente dicha jerarquía, mitigando el riesgo de fuga de información (\textit{data leakage}) al asegurar que las muestras de un mismo individuo no se distribuyan simultáneamente en los conjuntos de entrenamiento y evaluación.\newline
-
-%Debido a que las resoluciones en el orden de gigapíxeles imposibilitan el procesamiento directo mediante redes profundas convencionales, el conjunto de datos impone desafíos computacionales significativos. A la magnitud de los archivos se suman factores disruptivos como extensas áreas de fondo, artefactos de preparación y discrepancias cromáticas derivadas de los protocolos de tinción. Estas particularidades no solo exigen un preprocesamiento riguroso, sino que validan la estrategia de subdivisión en parches (\textit{tiling}) implementada en este trabajo.\newline
-
-%Finalmente, el conjunto de datos refleja fielmente la complejidad del tejido prostático, donde la coexistencia de focos malignos y regiones benignas dentro de una misma lámina es frecuente. Si bien esta variabilidad arquitectural incrementa la dificultad de la clasificación, proporciona un entorno de validación realista y de alto valor clínico para evaluar la robustez y la capacidad de discernimiento del enfoque MIL propuesto.
-
-%\subsection{Composición y distribución de las muestras}
-%El conjunto de datos \textbf{SICAPv2} representa un escenario desafiante debido a la distribución intrínseca de sus clases. El \textit{dataset} comprende un total de $155$ biopsias (WSI) provenientes de $95$ pacientes únicos, lo que subraya la importancia de la validación por grupos (\textit{GroupKFold}) implementada en este trabajo.\newline
-
-%Desde una perspectiva diagnóstica, las muestras se distribuyen en cinco categorías basadas en el puntaje de Gleason (NC, G3, G4, G5), las cuales han sido dicotomizadas para los fines de este proyecto en clases benignas y malignas. Esta partición no solo permite evaluar el desempeño binario del modelo, sino que también pone a prueba su resiliencia ante el desbalance de clases, una característica común en la práctica clínica donde la prevalencia de tejido benigno suele ser superior a las muestras con patologías específicas.
-
-%-------------------------------------------------------------
-
-% Tabla convertida a no-flotante para evitar problemas con el entorno de floats
 \begin{center}
     \captionof{table}{Configuración de hiperparámetros y entorno de entrenamiento.}
     \label{tab:hiperparametros}
