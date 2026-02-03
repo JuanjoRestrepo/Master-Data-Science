@@ -1,11 +1,66 @@
-El cáncer de próstata representa una de las principales causas de morbilidad y mortalidad en la población masculina a nivel global, lo que sitúa a su diagnóstico y pronóstico como prioridades críticas en la salud pública. En la práctica clínica actual, estas tareas dependen fundamentalmente de la evaluación histopatológica, donde el examen de biopsias mediante tinciones convencionales de hematoxilina y eosina (H\&E) permite la aplicación de la escala de Gleason. Este sistema de gradación, basado en el análisis de los patrones arquitecturales de las glándulas prostáticas, constituye el referente para clasificar la agresividad tumoral y definir el riesgo clínico del paciente \cite{litjens2017survey} \cite{Brett_2016}.\newline
+% ================= CÁNCER DE PRÓSTATA Y ESCALA DE GLEASON =================
 
-Sin embargo, la transición hacia una medicina de precisión exige integrar este dominio clínico con las capacidades de la ciencia de datos. Debido a que la interpretación de estas muestras genera grandes volúmenes de información visual de alta complejidad, se hace indispensable el uso de técnicas computacionales avanzadas. En este sentido, la presente sección revisa los conceptos fundamentales y los marcos metodológicos de aprendizaje profundo que permiten modelar estos datos provenientes de imágenes digitales, facilitando así una transición coherente desde la observación patológica tradicional hacia soluciones de diagnóstico asistido por computadora.\newline
+El cáncer de próstata es una de las neoplasias más frecuentes y una de las principales causas de morbilidad y mortalidad en la población masculina a nivel mundial \cite{SungH_2021, MinSalud_2025}.  
+La evaluación temprana y precisa de este tipo de cáncer es un componente crítico de la atención clínica, ya que permite orientar decisiones terapéuticas y estrategias de manejo individualizadas.\newline
 
-Ahora bien, la asignación del puntaje de Gleason presenta una variabilidad interobservador significativa. Esta subjetividad resulta particularmente crítica en la diferenciación entre patrones limítrofes, como Gleason 3 y Gleason 4, al igual que en la identificación de subtipos histológicos asociados a peor pronóstico, entre ellos el patrón cribiforme \cite{SILVARODRIGUEZ2020105637}. Dicho patrón se caracteriza por estructuras glandulares con arquitectura tipo criba y se asocia a mayor agresividad tumoral y riesgo de recurrencia, lo que tiene implicaciones clínicas directas en la toma de decisiones terapéuticas.\newline
+La metodología diagnóstica convencional se basa en el análisis histopatológico de biopsias teñidas con hematoxilina y eosina (H\&E), donde un patólogo examina patrones arquitecturales de tejido prostático bajo el microscopio.  
+Este examen visual conduce a la asignación de un \textbf{puntaje de Gleason}, un sistema de gradación que clasifica la agresividad del tumor con base en la arquitectura glandular observada en las muestras \cite{Brett_2016, Ozkan2016}.\newline
 
-Esta variabilidad diagnóstica resalta la necesidad de herramientas computacionales que contribuyan a mejorar la reproducibilidad y consistencia de la evaluación histopatológica, constituyendo así un punto de partida natural para la aplicación de metodologías de aprendizaje automático sobre imágenes histológicas digitalizadas.
+La escala de Gleason combina dos patrones arquitecturales, el primario y el secundario, para producir un puntaje sumado que refleja la agresividad biológica del tumor.  
+Puntajes bajos (por ejemplo, Gleason 6) se asocian con tumores bien diferenciados y de menor agresividad, mientras que puntajes altos (Gleason 8–10) indican tumores más indiferenciados y agresivos clínicamente.  
+Esta información se incorpora a través de las categorías de la \textbf{International Society of Urological Pathology (ISUP)}, que agrupan los puntajes de Gleason en grados clínicamente relevantes \cite{epstein2016gleason, SILVARODRIGUEZ2020105637}.\newline
 
+Un ejemplo particularmente desafiante es el patrón \textbf{cribriforme}, caracterizado por estructuras glandulares específicas que se asocian con un peor pronóstico y mayor riesgo de recurrencia. Estudios clínicos han demostrado que la presencia de patrones cribiformes se correlaciona con peores desenlaces, lo que subraya la importancia de su correcta identificación \cite{SILVARODRIGUEZ2020105637}. La Figura \ref{fig:cribriform_patterns} muestra ejemplos representativos de este patrón histológico, evidenciando la complejidad de su arquitectura glandular y las características morfológicas que dificultan su diferenciación en la práctica diagnóstica.
+
+\newpage
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.4\textwidth]{images/gleason_patterns/Four-basic-architectural-patterns-of-Gleason-pattern-4.jpg}
+    \caption{Ejemplos representativos de patrones cribiformes (Gleason 4) en tejido prostático \cite{SILVARODRIGUEZ2020105637}.}
+    \label{fig:cribriform_patterns}
+\end{figure}
+
+
+A pesar de su importancia clínica, la asignación del puntaje de Gleason está sujeta a variabilidad \textbf{interobservador} significativa, incluso entre patólogos experimentados \cite{Ozkan2016, Brett_2016}.  
+Esta variabilidad es particularmente notoria en la distinción entre \textbf{Gleason 3 y Gleason 4}, y en la identificación de patrones histológicos de riesgo intermedio o alto. La subjetividad inherente al proceso de gradación puede generar discrepancias diagnósticas, lo que plantea retos importantes para la reproducibilidad y consistencia del diagnóstico histopatológico.\newline
+
+% ### **Justificación clínica de la binarización ISUP**
+
+Para integrar esta complejidad diagnóstica con métodos computacionales basados en aprendizaje automático, es útil reformular el problema en términos clínicos significativos.  
+Una estrategia común y clínicamente respaldada consiste en \textbf{binarizar las categorías ISUP} en dos grupos de interés:
+
+\begin{itemize}
+    \item \textbf{Bajo grado}: tumores con menor agresividad (ISUP grades 1–2).
+    \item \textbf{Alto grado}: tumores con mayor probabilidad de progresión clínica adversa (ISUP grades ≥3).
+\end{itemize}
+
+Esta reformulación reduce la ambigüedad diagnóstica asociada a casos limítrofes y se alinea con decisiones clínicas reales, tales como la elección entre tratamientos activos vs. intervenciones más agresivas.  
+Diversos trabajos en patología computacional han adoptado enfoques similares cuando el objetivo es \textbf{clasificación binaria de riesgo clínico} en cáncer de próstata \cite{campanella2019clinical, MoralesAlvarez2024}.\newline
+
+% ### **Necesidad de enfoques computacionales**
+
+La generación de imágenes histopatológicas digitalizadas (WSIs) produce grandes volúmenes de información visual de alta resolución \cite{litjens2017survey}.  
+Procesar y analizar estas imágenes a escala supera las capacidades humanas en términos de rapidez y consistencia, debido a factores como:
+
+\begin{itemize}
+    \item Variabilidad morfológica intrínseca del tejido.
+    \item Artefactos de preparación y tinción.
+    \item La gran cantidad de parches contenidos en una sola WSI.
+\end{itemize}
+
+Esta situación ha motivado la adopción de técnicas computacionales avanzadas, particularmente en el ámbito del aprendizaje profundo, para apoyar el análisis histopatológico y mejorar la reproductibilidad diagnóstica.  
+Las arquitecturas de \textbf{Multiple Instance Learning} (MIL), junto con mecanismos de atención, se presentan como soluciones naturales para integrar supervisión débil con representación de patrones discriminativos en WSIs (ver Sección \ref{sec:aprendizaje_MIL}).\newline
+
+En consecuencia, el desarrollo de modelos computacionales que puedan imitar e incluso fortalecer el juicio clínico en la gradación de Gleason constituye un área de investigación activa y con alto impacto clínico. Desde el punto de vista morfológico, el patrón cribiforme presenta configuraciones glandulares complejas que dificultan su diferenciación frente a otros patrones de Gleason, especialmente en escenarios limítrofes. La Figura \ref{fig:cribriform_patterns} ilustra ejemplos representativos de este patrón histológico, destacando su arquitectura tipo criba y su relevancia clínica en la evaluación del cáncer de próstata.
+
+Esta complejidad en la gradación del cáncer de próstata, junto con la variabilidad interobservador y la necesidad de una evaluación rápida y reproducible, motiva la adopción de técnicas de histopatología digital.  
+El análisis de imágenes de lámina completa (Whole Slide Images, WSI) permite capturar información morfológica a alta resolución, integrando patrones microscópicos críticos como los observados en los puntajes de Gleason.  
+En la sección siguiente se abordarán los conceptos, características y desafíos de la histopatología digital, estableciendo el marco para la aplicación de modelos computacionales de aprendizaje de instancias múltiples en la clasificación de tejido prostático.
+
+
+
+\begin{comment}
+    
 \begin{figure}[h]
     \centering
     \includegraphics[width=0.4\textwidth]{images/Four-basic-architectural-patterns-of-Gleason-pattern-4-A-Cribriform-glands-B-Fused_W640.jpg}
@@ -15,3 +70,7 @@ Esta variabilidad diagnóstica resalta la necesidad de herramientas computaciona
     \caption{Ejemplos representativos de patrones cribiformes (Gleason 4) en tejido prostático \cite{SILVARODRIGUEZ2020105637}.}
     \label{fig:cribriform_patterns}
 \end{figure}
+
+\end{comment}
+
+
