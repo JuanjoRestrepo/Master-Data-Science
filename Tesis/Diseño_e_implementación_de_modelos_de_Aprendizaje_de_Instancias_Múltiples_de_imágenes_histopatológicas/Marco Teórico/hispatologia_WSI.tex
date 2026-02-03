@@ -1,12 +1,32 @@
-La histopatología digital, impulsada por el escaneo de muestras histológicas, ha revolucionado el análisis de tejidos al permitir la generación Whole Slide Images (WSI). Estas imágenes de resolución gigapíxel, como se puede apreciar en la figura \ref{fig:EjemploSuperResolucionWSI}, conservan la arquitectura tisular completa y posibilitan el análisis computacional a gran escala, prometiendo asistir a los patólogos al reducir el error humano y estandarizar los criterios de evaluación \cite{campanella2019clinical} \cite{lu2021data}.\newline
 
-No obstante, el uso de las WSI plantea desafíos técnicos significativos debido a su tamaño extremo y la heterogeneidad visual inherente al tejido. Para hacer viable su procesamiento, estas imágenes se dividen en pequeños bloques o parches. Esta segmentación, sin embargo, introduce nuevos retos, como la variabilidad de tinción entre laboratorios, la presencia de artefactos de preparación y la complejidad morfológica intra e interpaciente \cite{Tellez_2018}.\newline
+La histopatología digital consiste en la digitalización de cortes histológicos mediante escáneres de alta resolución, lo que permite la obtención de imágenes completas de láminas de tejido denominadas \emph{Whole Slide Images} (WSIs). Las WSIs proporcionan una representación detallada de la arquitectura tisular a nivel macroscópico y microscópico, conservando información espacial y morfológica que es fundamental para el diagnóstico clínico y el análisis computacional \cite{campanella2019clinical, lu2021data}.\newline
 
-Ante esta restricción, el Aprendizaje de Instancias Múltiples surge como una alternativa particularmente atractiva, la cual permite entrenar modelos con etiquetas globales a nivel de la imagen (slide-level), reduciendo la dependencia de anotaciones exhaustivas por parte de expertos. Por lo tanto, cualquier pipeline reproducible bajo este esquema debe considerar cuidadosamente las decisiones de preprocesamiento, como la normalización de tinción y el filtrado por porcentaje de tejido, asegurando estrategias de muestreo que se adapten a la heterogeneidad del WSI. \cite{campanella2019clinical} \cite{lu2021data}.
-
-\begin{figure}[h]
-    \hspace*{4.5cm} % ajusta el valor según lo necesites (cm, mm, etc.)
-    \includegraphics[scale=0.2]{images/Ejemplo de Super-Resolucion WSI.png}
-    \caption{Ejemplo de imagen de super-resolución WSI \cite{Le_2023}}
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Ejemplo de Super-Resolucion WSI.png}
+    \caption{Ejemplo de imagen de super-resolución de una WSI, en la cual se aprecia la escala y complejidad de la información visual disponible \cite{Le_2023}.}
     \label{fig:EjemploSuperResolucionWSI}
 \end{figure}
+
+Las WSIs pueden alcanzar resoluciones de varios gigapíxeles, lo que las hace extremadamente grandes para el procesamiento directo mediante modelos de visión por computador tradicionales. Esta característica introduce importantes desafíos técnicos:
+
+\begin{itemize}
+    \item \textbf{Tamaño de imagen extremo:} El tamaño total de una WSI excede con creces la capacidad de entrada de redes neuronales convencionales, lo que impide el análisis de toda la imagen de una sola vez.
+    \item \textbf{Heterogeneidad visual:} Las áreas dentro de una misma WSI pueden contener tejido sano, regiones tumorales de distintos grados, artefactos de preparación y variación de tinción entre laboratorios, lo que complica la extracción de patrones consistentes \cite{Tellez_2018}.
+    \item \textbf{Variabilidad intra e interpaciente:} La morfología del tejido puede variar ampliamente, tanto entre diferentes pacientes como dentro de distintas regiones de la misma WSI.
+\end{itemize}
+
+Para hacer viable el procesamiento computacional, es necesario fragmentar la WSI en regiones más pequeñas denominadas \emph{parches} o \emph{tiles}, que pueden ser analizados individualmente por modelos de aprendizaje profundo.  
+Esta \textbf{metodología} basada en parches permite reducir la complejidad espacial global y focalizar la extracción de características locales, pero no elimina los desafíos de heterogeneidad ni la necesidad de técnicas que integren contexto global sin etiquetas locales.\newline
+
+Debido a que las anotaciones clínicas suelen disponerse únicamente a nivel de WSI (etiquetas globales), la fragmentación en parches crea un problema de supervisión débil: no se conoce a priori qué parches individuales son informativos para la etiqueta de la imagen completa. Por esta razón, métodos de aprendizaje que prescinden de anotaciones detalladas a nivel de instancia como los \textbf{paradigmas} de \emph{Multiple Instance Learning} (MIL), son particularmente adecuados para el análisis de WSIs, ya que permiten entrenar modelos directamente con etiquetas slide-level sin requerir anotaciones de regiones de interés \cite{campanella2019clinical, lu2021data}.\newline
+
+Finalmente, un pipeline computacional robusto para WSIs debe considerar varias etapas de preprocesamiento, tales como:
+
+\begin{itemize}
+    \item \textbf{Normalización de tinción:} Para reducir la variabilidad de color entre diferentes sesiones de escaneo y laboratorios.
+    \item \textbf{Filtrado de regiones no informativas:} Para eliminar parches que contienen poco o ningún tejido relevante.
+    \item \textbf{Estrategias de muestreo y balance de clases:} Para asegurar una representación adecuada de los patrones clínicamente relevantes durante el entrenamiento del modelo.
+\end{itemize}
+
+Estas decisiones de preprocesamiento y representación son fundamentales para asegurar que los modelos aprendan de manera eficiente a partir de datos con supervisión débil, maximizando su capacidad para generalizar a nuevas WSIs sin requerir anotaciones exhaustivas.
