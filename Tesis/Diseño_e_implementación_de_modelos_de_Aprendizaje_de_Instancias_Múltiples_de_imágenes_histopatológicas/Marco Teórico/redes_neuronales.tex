@@ -1,16 +1,22 @@
-Las redes neuronales convolucionales (CNN) se han establecido como el paradigma dominante en la visión por computadora debido a su capacidad intrínseca para aprender jerarquías de características espaciales y patrones visuales complejos \cite{Géron_2022}. En el contexto de la histopatología digital, las CNN se emplean fundamentalmente como extractores de características a nivel de parche, lo cual es vital para procesar las imágenes de diapositivas completas (WSI) dada su gran escala.\newline
+% ====================== REDES NEURONALES CONVOLUCIONALES ======================
 
-Cada parche es procesado individualmente por la CNN para generar una representación vectorial (embedding) que encapsula la información morfológica relevante, como las texturas, estructuras glandulares y patrones tisulares. Estas representaciones permiten reducir la subjetividad inherente a la interpretación visual humana y constituyen la entrada fundamental para los modelos MIL \cite{lu2021data} \cite{HEZI2025108513}.\newline
+Las \textbf{redes neuronales convolucionales (CNN)} constituyen una de las familias de modelos más utilizadas en visión por computador y en el campo del análisis de imágenes médicas, dado que permiten aprender automáticamente representaciones jerárquicas de características directamente de los datos de imagen \cite{turn0search4, turn0search11}.  
+En particular, las CNN han revolucionado el análisis de imágenes histopatológicas por su capacidad de identificar patrones morfológicos complejos que son relevantes para tareas diagnósticas y subtipificación de tumores.\newline
 
-A continuación, se presenta la figura \ref{fig:cnn_arch} que ilustra la arquitectura típica de una CNN.\newpage
+En el contexto de la histopatología digital, las CNN se emplean principalmente como \textbf{extractores de características a nivel de parche} debido a que las imágenes de diapositivas completas (WSIs) son demasiado grandes para ser procesadas directamente por modelos de visión estándar. Convertir cada parche en un \textbf{vector de características (embedding)} permite capturar información local relevante, como texturas, estructuras celulares y patrones tisulares, que luego puede utilizarse como entrada para modelos de agregación posteriores \cite{turn0search2, turn0search11, turn0search29}.\newline
 
-\begin{figure}[h]
+\newpage
+A continuación, se presenta la Figura \ref{fig:cnn_arch} que ilustra la arquitectura típica de una CNN.
+\begin{figure}[h!]
     \centering
-    \includegraphics[scale=0.3]{images/CNN_Typical_Arch.png}
-    \caption{Arquitectura típica de una red neuronal convolucional \cite{Géron_2022}}
+    \includegraphics[width=0.6\textwidth]{images/CNN_Typical_Arch.png}
+    \caption{Arquitectura típica de una red neuronal convolucional, con capas de convolución, activación y \textit{pooling} que permiten extraer características jerárquicas \cite{Géron_2022}.}
     \label{fig:cnn_arch}
 \end{figure}
 
-Una estrategia comúnmente adoptada es el uso de transfer learning con arquitecturas pre-entrenadas en grandes bases de datos como ImageNet. Modelos como ResNet o EfficientNet son adaptados para la tarea de clasificación histopatológica, lo cual acelera la convergencia del entrenamiento y mejora la generalización en conjuntos de datos de tamaño moderado \cite{lu2021data} \cite{he2016deep} \cite{tan2019efficientnet}. Para estabilizar el proceso de aprendizaje y mitigar el sobreajuste, es crucial incorporar técnicas de regularización y estrategias de aumentación de datos diseñadas específicamente para el dominio histopatológico.\newline
+Una estrategia comúnmente adoptada en aplicaciones de histopatología digital es el uso de \textbf{transfer learning}, donde arquitecturas de CNN pre-entrenadas en conjuntos de datos extensos como ImageNet son adaptadas para tareas específicas de clasificación o extracción de características sobre parches de tejido \cite{turn0search2, turn0search11}.  
+Modelos como ResNet, VGG y EfficientNet han demostrado ser eficaces como extractores de características en dominios médicos, reduciendo el tiempo de entrenamiento y mejorando la generalización cuando la cantidad de datos anotados es limitada. \newline
 
-En el marco del Aprendizaje de Instancias Múltiples (MIL), las características vectoriales extraídas por la CNN de cada parche son posteriormente agregadas por módulos especializados, como los mecanismos de atención o el pooling jerárquico. Esto permite generar una predicción a nivel de la lámina completa, eliminando la necesidad de un etiquetado exhaustivo de cada parche y consolidando el pipeline de análisis de WSI.
+Durante el proceso de entrenamiento de los modelos, se emplean técnicas de \textbf{aumentación de datos},  como rotaciones, volteos y variaciones de color, para expandir de forma virtual el conjunto de entrenamiento y mitigar el riesgo de sobreajuste \cite{turn0search4}. Además, la normalización de tinción y ajustes de color suelen aplicarse como pasos adicionales de preprocesamiento en histopatología digital para reducir la variación entre diferentes instituciones o dispositivos de escaneo. \newline
+
+En el marco de \textbf{Aprendizaje de Instancias Múltiples (MIL)}, los embeddings extraídos por la CNN de cada parche son posteriormente combinados mediante mecanismos de agregación, como el \textit{pooling} o mecanismos de atención, para generar una predicción a nivel de WSI sin requerir anotaciones localizadas exhaustivas \cite{turn0search11}.
