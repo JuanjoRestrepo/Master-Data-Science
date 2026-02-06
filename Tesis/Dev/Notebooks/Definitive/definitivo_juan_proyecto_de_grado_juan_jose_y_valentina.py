@@ -540,13 +540,17 @@ Se validó que:
 
 El conjunto final contiene $496$ bags, con un número variable de instancias por bag, lo cual refleja la heterogeneidad espacial propia de las imágenes histopatológicas y justifica el uso de modelos MIL con mecanismos de agregación basados en atención.
 
-# **Sprint 4 Feature Extraction (Backbone CNN)**
+# **Sprint 4: Modelado MIL Binario, Benchmarking y Evaluación Clínica**
 
 ## **Objetivo**
 
-Extraer representaciones profundas (embeddings) de cada parche histopatológico mediante una CNN preentrenada. Estos embeddings se utilizarán posteriormente como instancias en un modelo de Multiple Instance Learning (MIL).
+Entrenar y comparar modelos de Multiple Instance Learning (MIL) binarios
+(Mean Pooling, Max Pooling, ABMIL y SmABMIL) a nivel de Whole Slide Image (WSI),
+utilizando embeddings de parches extraídos mediante una CNN preentrenada.
 
-En este sprint no se realiza MIL ni agregación por WSI. Se trata de una etapa clásica de computer vision con transfer learning, cuyo objetivo es obtener descriptores robustos a nivel de parche.
+El sprint incluye benchmarking cuantitativo, evaluación clínica
+y análisis de interpretabilidad basado en mecanismos de atención
+a nivel de instancia.
 
 
 ## **1. Decisiones metodológicas (justificación técnica)**
@@ -575,32 +579,80 @@ Razones:
   - Riesgo alto de sobreajuste
   - Práctica estándar en pipelines MIL para histopatología
 
-## **Sprint 4.1 — Implementación paso a paso**
+## **A. Dataset y trazabilidad**
 
-### 4.1.1 Imports y configuración base
+### 4.A.1 Cargar bags MIL desde Sprint 3
+"""
+
+MANIFEST_PATH = "/content/sicapv2_data/SICAPv2/metadata/dataset_manifest.csv"
+manifestDf = pd.read_csv(MANIFEST_PATH)
+
+print("Total patches:", len(manifestDf))
+print("Total WSIs:", manifestDf["wsiId"].nunique())
+
+"""### 4.A.2 Estadísticas clave del dataset"""
+
+# ISUP original
+isupDist = manifestDf.drop_duplicates("wsiId")["isup"].value_counts().sort_index()
+
+# Binarización (decisión explícita)
+# ISUP >= 2 → cáncer clínicamente significativo
+wsiDf = manifestDf.drop_duplicates("wsiId").copy()
+wsiDf["labelBinary"] = (wsiDf["isup"] >= 2).astype(int)
+
+binaryDist = wsiDf["labelBinary"].value_counts()
+
+isupDist, binaryDist
+
+"""### 4.A.3 Tamaño de bags (parches por WSI)"""
+
+bagSizes = manifestDf.groupby("wsiId").size()
+
+print("Bags (WSIs):", bagSizes.shape[0])
+print("Patches por bag:")
+print("  min :", bagSizes.min())
+print("  max :", bagSizes.max())
+print("  mean:", round(bagSizes.mean(), 2))
+
+plt.hist(bagSizes, bins=30)
+plt.xlabel("Patches por WSI")
+plt.ylabel("Frecuencia")
+plt.title("Distribución de tamaño de bags (SICAPv2)")
+plt.show()
+
+"""## **B. Feature Extraction (ResNet50 congelada)**
+
+### 4.B.1 Dataset de parches (PyTorch)
 """
 
 import torch
-import torch.nn as nn
-from torchvision import models, transforms
 from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms, models
 from PIL import Image
+import os
 
-import pandas as pd
-import numpy as np
-from tqdm import tqdm
+class PatchDataset(Dataset):
+    def __init__(self, df, transform=None):
+        self.df = df.reset_index(drop=True)
+        self.transform = transform
 
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-print("Using device:", DEVICE)
+    def __len__(self):
+        return len(self.df)
 
-manifestDf.head()
+    def __getitem__(self, idx):
+        row = self.df.iloc[idx]
+        img = Image.open(row["imagePath"]).convert("RGB")
 
-"""### 4.1.2 Transformaciones de imagen
+        if self.transform:
+            img = self.transform(img)
 
-Muy importante: consistentes con ImageNet.
-"""
+        return img, row["wsiId"]
 
-imageTransforms = transforms.Compose([
+"""### 4.B.2 Transforms y backbone"""
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
     transforms.Normalize(
@@ -609,1976 +661,660 @@ imageTransforms = transforms.Compose([
     )
 ])
 
-"""📌 Esta normalización es obligatoria para garantizar compatibilidad con los pesos de ImageNet.
+backbone = models.resnet50(pretrained=True)
+backbone.fc = torch.nn.Identity()
+backbone = backbone.to(device)
+backbone.eval()
 
-### 4.1.3 Dataset de parches
+"""### 4.B.3 Extraer embeddings por fold"""
 
-Se utiliza directamente el archivo `dataset_manifest.csv`, que contiene la información de cada parche
-"""
+def extractEmbeddings(df, batchSize=64):
+    dataset = PatchDataset(df, transform)
+    loader = DataLoader(dataset, batch_size=batchSize, shuffle=False)
 
-class PatchDataset(Dataset):
-    def __init__(self, manifestDf, transform=None):
-        self.df = manifestDf.reset_index(drop=True)
-        self.transform = transform
-
-    def __len__(self):
-        return len(self.df)
-
-    def __getitem__(self, idx):
-        row = self.df.iloc[idx]
-        image = Image.open(row["imagePath"]).convert("RGB")
-
-        if self.transform:
-            image = self.transform(image)
-
-        return {
-            "image": image,
-            "wsiId": row["wsiId"],
-            "isup": int(row["isup"]),
-            "fold": row["fold"],
-            "split": row["split"]
-        }
-
-"""### 4.1.4 DataLoader"""
-
-patchDataset = PatchDataset(manifestDf, transform=imageTransforms)
-
-patchLoader = DataLoader(
-    patchDataset,
-    batch_size=32,
-    shuffle=False,
-    num_workers=2,
-    pin_memory=True
-)
-
-"""### 4.1.5 Backbone ResNet50 (feature extractor)"""
-
-resnet = models.resnet50(
-    weights=models.ResNet50_Weights.IMAGENET1K_V1
-)
-
-featureExtractor = nn.Sequential(*list(resnet.children())[:-1])
-
-for param in featureExtractor.parameters():
-    param.requires_grad = False
-
-featureExtractor = featureExtractor.to(DEVICE)
-featureExtractor.eval()
-
-"""### 4.1.6 Validación de dimensionalidad"""
-
-batch = next(iter(patchLoader))
-imgs = batch["image"].to(DEVICE)
-
-with torch.no_grad():
-    out = featureExtractor(imgs)
-
-print("Salida backbone:", out.shape)
-
-out = out.squeeze(-1).squeeze(-1)
-print("Salida flatten:", out.shape)
-
-"""### 4.1.7 Extracción de embeddings (PATCH-LEVEL)"""
-
-def extractFeatures(dataloader, model, device):
-    features = []
-
+    features = {}
     with torch.no_grad():
-        for batch in tqdm(dataloader, desc="Extracting features"):
-            imgs = batch["image"].to(device)
-            out = model(imgs).squeeze(-1).squeeze(-1)
+        for imgs, wsiIds in loader:
+            imgs = imgs.to(device)
+            emb = backbone(imgs).cpu().numpy()
 
-            for i in range(out.shape[0]):
-                features.append({
-                    "embedding": out[i].cpu().numpy(),
-                    "wsiId": batch["wsiId"][i],
-                    "isup": int(batch["isup"][i].item()),
-                    "fold": batch["fold"][i],
-                    "split": batch["split"][i],
-                })
+            for e, wsi in zip(emb, wsiIds):
+                features.setdefault(wsi, []).append(e)
 
-    return features
+    return {k: np.stack(v) for k, v in features.items()}
 
-features = extractFeatures(patchLoader, featureExtractor, DEVICE)
+"""## **C. Modelos MIL y Benchmarking**
 
-"""### 4.1.8 Validaciones finales"""
-
-featuresDf = pd.DataFrame(features)
-
-assert len(featuresDf) == len(manifestDf)
-assert featuresDf.groupby("wsiId")["isup"].nunique().max() == 1
-assert featuresDf.groupby("wsiId")["isup"].nunique().min() == 1
-
-np.isnan(np.vstack(featuresDf["embedding"].values)).sum()
-
-print("Embeddings:", len(features))
-print("Manifest rows:", len(manifestDf))
-assert len(features) == len(manifestDf)
-
-"""#### Dimensión del embedding"""
-
-features[0]["embedding"].shape
-# (2048,)
-
-"""#### Coherencia WSI–ISUP"""
-
-featuresDf.groupby("wsiId")["isup"].nunique().max()
-# ✅ 1
-
-featuresDf.groupby("wsiId")["isup"].nunique().min()
-# ✅ 1
-
-FEATURES_PATH = "/content/sicapv2_data/SICAPv2/metadata/patch_embeddings.pkl"
-pd.to_pickle(featuresDf, FEATURES_PATH)
-print("Patch embeddings guardados en:", FEATURES_PATH)
-
-"""Debido al número de instancias por WSI y a la dimensionalidad de los embeddings, los bags MIL no se materializan completamente en memoria en esta etapa. En su lugar, los embeddings se almacenan a nivel patch y los bags se construyen dinámicamente durante el entrenamiento, siguiendo prácticas estándar en aprendizaje por instancias múltiples para histopatología digital.
-
-Los embeddings se almacenan a nivel de parche, junto con sus metadatos (WSI, ISUP, fold y split).
-
-### 4.1.9 Construcción lógica de bags MIL (conceptual)
-
-Debido al tamaño de los embeddings y al número de instancias por WSI, los bags MIL no se materializan completamente en memoria. En su lugar, los embeddings se almacenan a nivel patch y los bags se construyen dinámicamente durante el entrenamiento, siguiendo prácticas estándar en MIL para histopatología.
-
-### 4.1.10 Construcción lógica de bags MIL (conceptual)
-
-En esta etapa no se materializan explícitamente los bags MIL en memoria.
-
-Conceptualmente, cada bag corresponde al conjunto de embeddings de parches asociados a un mismo wsiId, junto con su etiqueta ISUP. Durante el entrenamiento del modelo MIL (Sprint 5), los bags se construyen dinámicamente agrupando los embeddings almacenados a nivel de parche.
-
-Esta estrategia:
-
-- Reduce significativamente el consumo de memoria
-- Escala mejor a WSIs con miles de parches
-- Sigue prácticas estándar en MIL aplicado a histopatología digital
-
-### 4.1.11 Análisis exploratorio opcional (PCA)
+### 4.C.1 Definición de modelos MIL
 """
 
-from sklearn.decomposition import PCA
-import matplotlib.pyplot as plt
-
-X = np.vstack(featuresDf["embedding"].values)
-y = featuresDf["isup"].values
-
-pca = PCA(n_components=2)
-X_pca = pca.fit_transform(X)
-
-plt.figure(figsize=(7,6))
-scatter = plt.scatter(
-    X_pca[:,0],
-    X_pca[:,1],
-    c=y,
-    cmap="tab10",
-    s=5,
-    alpha=0.6
-)
-plt.colorbar(scatter, label="ISUP")
-plt.xlabel("PC1")
-plt.ylabel("PC2")
-plt.title("Proyección PCA de embeddings (ResNet50)")
-plt.show()
-
-"""Este análisis tiene fines exclusivamente exploratorios. No se espera una separación clara entre clases a nivel de parche; sin embargo, la proyección sugiere que las representaciones extraídas capturan información histopatológica relevante que será explotada por el modelo MIL en etapas posteriores.
-
-# **Sprint 5 — MIL Dataset + Modelos**
-
-Construir un Dataset MIL que:
-
-- No materialice bags en memoria
-- Agrupe dinámicamente patches → WSI
-- Devuelva una bag por iteración
-- Sea escalable y estable en RAM
-
-## Decisión metodológica clave (para el documento)
-- Los bags MIL no se preconstruyen.
-- Se generan dinámicamente a partir de embeddings almacenados a nivel de parche.
-
-## **Justificación:**
-
-- WSIs con cientos/miles de patches
-- Embeddings de 2048 dimensiones
-- Práctica estándar en MIL histopatológico moderno
-
-## 5.1 Dataset MIL dinámico
-"""
-
-class MILDataset(torch.utils.data.Dataset):
-    def __init__(self, featuresDf, split="train", fold=None):
-        """
-        Dataset MIL dinámico.
-        Cada __getitem__ devuelve un bag completo (WSI).
-        """
-        self.df = featuresDf.copy()
-
-        if fold is not None:
-            self.df = self.df[self.df["fold"] == fold]
-
-        self.df = self.df[self.df["split"] == split]
-
-        # Lista única de WSIs
-        self.wsiIds = self.df["wsiId"].unique()
-
-        # Agrupación lazy
-        self.grouped = self.df.groupby("wsiId")
-
-    def __len__(self):
-        return len(self.wsiIds)
-
-    def __getitem__(self, idx):
-        wsiId = self.wsiIds[idx]
-        group = self.grouped.get_group(wsiId)
-
-        embeddings = torch.tensor(
-            np.vstack(group["embedding"].values),
-            dtype=torch.float32
-        )
-
-        label = int(group["isup"].iloc[0])
-
-        return {
-            "wsiId": wsiId,
-            "embeddings": embeddings,
-            "label": label
-        }
-
-"""### 5.1.2 Validaciones
-
-Esperado:
-
-- embeddings.shape → (N_i, 2048)
-- label ∈ {1,2,3,4,5}
-- N_i variable entre WSIs
-"""
-
-trainDataset = MILDataset(
-    featuresDf,
-    split="train",
-    fold="Val1"
-)
-
-sample = trainDataset[0]
-
-print("WSI:", sample["wsiId"])
-print("Embeddings shape:", sample["embeddings"].shape)
-print("Label:", sample["label"])
-
-"""### 5.1.3 DataLoader MIL"""
-
-trainLoader = torch.utils.data.DataLoader(
-    trainDataset,
-    batch_size=1,
-    shuffle=True
-)
-
-"""## 5.2 Modelo MIL – Mean Pooling
-
-Se implementa el primer modelo MIL real del pipeline
-Es obligatorio como baseline antes de Attention MIL.
-
-
-Implementar un modelo Multiple Instance Learning con Mean Pooling, donde:
-
-- Cada parche → embedding (ya extraído)
-- Cada WSI → bag de embeddings
-- La agregación se hace mediante promedio
-- Se predice ISUP a nivel WSI
-
-Este modelo servirá como:
-- Baseline cuantitativo
-- Punto de comparación contra Attention MIL
-- Control experimental (¿la atención realmente aporta?)
-"""
-
-class MeanMIL(nn.Module):
-    def __init__(self, inputDim=2048, numClasses=6):
-        super().__init__()
-
-        self.classifier = nn.Linear(inputDim, numClasses)
-
-    def forward(self, embeddings):
-        """
-        embeddings: Tensor de forma (N, D)
-        """
-        bagEmbedding = embeddings.mean(dim=0)      # (D,)
-        logits = self.classifier(bagEmbedding)     # (numClasses,)
-
-        return logits, None
-
-"""### 5.2.2 Inicialización del modelo"""
-
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-modelMean = MeanMIL(
-    inputDim=2048,
-    numClasses=6
-).to(DEVICE)
-
-modelMean
-
-"""### 5.2.3 Forward pass por bag (validación crítica)
-
-Logits shape: torch.Size([6])
-
-Label: int
-"""
-
-sample = trainDataset[0]
-
-embeddings = sample["embeddings"].to(DEVICE)
-label = sample["label"]
-
-logits, _ = modelMean(embeddings)
-
-print("Logits shape:", logits.shape)
-print("Label:", label)
-
-"""### 5.2.4 Validación sobre varios bags"""
-
-for i in range(5):
-    bag = trainDataset[i]
-    logits, _ = modelMean(bag["embeddings"].to(DEVICE))
-
-    assert logits.shape == (6,)
-
-"""NOTA:
-El modelo Mean MIL utiliza una agregación uniforme sobre todas las instancias del bag. Aunque simple, este enfoque constituye un baseline fuerte y ampliamente utilizado en MIL, permitiendo evaluar si mecanismos más complejos (e.g., atención) aportan mejoras reales en desempeño.
-
-## 5.3 Modelo MIL – Attention-based MIL (ABMIL)
-
-Implementar un modelo Multiple Instance Learning con mecanismo de atención, donde:
-
-- Cada parche aporta de forma no uniforme a la predicción del WSI
-- El modelo aprende qué parches son relevantes
-
-Se obtiene:
-
-- Predicción ISUP por WSI
-- Pesos de atención por parche (interpretabilidad)
-
-## Objetivo
-Implementar un modelo Multiple Instance Learning con mecanismo de atención, donde:
-
-- Cada parche aporta de forma no uniforme a la predicción del WSI
-- El modelo aprende qué parches son relevantes
-
-Se obtiene:
-
-- Predicción ISUP por WSI
-- Pesos de atención por parche (interpretabilidad)
-
-***Este será el modelo principal del proyecto.***
-
-### Formulación matemática (tesis-ready)
-
-Dado un bag $B = \{x_1, \ldots, x_N\}$, con $x_i \in \mathbb{R}^{2048}$:
-
-#### Atención (Ilse et al., 2018)
-
-$$
-a_i = \frac{\exp(w^\top \tanh(Vx_i))}{\sum_j \exp(w^\top \tanh(Vx_j))}
-$$
-
-$$z = \sum_{i=1}^N a_i x_i$$
-
-$$\hat{y} = f(z)$$
-
-
-Donde:
-
-$a_i$: peso de atención del parche $i$
-
-$z$: representación agregada del bag
-
-$f(\cdot)$: clasificador
-"""
-
-class AttentionMIL(nn.Module):
-    def __init__(self, inputDim=2048, hiddenDim=256, numClasses=6):
-        super().__init__()
-
-        self.attention = nn.Sequential(
-            nn.Linear(inputDim, hiddenDim),
-            nn.Tanh(),
-            nn.Linear(hiddenDim, 1)
-        )
-
-        self.classifier = nn.Linear(inputDim, numClasses)
-
-    def forward(self, embeddings):
-        """
-        embeddings: Tensor (N, D)
-        """
-        # Atención
-        A = self.attention(embeddings)          # (N, 1)
-        A = torch.softmax(A, dim=0)             # normalización sobre instancias
-
-        # Agregación ponderada
-        bagEmbedding = torch.sum(A * embeddings, dim=0)  # (D,)
-
-        # Clasificación
-        logits = self.classifier(bagEmbedding)  # (numClasses,)
-
-        return logits, A
-
-"""#### Inicialización del modelo"""
-
-modelAtt = AttentionMIL(
-    inputDim=2048,
-    hiddenDim=256,
-    numClasses=6
-).to(DEVICE)
-
-modelAtt
-
-"""#### Forward pass por bag"""
-
-sample = trainDataset[0]
-
-embeddings = sample["embeddings"].to(DEVICE)
-label = sample["label"]
-
-logits, A = modelAtt(embeddings)
-
-print("Logits shape:", logits.shape)
-print("Attention shape:", A.shape)
-print("Attention sum:", A.sum().item())
-
-for i in range(5):
-    bag = trainDataset[i]
-    logits, A = modelAtt(bag["embeddings"].to(DEVICE))
-
-    assert logits.shape == (6,)
-    assert abs(A.sum().item() - 1.0) < 1e-4
-
-"""NOTA
-
-A diferencia del Mean MIL, el modelo ABMIL asigna pesos de atención aprendidos a cada parche, permitiendo al modelo enfocarse en regiones histopatológicas relevantes y atenuar la contribución de parches no informativos. Este mecanismo introduce interpretabilidad explícita a nivel de instancia, aspecto clave en aplicaciones clínicas.
-
-🧠 Ventajas frente a Mean MIL
-
-| Aspecto | Mean MIL | Attention MIL |
-| :--- | :---: | :---: |
-| Pesos por parche | Uniformes | Aprendidos |
-| Manejo de ruido | Limitado | Mejor |
-| Interpretabilidad | ❌ | ✅ |
-| Capacidad expresiva | Baja | Alta |
-
-## 5.4 Función de pérdida y setup de entrenamiento
-
-### 5.4.1 Loss function
-
-Clasificación multiclase ISUP (1–5, opcionalmente 0):
-"""
-
-criterion = nn.CrossEntropyLoss()
-
-"""### 5.4.2 Optimizer
-Solo se entrenan parámetros del modelo MIL (no el backbone):
-"""
-
-optimizer = torch.optim.Adam(
-    modelAtt.parameters(),
-    lr=1e-4,
-    weight_decay=1e-5
-)
-
-"""### 5.4.3 Training step (una WSI)"""
-
-def trainStep(model, bag, optimizer, criterion, device):
-    model.train()
-
-    embeddings = bag["embeddings"].to(device)
-    label = torch.tensor([bag["label"]], device=device)
-
-    optimizer.zero_grad()
-
-    logits, _ = model(embeddings)
-    loss = criterion(logits.unsqueeze(0), label)
-
-    loss.backward()
-    optimizer.step()
-
-    pred = logits.argmax().item()
-
-    return loss.item(), pred
-
-"""### 5.4.4 Validation step"""
-
-@torch.no_grad()
-def valStep(model, bag, criterion, device):
-    model.eval()
-
-    embeddings = bag["embeddings"].to(device)
-    label = torch.tensor([bag["label"]], device=device)
-
-    logits, _ = model(embeddings)
-    loss = criterion(logits.unsqueeze(0), label)
-
-    pred = logits.argmax().item()
-
-    return loss.item(), pred
-
-"""### 5.4.5 Epoch loop"""
-
-def runEpoch(model, dataset, optimizer, criterion, device, train=True):
-    totalLoss = 0
-    yTrue, yPred = [], []
-
-    for bag in dataset:
-        if train:
-            loss, pred = trainStep(model, bag, optimizer, criterion, device)
-        else:
-            loss, pred = valStep(model, bag, criterion, device)
-
-        totalLoss += loss
-        yTrue.append(bag["label"])
-        yPred.append(pred)
-
-    avgLoss = totalLoss / len(dataset)
-    accuracy = (np.array(yTrue) == np.array(yPred)).mean()
-
-    return avgLoss, accuracy
-
-"""### 5.4.6 Entrenamiento completo (por fold)"""
-
-FEATURES_PATH = "/content/sicapv2_data/SICAPv2/metadata/patch_embeddings.pkl"
-featuresDf = pd.read_pickle(FEATURES_PATH)
-
-trainDataset = MILDataset(
-    featuresDf,
-    split="train",
-    fold="Val1"
-)
-
-valDataset = MILDataset(
-    featuresDf,
-    split="test",
-    fold="Val1"
-)
-
-EPOCHS = 30
-
-for epoch in range(EPOCHS):
-    trainLoss, trainAcc = runEpoch(
-        modelAtt,
-        trainDataset,
-        optimizer,
-        criterion,
-        DEVICE,
-        train=True
-    )
-
-    valLoss, valAcc = runEpoch(
-        modelAtt,
-        valDataset,
-        optimizer,
-        criterion,
-        DEVICE,
-        train=False
-    )
-
-    print(
-        f"Epoch {epoch+1:02d} | "
-        f"Train Loss: {trainLoss:.4f}, Acc: {trainAcc:.3f} | "
-        f"Val Loss: {valLoss:.4f}, Acc: {valAcc:.3f}"
-    )
-
-"""## 📊 **Análisis del Entrenamiento y Diagnóstico de Desempeño**
-
-### 1. Resumen de Métricas Finales (Época 30)
-| Conjunto | Loss | Accuracy | Estado |
-| :--- | :--- | :--- | :--- |
-| **Entrenamiento** | $0.2807 \downarrow$ | $95.8\% \uparrow$ | Convergencia óptima |
-| **Validación** | $1.9453 \uparrow$ | $31.0\% \downarrow$ | Divergencia (Overfitting) |
-
-### 2. Diagnóstico Técnico
-Se observa una mejora progresiva y robusta en las métricas de entrenamiento; sin embargo, el desempeño en validación alcanza su punto óptimo prematuramente en la **Época 11 ($Loss: 1.4183$)**, para luego degradarse de forma sostenida.
-
-
-
-Esta divergencia entre ambas curvas es un indicador claro de **sobreajuste (overfitting)**. El comportamiento es consistente con la alta capacidad del modelo de atención frente al tamaño reducido del conjunto de entrenamiento (~95 WSIs). Los resultados sugieren que el modelo está memorizando ruido o características específicas del set de entrenamiento en lugar de generalizar patrones subyacentes.
-
-### 3. Observaciones Clave
-* **Capacidad del Modelo:** El hecho de que el *Train Accuracy* alcance el $96\%$ confirma que el mecanismo de atención y los embeddings (ResNet50) son capaces de capturar la información necesaria para la tarea. **No es un bug**, es una señal de que el modelo "tiene potencia".
-* **Limitaciones del Dataset:** El volumen de datos es crítico. Con bags pequeños, el modelo asocia configuraciones específicas de instancias con la etiqueta de la WSI con demasiada facilidad.
-* **Estado de la Arquitectura:** Los embeddings fijos (congelados) limitan la adaptación de las características, mientras que la atención (alta capacidad) intenta compensar sobreajustando los pesos.
-
-### 4. Próximos Pasos (Propuesta)
-Para mitigar este comportamiento y mejorar la generalización, se justifica la implementación de:
-1.  **Regularización Fuerte:** Incorporar *Dropout* en las capas de atención y aumentar el *Weight Decay*.
-2.  **Early Stopping:** Interrumpir el entrenamiento cerca de la época 11-13 para conservar el mejor estado de validación.
-3.  **Comparativa:** Evaluar este modelo contra un agregador simple (*Mean/Max Pooling*) para cuantificar el beneficio real de la atención en este volumen de datos.
-
-## Sprint 5.5 — Cross-Validation + Comparación Mean MIL vs Attention MIL
-
-### Objetivo:
-Evaluar de forma rigurosa dos estrategias de agregación en Multiple Instance Learning a nivel WSI:
-
-- Mean MIL (baseline)
-- Attention MIL (ABMIL)
-
-utilizando cross-validation por WSI, reportando métricas agregadas y controlando el sobreajuste.
-
-### 5.5.1 Configuración global
-
-Esta sección define el experimental setup.
-Todo lo que esté aquí afecta todos los folds y modelos.
-"""
-
-import random
-import torch
-import numpy as np
-
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-EPOCHS = 30
-LR = 1e-4
-NUM_CLASSES = 6
-
-SEED = 42
-
-torch.manual_seed(SEED)
-np.random.seed(SEED)
-random.seed(SEED)
-
-if torch.cuda.is_available():
-    torch.cuda.manual_seed_all(SEED)
-
-"""### 5.5.2 Folds de validación"""
-
-FOLDS = featuresDf["fold"].unique()
-print("Folds:", FOLDS)
-
-"""### 5.5.3 Métricas de evaluación"""
-
-from sklearn.metrics import accuracy_score, f1_score
-
-"""### 5.5.4 Función de evaluación (WSI-level)"""
-
-@torch.no_grad()
-def evaluateModel(model, dataset, device):
-    model.eval()
-
-    allPreds = []
-    allLabels = []
-
-    for i in range(len(dataset)):
-        sample = dataset[i]
-
-        embeddings = sample["embeddings"].to(device)
-        label = sample["label"]
-
-        logits, _ = model(embeddings)
-        pred = logits.argmax(dim=0).item()
-
-        allPreds.append(pred)
-        allLabels.append(label)
-
-    acc = accuracy_score(allLabels, allPreds)
-    f1 = f1_score(allLabels, allPreds, average="macro")
-
-    return acc, f1
-
-"""**La evaluación se realiza por bag (WSI), no por parche, coherente con el setting MIL.**
-
-### 5.5.5 Loop de entrenamiento y evaluación por fold
-"""
-
-results = []
-
-# Create the checkpoints directory if it doesn't exist
-os.makedirs("checkpoints", exist_ok=True)
-
-for fold in FOLDS:
-    print(f"\n===== Fold {fold} ====")
-
-    trainDataset = MILDataset(
-        featuresDf,
-        split="train",
-        fold=fold
-    )
-
-    valDataset = MILDataset(
-        featuresDf,
-        split="test",
-        fold=fold
-    )
-
-    for modelName in ["mean", "attention"]:
-        print(f"\n--- Model: {modelName} ---")
-
-        if modelName == "mean":
-            model = MeanMIL(
-                inputDim=2048,
-                numClasses=NUM_CLASSES
-            )
-        else:
-            model = AttentionMIL(
-                inputDim=2048,
-                hiddenDim=256,
-                numClasses=NUM_CLASSES
-            )
-
-        model.to(DEVICE)
-
-        optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=LR,
-            weight_decay=1e-4
-        )
-
-        criterion = torch.nn.CrossEntropyLoss()
-
-        # Entrenamiento
-        for epoch in range(EPOCHS):
-            trainLoss, trainAcc = runEpoch(
-                model,
-                trainDataset,
-                optimizer,
-                criterion,
-                DEVICE,
-                train=True
-            )
-
-        # Evaluación
-        valAcc, valF1 = evaluateModel(
-            model,
-            valDataset,
-            DEVICE
-        )
-
-        results.append({
-            "fold": fold,
-            "model": modelName,
-            "valAccuracy": valAcc,
-            "valF1": valF1
-        })
-
-        print(
-            f"Fold {fold} | "
-            f"Acc: {valAcc:.3f} | "
-            f"F1-macro: {valF1:.3f}"
-        )
-
-        # Save the attention model checkpoint after training for the current fold
-        if modelName == "attention":
-            checkpointPath = f"checkpoints/attention_fold_{fold}.pt"
-            torch.save(model.state_dict(), checkpointPath)
-            print(f"  Attention model for {fold} saved to {checkpointPath}")
-
-"""***No se realiza early stopping ni hyperparameter tuning en esta etapa para garantizar una comparación justa entre agregadores.***
-
-### 5.5.6 Resultados agregados (Cross-Validation)
-"""
-
-resultsDf = pd.DataFrame(results)
-
-print("Resultados por fold:")
-display(resultsDf)
-
-"""### Resultados promedio por modelo"""
-
-summaryDf = (
-    resultsDf
-    .groupby("model")[["valAccuracy", "valF1"]]
-    .mean()
-    .reset_index()
-)
-
-print("Resultados promedio (cross-validation):")
-display(summaryDf)
-
-"""## **Discusión de resultados — Cross-Validation MIL**
-
-Se evaluaron dos estrategias de agregación MIL (Mean Pooling y Attention-based MIL)
-mediante validación cruzada a nivel WSI, utilizando métricas clínicas relevantes
-(Accuracy y F1-score macro).
-
-### Resultados clave
-
-- El modelo **Mean MIL** obtuvo una mayor accuracy promedio, reflejando un buen
-  desempeño en clases dominantes.
-- El modelo **Attention MIL** alcanzó un **F1-score macro superior**, indicando
-  una mejor capacidad para modelar clases minoritarias y un comportamiento más
-  equilibrado entre grados ISUP.
-
-### Interpretación clínica
-
-Dado el carácter desbalanceado del problema y la relevancia clínica de detectar
-grados ISUP altos, el F1-score macro constituye una métrica más adecuada que la
-accuracy global. Bajo este criterio, el modelo Attention MIL demuestra una ventaja
-clara frente al baseline Mean MIL.
-
-### Conclusión
-
-Estos resultados sugieren que el mecanismo de atención permite al modelo enfocar
-su decisión en parches histopatológicos relevantes, mejorando la discriminación
-entre clases, aun cuando la accuracy global no siempre se incremente.
-
-En consecuencia, el modelo Attention MIL se selecciona como arquitectura principal
-para los análisis de interpretabilidad desarrollados en el Sprint 6.
-
-# **Sprint 6 — Interpretabilidad (Attention-based MIL)**
-
-Interpretar cómo y por qué el modelo MIL con atención toma decisiones a nivel WSI, analizando:
-
-- La distribución de pesos de atención
-- La importancia relativa de los parches
-- La coherencia clínica de las regiones más atendidas
-- La relación entre atención y grado ISUP
-
-⚠️ Importante:
-* Este sprint no modifica ni reentrena el modelo.
-* Es post-hoc interpretability.
-
-## 6.1 Preparación del modelo para inferencia interpretativa -- Seleccionar fold y cargar modelo
-
-Usamos el fold con mejor F1 en Attention (Val2)
-"""
-
-INTERPRET_FOLD = "Val2"
-DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-"""### Cargar modelo entrenado"""
-
-modelAtt = AttentionMIL(
-    inputDim=2048,
-    hiddenDim=256,
-    numClasses=NUM_CLASSES
-)
-
-checkpointPath = f"checkpoints/attention_fold_{INTERPRET_FOLD}.pt"
-modelAtt.load_state_dict(torch.load(checkpointPath,
-                                    map_location=DEVICE))
-
-modelAtt.to(DEVICE)
-modelAtt.eval()
-
-"""### Verificación rápida (sanity check)"""
-
-sample = interpretDataset[0]
-
-print(sample["wsiId"])
-print(sample["embeddings"].shape)   # (N, 2048)
-print(sample["label"])
-
-"""## 6.2 — Extracción de atención por WSI (código completo)
-
-### Estructura de almacenamiento
-
-Diseñada para:
-
-- análisis estadístico
-- visualización
-- trazabilidad científica
-
-### Extracción de pesos de atención por WSI
-
-Usamos el mismo MILDataset, sin cambios:
-"""
-
-interpretDataset = MILDataset(
-    featuresDf,
-    split="test",
-    fold=INTERPRET_FOLD
-)
-
-"""### Loop de inferencia interpretativa (core del sprint)"""
-
+import torch.nn as nn
 import torch.nn.functional as F
 
-def extractAttentionOutputs(model, dataset, device):
-    outputs = []
-
-    with torch.no_grad():
-        for i in range(len(dataset)):
-            sample = dataset[i]
-
-            embeddings = sample["embeddings"].to(device)
-            label = sample["label"]
-            wsiId = sample["wsiId"]
-
-            logits, att = model(embeddings)
-
-            att = att.squeeze(1)          # (N,)
-            att = att.cpu().numpy()
-
-            outputs.append({
-                "wsiId": wsiId,
-                "label": label,
-                "logits": logits.cpu().numpy(),
-                "attention": att,
-                "numPatches": len(att)
-            })
-
-    return outputs
-
-attentionOutputs = extractAttentionOutputs(
-    modelAtt,
-    interpretDataset,
-    DEVICE
-)
-
-"""## 6.3 Análisis cuantitativo de la atención
-
-Check 1 — Verificación básica (sanity checks)
-
-Confirma:
-
-- Atención normalizada (softmax)
-- Interpretabilidad válida
-"""
-
-sample = attentionOutputs[0]
-
-assert np.isclose(sample["attention"].sum(), 1.0, atol=1e-4)
-assert sample["attention"].min() >= 0
-
-"""### Check 2 — Distribución de atención por WSI"""
-
-att = sample["attention"]
-
-print("Min attention:", att.min())
-print("Max attention:", att.max())
-print("Top 10% mass:", np.sort(att)[-int(0.1*len(att)):].sum())
-
-plt.hist(sample["attention"], bins=50)
-plt.xlabel("Peso de atención")
-plt.ylabel("Frecuencia")
-plt.title(f"Distribución de atención – WSI {sample['wsiId']}")
-plt.show()
-
-"""Interpretación típica:
-
-- Distribución altamente sesgada
-- Pocos parches concentran la mayor atención
-- Comportamiento esperado en MIL histopatológico
-
-## 6.4 Identificación de parches más relevantes (Top-K)
-
-Selección de top-k parches
-"""
-
-def getTopKPatches(sample, k=10):
-    att = sample["attention"]
-    topIdx = np.argsort(att)[-k:][::-1]
-
-    return topIdx, att[topIdx]
-
-topIdx, topAtt = getTopKPatches(sample, k=10)
-
-topAtt
-
-"""Estos parches son:
-
-- Los que más influyen en la predicción del WSI
-- Candidatos directos a inspección clínica
-
-### Asociación con rutas de imagen (opcional visual)
-"""
-
-# ================================
-# FIX Sprint 6.4.2 – imagePath
-# ================================
-
-# Re-asociar imagePath desde manifestDf (misma longitud y orden)
-featuresDf = featuresDf.copy()
-featuresDf["imagePath"] = manifestDf["imagePath"].values
-
-# ================================
-# 6.4.2 Asociación con rutas de imagen
-# ================================
-
-# Subset del WSI analizado
-wsiDf = featuresDf[
-    featuresDf["wsiId"] == sample["wsiId"]
-].reset_index(drop=True)
-
-# Top-K parches según atención
-topPatchesDf = wsiDf.iloc[topIdx]
-
-# Verificación
-topPatchesDf[["imagePath", "isup"]]
-
-"""Esto permite:
-
-- Visualización directa
-- Validación con patólogo
-- Figuras interpretables para tesis
-
-## 6.5 Análisis estadístico global de atención
-
-6.5.1 Entropía de atención (concentración)
-"""
-
-from scipy.stats import entropy
-import matplotlib.pyplot as plt
-import numpy as np
-
-def attentionEntropy(att):
-    att = np.asarray(att)
-    return entropy(att + 1e-8)
-
-entropies = [
-    attentionEntropy(o["attention"])
-    for o in attentionOutputs
-]
-
-"""### Histograma global"""
-
-plt.figure(figsize=(6,4))
-plt.hist(entropies, bins=30)
-plt.xlabel("Entropía de atención")
-plt.ylabel("Número de WSIs")
-plt.title("Concentración de atención por WSI")
-plt.show()
-
-"""### WSIs con baja entropía
-- El modelo concentra casi toda la atención en muy pocos parches
-- Indica foco morfológico claro, típico de lesiones tumorales bien definidas
-
-WSIs con alta entropía
-- Atención distribuida en muchos parches
-- Puede corresponder a:
-  * Tumores difusos
-  * Casos borderline
-  * WSIs con alto ruido / heterogeneidad
-
-## 6.6 Atención vs ISUP (análisis clínico)
-"""
-
-import pandas as pd
-
-analysisDf = pd.DataFrame({
-    "wsiId": [o["wsiId"] for o in attentionOutputs],
-    "isup": [o["label"] for o in attentionOutputs],
-    "entropy": entropies,
-    "numPatches": [o["numPatches"] for o in attentionOutputs]
-})
-
-analysisDf.groupby("isup")["entropy"].mean()
-
-"""Lectura clínica correcta
-
-* ISUP 5 (alto grado)
-  - Menor entropía
-  - El modelo se enfoca en regiones muy específicas
-✔️ Coherente con patrones morfológicos agresivos
-
-* ISUP 2
-  - Entropía muy alta
-  - Casos ambiguos, heterogéneos, difíciles incluso para humanos
-✔️ Muy realista
-
-* Tendencia general:
-  - A mayor agresividad tumoral → atención más focalizada
-
-  El NaN en ISUP 2 es solo por bajo N, no es un error.
-"""
-
-analysisDf.groupby("isup")[["entropy", "numPatches"]].agg(["mean", "std"])
-
-"""### Relación entropía – número de parches
-
-También tiene sentido:
-
-- ISUP altos → menos parches relevantes
-- ISUP bajos → más tejido benigno / variabilidad
-
-Esto refuerza que el modelo:
-
-- No depende del número de patches
-- Aprende patrones discriminativos reales
-
-# **Sprint 7 — Binarización ISUP + Reentrenamiento MIL**
-## Objetivo del Sprint 7
-
-Reformular el problema de clasificación multiclase ISUP (0–5) a un escenario binario clínicamente relevante, y evaluar:
-
-- Si la binarización mejora la generalización
-- Si el modelo Attention MIL mantiene ventaja frente a Mean MIL
-- Si la atención se vuelve aún más focalizada
-
-## 7.1 Decisión clínica y metodológica
-
-### Definición de binarización
-
-Usaremos el criterio estándar en literatura prostática:
-
-| Grado ISUP Original | Categoría Binaria | Etiqueta (*Label*) |
-| :--- | :--- | :---: |
-| **ISUP $\leq$ 2** | Bajo Grado (*Low-grade*) | `0` |
-| **ISUP $\geq$ 3** | Alto Grado (*High-grade*) | `1` |
-
- **Contexto Clínico:** La elección de este umbral ($ISUP \ 3$ como punto de corte) es estándar en diversas tareas de patología computacional, ya que suele marcar la transición hacia un comportamiento clínico más agresivo en el cáncer de próstata.
-
-👉 Justificación:
-
-- ISUP ≥ 3 implica riesgo clínico significativo
-- Separación usada en trabajos MIL SOTA
-- Reduce ambigüedad intermedia
-- Aumenta estabilidad estadística
-
-Esto NO invalida el análisis multiclase previo.
-Es un experimento complementario, no un reemplazo.
-
-## 7.2 Estrategia general del Sprint 7
-
-NO se cambia nada del pipeline estructural:
-
-- Mismos embeddings (Sprint 4)
-- Mismo Dataset MIL dinámico (Sprint 5)
-- Mismas arquitecturas (Mean / Attention)
-- Mismo cross-validation por fold
-
-Único cambio:
-- Re-etiquetado binario
-- Ajuste de numClasses = 2
-- Nuevas métricas
-
-## 7.3 Paso 1 — Crear etiqueta binaria (sin tocar datos originales)
-"""
-
-# =========================
-# Sprint 7.3 – Binarización ISUP
-# =========================
-
-featuresDf_bin = featuresDf.copy()
-
-def binarizeIsup(isup):
-    return 0 if isup <= 2 else 1
-
-featuresDf_bin["labelBin"] = featuresDf_bin["isup"].apply(binarizeIsup)
-
-# Sanity check
-featuresDf_bin["labelBin"].value_counts()
-
-"""Nunca sobreescribimos isup
-
-Esto es clave para trazabilidad científica.
-
-## 7.4 Paso 2 — Dataset MIL binario (mínimo cambio)
-
-Extendemos el dataset sin duplicar lógica:
-"""
-
-class MILDatasetBinary(torch.utils.data.Dataset):
-    def __init__(self, featuresDf, split="train", fold=None):
-        self.df = featuresDf.copy()
-
-        if fold is not None:
-            self.df = self.df[self.df["fold"] == fold]
-
-        self.df = self.df[self.df["split"] == split]
-
-        self.wsiIds = self.df["wsiId"].unique()
-        self.grouped = self.df.groupby("wsiId")
-
-    def __len__(self):
-        return len(self.wsiIds)
-
-    def __getitem__(self, idx):
-        wsiId = self.wsiIds[idx]
-        group = self.grouped.get_group(wsiId)
-
-        embeddings = torch.tensor(
-            np.vstack(group["embedding"].values),
-            dtype=torch.float32
+"""#### Mean Pooling MIL"""
+
+class MeanPoolingMIL(nn.Module):
+    def __init__(self, dim):
+        super().__init__()
+        self.fc = nn.Linear(dim, 1)
+
+    def forward(self, x):
+        return self.fc(x.mean(dim=0))
+
+"""#### Max Pooling MIL"""
+
+class MaxPoolingMIL(nn.Module):
+    def __init__(self, inputDim):
+        super().__init__()
+        self.classifier = nn.Linear(inputDim, 1)
+
+    def forward(self, x):
+        x, _ = x.max(dim=0)
+        return self.classifier(x)
+
+"""#### ABMIL (Attention-Based MIL)"""
+
+class ABMIL(nn.Module):
+    def __init__(self, dim, hidden=256):
+        super().__init__()
+        self.att = nn.Sequential(
+            nn.Linear(dim, hidden),
+            nn.Tanh(),
+            nn.Linear(hidden, 1)
         )
+        self.fc = nn.Linear(dim, 1)
 
-        label = int(group["labelBin"].iloc[0])
+    def forward(self, x):
+        A = torch.softmax(self.att(x), dim=0)
+        M = torch.sum(A * x, dim=0)
+        return self.fc(M), A
 
-        return {
-            "wsiId": wsiId,
-            "embeddings": embeddings,
-            "label": label
-        }
+"""#### SmABMIL (Gated Attention)"""
 
-"""Misma estructura → cero riesgo de bugs nuevos
+class SmABMIL(nn.Module):
+    def __init__(self, dim, hidden=256):
+        super().__init__()
+        self.V = nn.Linear(dim, hidden)
+        self.U = nn.Linear(dim, hidden)
+        self.W = nn.Linear(hidden, 1)
+        self.fc = nn.Linear(dim, 1)
 
-## 7.5 Paso 3 — Modelos MIL binarios
+    def forward(self, x):
+        A = torch.tanh(self.V(x)) * torch.sigmoid(self.U(x))
+        A = torch.softmax(self.W(A), dim=0)
+        M = torch.sum(A * x, dim=0)
+        return self.fc(M), A
 
-### 7.5.1 Mean MIL binario
+"""## **D. Entrenamiento + Evaluación Clínica**
+
+### 4.D.1 Métricas clínicas
 """
-
-modelMeanBin = MeanMIL(
-    inputDim=2048,
-    numClasses=2
-).to(DEVICE)
-
-"""### 7.5.2 Attention MIL binario"""
-
-modelAttBin = AttentionMIL(
-    inputDim=2048,
-    hiddenDim=256,
-    numClasses=2
-).to(DEVICE)
-
-"""## 7.6 Paso 4 — Setup de entrenamiento (binario)"""
-
-criterion = nn.CrossEntropyLoss()
-
-optimizer = torch.optim.Adam(
-    modelAttBin.parameters(),
-    lr=1e-4,
-    weight_decay=1e-4
-)
-
-"""Mantenemos hiperparámetros para comparación justa
-
-## 7.7 Paso 5 — Métricas (clínicamente adecuadas)
-
-En binario NO basta accuracy. Evaluaremos:
-
-- Accuracy
-- F1-score
-- ROC-AUC
-"""
-
-from sklearn.metrics import accuracy_score, f1_score, roc_auc_score
-
-"""## 7.8 Paso 6 — Cross-validation binaria (core del sprint)"""
-
-resultsBin = []
-
-torch.manual_seed(42)
-np.random.seed(42)
-
-for fold in FOLDS:
-    print(f"\n===== Fold {fold} =====")
-
-    trainDataset = MILDatasetBinary(
-        featuresDf_bin,
-        split="train",
-        fold=fold
-    )
-
-    valDataset = MILDatasetBinary(
-        featuresDf_bin,
-        split="test",
-        fold=fold
-    )
-
-    for modelName in ["mean", "attention"]:
-        print(f"\n--- Model: {modelName} ---")
-
-        if modelName == "mean":
-            model = MeanMIL(inputDim=2048, numClasses=2)
-        else:
-            model = AttentionMIL(inputDim=2048, hiddenDim=256, numClasses=2)
-
-        model.to(DEVICE)
-
-        optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=1e-4,
-            weight_decay=1e-4
-        )
-
-        criterion = nn.CrossEntropyLoss()
-
-        # Entrenamiento
-        for epoch in range(EPOCHS):
-            runEpoch(
-                model,
-                trainDataset,
-                optimizer,
-                criterion,
-                DEVICE,
-                train=True
-            )
-
-        # Evaluación
-        acc, f1 = evaluateModel(model, valDataset, DEVICE)
-
-        resultsBin.append({
-            "fold": fold,
-            "model": modelName,
-            "valAccuracy": acc,
-            "valF1": f1
-        })
-
-        print(f"Acc: {acc:.3f} | F1: {f1:.3f}")
-
-"""## 7.9 Paso 7 — Resultados agregados"""
-
-resultsBinDf = pd.DataFrame(resultsBin)
-
-resultsBinDf.groupby("model")[["valAccuracy", "valF1"]].mean()
-
-"""## Implementación de Kappa
-
-
-"""
-
-from sklearn.metrics import cohen_kappa_score
-
-def evaluateModel(model, dataset, device):
-    model.eval()
-
-    yTrue = []
-    yPred = []
-
-    with torch.no_grad():
-        for i in range(len(dataset)):
-            sample = dataset[i]
-
-            embeddings = sample["embeddings"].to(device)
-            label = sample["label"]
-
-            logits, _ = model(embeddings)
-            pred = torch.argmax(logits).item()
-
-            yTrue.append(label)
-            yPred.append(pred)
-
-    acc = accuracy_score(yTrue, yPred)
-    f1 = f1_score(yTrue, yPred)
-    kappa = cohen_kappa_score(yTrue, yPred)
-
-    return acc, f1, kappa
-
-"""### Guardar resultados por fold"""
-
-results = []
-
-for foldName in FOLDS: # Iterate over fold names
-
-    print(f"\n===== Fold {foldName} ====")
-
-    # Datasets del fold
-    trainDataset = MILDatasetBinary(
-        featuresDf_bin,
-        split="train",
-        fold=foldName
-    )
-
-    valDataset = MILDatasetBinary(
-        featuresDf_bin,
-        split="test",
-        fold=foldName
-    )
-
-    for modelName in ["mean", "attention"]:
-        print(f"\n--- Model: {modelName} ---")
-
-        if modelName == "mean":
-            model = MeanMIL(inputDim=2048, numClasses=2)
-        else:
-            model = AttentionMIL(
-                inputDim=2048,
-                hiddenDim=256,
-                numClasses=2
-            )
-
-        model.to(DEVICE)
-
-        optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=LR,
-            weight_decay=1e-4
-        )
-
-        criterion = nn.CrossEntropyLoss()
-
-        # Entrenamiento
-        for epoch in range(EPOCHS):
-            runEpoch(
-                model,
-                trainDataset,
-                optimizer,
-                criterion,
-                DEVICE,
-                train=True
-            )
-
-        # Evaluación
-        acc, f1, kappa = evaluateModel(
-            model,
-            valDataset,
-            DEVICE
-        )
-
-        print(f"Acc: {acc:.3f} | F1: {f1:.3f} | Kappa: {kappa:.3f}")
-
-        results.append({
-            "fold": foldName,
-            "model": modelName,
-            "valAccuracy": acc,
-            "valF1": f1,
-            "valKappa": kappa
-        })
-
-resultsDf2 = pd.DataFrame(results)
-
-summaryDf2 = (
-    resultsDf2
-    .groupby("model")[["valAccuracy", "valF1", "valKappa"]]
-    .agg(["mean", "std"])
-)
-
-summaryDf2
-
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-sns.set(style="whitegrid")
-
-# Accuracy por fold
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsDf2,
-    x="fold",
-    y="valAccuracy",
-    hue="model"
-)
-plt.title("Accuracy por fold (ISUP binario)")
-plt.ylabel("Accuracy")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
-plt.show()
-
-# Kappa por fold
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsDf2,
-    x="fold",
-    y="valKappa",
-    hue="model"
-)
-plt.title("Cohen’s Kappa por fold (ISUP binario)")
-plt.ylabel("Kappa")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
-plt.show()
-
-# Boxplot global de Kappa
-plt.figure(figsize=(6,4))
-sns.boxplot(
-    data=resultsDf2,
-    x="model",
-    y="valKappa"
-)
-plt.title("Distribución de Kappa por modelo")
-plt.ylabel("Kappa")
-plt.xlabel("Modelo")
-plt.show()
-
-"""## Función de evaluación clínica (WSI-level)"""
 
 from sklearn.metrics import (
-    accuracy_score,
-    f1_score,
-    roc_auc_score,
-    confusion_matrix,
-    cohen_kappa_score
+    accuracy_score, recall_score, precision_score,
+    confusion_matrix, roc_auc_score, f1_score
 )
 
-def evaluateModelClinical(model, dataset, device):
+def evaluate(model, bags, labels):
+    yTrue, yPred, yProb = [], [], []
+
     model.eval()
-
-    yTrue = []
-    yPred = []
-    yProb = []
-
     with torch.no_grad():
-        for i in range(len(dataset)):
-            sample = dataset[i]
+        for bag, y in zip(bags, labels):
+            bag = bag.to(device)  # ✅ FIX CRÍTICO
 
-            embeddings = sample["embeddings"].to(device)
-            label = sample["label"]
+            out = model(bag)
+            if isinstance(out, tuple):
+                out = out[0]
 
-            logits, _ = model(embeddings)
-            probs = torch.softmax(logits, dim=0)
+            p = torch.sigmoid(out).item()
 
-            pred = torch.argmax(probs).item()
-            probPos = probs[1].item()  # Probabilidad clase positiva (High-grade)
-
-            yTrue.append(label)
-            yPred.append(pred)
-            yProb.append(probPos)
-
-    # Métricas estándar
-    acc = accuracy_score(yTrue, yPred)
-    f1 = f1_score(yTrue, yPred)
-    kappa = cohen_kappa_score(yTrue, yPred)
-    auc = roc_auc_score(yTrue, yProb)
-
-    # Matriz de confusión
-    tn, fp, fn, tp = confusion_matrix(yTrue, yPred).ravel()
-
-    sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-    specificity = tn / (tn + fp) if (tn + fp) > 0 else 0.0
+            yTrue.append(y)
+            yPred.append(int(p >= 0.5))
+            yProb.append(p)
 
     return {
-        "accuracy": acc,
-        "f1": f1,
-        "kappa": kappa,
-        "auc": auc,
-        "sensitivity": sensitivity,
-        "specificity": specificity
+        "accuracy": accuracy_score(yTrue, yPred),
+        "sensitivity": recall_score(yTrue, yPred),
+        "specificity": recall_score(yTrue, yPred, pos_label=0),
+        "precision": precision_score(yTrue, yPred),
+        "f1": f1_score(yTrue, yPred),
+        "auc": roc_auc_score(yTrue, yProb),
+        "confusion": confusion_matrix(yTrue, yPred)
     }
 
-"""## Loop de cross-validation (mínimo cambio)"""
+"""### 4.D.2 Loop completo por fold (benchmarking real)"""
 
-resultsClinical = []
+from tqdm.auto import tqdm
 
-for foldName in FOLDS:
-    print(f"\n===== Fold {foldName} =====")
+EPOCHS = 10
+LR = 1e-4
+LOSS = nn.BCEWithLogitsLoss()
 
-    trainDataset = MILDatasetBinary(
-        featuresDf_bin,
-        split="train",
-        fold=foldName
-    )
+results = []
+trainingLogs = []
+trainedModels = {}
 
-    valDataset = MILDatasetBinary(
-        featuresDf_bin,
-        split="test",
-        fold=foldName
-    )
+for fold in ["Val1", "Val2", "Val3", "Val4"]:
+    print(f"\n==============================")
+    print(f"        FOLD {fold}")
+    print(f"==============================")
 
-    for modelName in ["mean", "attention"]:
-        print(f"\n--- Model: {modelName} ---")
+    # Split por fold
+    dfTrain = manifestDf[(manifestDf.fold == fold) & (manifestDf.split == "train")]
+    dfTest  = manifestDf[(manifestDf.fold == fold) & (manifestDf.split == "test")]
 
-        if modelName == "mean":
-            model = MeanMIL(inputDim=2048, numClasses=2)
-        else:
-            model = AttentionMIL(inputDim=2048, hiddenDim=256, numClasses=2)
+    # Embeddings
+    embTrain = extractEmbeddings(dfTrain)
+    embTest  = extractEmbeddings(dfTest)
 
-        model.to(DEVICE)
+    # Construcción de bags
+    trainBags, trainLabels = [], []
+    for wsi, emb in embTrain.items():
+        y = int(wsiDf.loc[wsiDf.wsiId == wsi, "labelBinary"].iloc[0])
+        trainBags.append(torch.tensor(emb, dtype=torch.float32))
+        trainLabels.append(y)
 
-        optimizer = torch.optim.Adam(
-            model.parameters(),
-            lr=LR,
-            weight_decay=1e-4
-        )
+    testBags, testLabels = [], []
+    for wsi, emb in embTest.items():
+        y = int(wsiDf.loc[wsiDf.wsiId == wsi, "labelBinary"].iloc[0])
+        testBags.append(torch.tensor(emb, dtype=torch.float32))
+        testLabels.append(y)
 
-        criterion = nn.CrossEntropyLoss()
+    # Modelos a comparar
+    for Model, name in [
+        (MeanPoolingMIL, "MeanMIL"),
+        (MaxPoolingMIL, "MaxMIL"),
+        (ABMIL, "ABMIL"),
+        (SmABMIL, "SmABMIL")
+    ]:
+        print(f"\n▶ Entrenando modelo: {name}")
 
+        model = Model(trainBags[0].shape[1]).to(device)
+        optimizer = torch.optim.Adam(model.parameters(), lr=LR)
+
+        # ===== Entrenamiento =====
         for epoch in range(EPOCHS):
-            runEpoch(
-                model,
-                trainDataset,
-                optimizer,
-                criterion,
-                DEVICE,
-                train=True
+            model.train()
+            epochLoss = 0.0
+
+            loop = tqdm(
+                zip(trainBags, trainLabels),
+                total=len(trainBags),
+                leave=False,
+                desc=f"{name} | Epoch {epoch+1}/{EPOCHS}"
             )
 
-        metrics = evaluateModelClinical(model, valDataset, DEVICE)
+            for bag, y in loop:
+                bag = bag.to(device)
+                target = torch.tensor([float(y)], device=device)
+
+                optimizer.zero_grad()
+                out = model(bag)
+                if isinstance(out, tuple):
+                    out = out[0]
+
+                loss = LOSS(out, target)
+                loss.backward()
+                optimizer.step()
+
+                epochLoss += loss.item()
+                loop.set_postfix(loss=loss.item())
+
+            avgLoss = epochLoss / len(trainBags)
+
+            trainingLogs.append({
+                "fold": fold,
+                "model": name,
+                "epoch": epoch + 1,
+                "loss": avgLoss
+            })
+
+            print(f"    Epoch [{epoch+1}/{EPOCHS}] - Avg Loss: {avgLoss:.4f}")
+
+        # GUARDAMOS EL MODELO
+        trainedModels[(name, fold)] = model
+
+        # ===== Evaluación clínica =====
+        metrics = evaluate(model, testBags, testLabels)
+        metrics["model"] = name
+        metrics["fold"] = fold
+        results.append(metrics)
 
         print(
-            f"Acc: {metrics['accuracy']:.3f} | "
-            f"F1: {metrics['f1']:.3f} | "
+            f"✔ Evaluación {name} | Fold {fold}\n"
+            f"  Acc: {metrics['accuracy']:.3f} | "
             f"Sens: {metrics['sensitivity']:.3f} | "
             f"Spec: {metrics['specificity']:.3f} | "
-            f"AUC: {metrics['auc']:.3f} | "
-            f"Kappa: {metrics['kappa']:.3f}"
+            f"AUC: {metrics['auc']:.3f}"
         )
 
-        resultsClinical.append({
-            "fold": foldName,
-            "model": modelName,
-            **metrics
-        })
+"""## **E — Tabla clínica final**"""
 
-"""## Tabla final"""
+trainLogDf = pd.DataFrame(trainingLogs)
+resultsDf  = pd.DataFrame(results)
 
-resultsClinicalDf = pd.DataFrame(resultsClinical)
+trainLogDf.head()
 
-summaryClinicalDf = (
-    resultsClinicalDf
-    .groupby("model")[[
-        "accuracy",
-        "f1",
-        "sensitivity",
-        "specificity",
-        "auc",
-        "kappa"
-    ]]
+resultsDf.head()
+
+"""### **Curva promedio de loss (promedio sobre folds)**"""
+
+plt.figure(figsize=(8, 5))
+
+for modelName in trainLogDf["model"].unique():
+    dfModel = (
+        trainLogDf[trainLogDf.model == modelName]
+        .groupby("epoch")["loss"]
+        .mean()
+    )
+    plt.plot(dfModel.index, dfModel.values, marker="o", label=modelName)
+
+plt.xlabel("Epoch")
+plt.ylabel("Loss (BCE)")
+plt.title("Curvas de entrenamiento MIL (promedio sobre folds)")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
+
+"""### **Curvas por fold**"""
+
+for modelName in trainLogDf["model"].unique():
+    plt.figure(figsize=(7,4))
+    for fold in trainLogDf["fold"].unique():
+        df = trainLogDf[
+            (trainLogDf.model == modelName) &
+            (trainLogDf.fold == fold)
+        ]
+        plt.plot(df.epoch, df.loss, label=fold)
+
+    plt.title(f"Training Loss — {modelName}")
+    plt.xlabel("Epoch")
+    plt.ylabel("Loss")
+    plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+"""### Tabla clinica"""
+
+metricCols = [
+    "accuracy",
+    "sensitivity",
+    "specificity",
+    "precision",
+    "f1",
+    "auc"
+]
+
+summary = (
+    resultsDf[["model"] + metricCols]
+    .groupby("model")
     .agg(["mean", "std"])
+    .round(3)
 )
 
-summaryClinicalDf
+summary
 
-resultsClinicalDf.dtypes
+"""### Matriz de Confusion"""
+
+confusionRows = []
+
+for _, row in resultsDf.iterrows():
+    tn, fp, fn, tp = row["confusion"].ravel()
+
+    confusionRows.append({
+        "model": row["model"],
+        "fold": row["fold"],
+        "TN": tn,
+        "FP": fp,
+        "FN": fn,
+        "TP": tp
+    })
+
+confusionDf = pd.DataFrame(confusionRows)
+confusionDf
+
+confusionSummary = (
+    confusionDf
+    .groupby("model")[["TN", "FP", "FN", "TP"]]
+    .agg(["mean", "std"])
+    .round(2)
+)
+
+confusionSummary
 
 import matplotlib.pyplot as plt
 import seaborn as sns
+import numpy as np
 
-sns.set(style="whitegrid")
+def plotMeanConfusionMatrix(confusionSummary, modelName):
+    meanVals = confusionSummary.loc[modelName].xs("mean", level=1)
 
-"""### Accuracy por fold (comparación directa)"""
+    cm = np.array([
+        [meanVals["TN"], meanVals["FP"]],
+        [meanVals["FN"], meanVals["TP"]]
+    ])
 
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsClinicalDf,
-    x="fold",
-    y="accuracy",
-    hue="model"
-)
-plt.title("Accuracy por Fold — Clasificación ISUP Binaria")
-plt.ylabel("Accuracy")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
-plt.tight_layout()
-plt.show()
+    plt.figure(figsize=(4.5, 4))
+    sns.heatmap(
+        cm,
+        annot=True,
+        fmt=".1f",
+        cmap="Blues",
+        xticklabels=["Benigno", "Maligno"],
+        yticklabels=["Benigno", "Maligno"]
+    )
+    plt.xlabel("Predicción")
+    plt.ylabel("Ground Truth")
+    plt.title(f"Matriz de Confusión Promedio — {modelName}")
+    plt.tight_layout()
+    plt.show()
 
-"""Demuestra: Estabilidad global y diferencias claras entre folds (especialmente Fold 4).
+for model in confusionSummary.index:
+    plotMeanConfusionMatrix(confusionSummary, model)
 
-### F1-score por fold
+"""### Boxplot de métricas clínicas por modelo"""
+
+metricsToPlot = ["accuracy", "sensitivity", "specificity", "auc"]
+colors = ['#ADD8E6', '#90EE90', '#FFB6C1', '#DDA0DD'] # Lighter shades: LightBlue, LightGreen, LightPink, Plum
+
+for i, metric in enumerate(metricsToPlot):
+    plt.figure(figsize=(6,4))
+    sns.boxplot(data=resultsDf, x="model", y=metric, color=colors[i]) # Use a different color for each metric
+    plt.title(f"Distribución de {metric.upper()} por modelo")
+    plt.grid(True)
+    plt.show()
+
+"""### Radar plot clínico"""
+
+from math import pi
+
+def radarPlot(summary, model):
+    metrics = ["accuracy", "sensitivity", "specificity", "precision", "f1", "auc"]
+    # Correctly access 'mean' values from the MultiIndex columns
+    values = summary.loc[model].xs('mean', level=1)[metrics].values.tolist()
+    values += values[:1]
+
+    angles = [n / float(len(metrics)) * 2 * pi for n in range(len(metrics))]
+    angles += angles[:1]
+
+    plt.figure(figsize=(5,5))
+    ax = plt.subplot(111, polar=True)
+    ax.plot(angles, values, linewidth=2)
+    ax.fill(angles, values, alpha=0.25)
+    ax.set_thetagrids(np.degrees(angles[:-1]), metrics)
+    ax.set_title(f"Perfil clínico — {model}")
+    plt.show()
+
+radarPlot(summary, "SmABMIL")
+
+summary.to_csv("mil_metrics_summary.csv")
+confusionSummary.to_csv("mil_confusion_summary.csv")
+resultsDf.to_csv("mil_results_per_fold.csv", index=False)
+trainLogDf.to_csv("mil_training_logs.csv", index=False)
+
+"""## **F Interpretabilidad por atención (ABMIL / SmABMIL)**
+
+### Visualizar pesos de atención
 """
 
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsClinicalDf,
-    x="fold",
-    y="f1",
-    hue="model"
-)
-plt.title("F1-score por Fold — Clasificación ISUP Binaria")
-plt.ylabel("F1-score")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
-plt.tight_layout()
-plt.show()
+def visualizeAttention(model, bag, topK=20):
+    model.eval()
 
-"""### Sensibilidad por fold"""
+    bag = bag.to(device)
 
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsClinicalDf,
-    x="fold",
-    y="sensitivity",
-    hue="model"
-)
-plt.title("Sensibilidad por Fold — Detección de Alto Grado (ISUP ≥ 3)")
-plt.ylabel("Sensibilidad")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
-plt.tight_layout()
-plt.show()
+    with torch.no_grad():
+        _, A = model(bag)   # atención
+        A = A.squeeze().cpu().numpy()
 
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsClinicalDf,
-    x="fold",
-    y="specificity",
-    hue="model"
-)
-plt.title("Especificidad por Fold — Clasificación ISUP Binaria")
-plt.ylabel("Especificidad")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
-plt.tight_layout()
-plt.show()
+    # Top parches con mayor atención
+    idx = np.argsort(A)[::-1][:topK]
 
-"""Attention MIL detecta mejor los casos de alto riesgo.
+    plt.figure(figsize=(8, 4))
+    plt.bar(range(topK), A[idx])
+    plt.xlabel("Top patches")
+    plt.ylabel("Attention weight")
+    plt.title("Top-k Attention Weights per Bag (Instance-level MIL)")
+    plt.grid(True)
+    plt.show()
 
-### ROC-AUC por fold
+    return idx, A
+
+abmilModel   = trainedModels[("ABMIL", "Val1")]
+smabmilModel = trainedModels[("SmABMIL", "Val1")]
+
+positiveIdx = [i for i, y in enumerate(testLabels) if y == 1]
+
+assert len(positiveIdx) > 0, "No positive bags in test set"
+
+bagIdx = positiveIdx[0]
+bag = testBags[bagIdx]
+
+"""### Visualizar atención — ABMIL"""
+
+print("ABMIL – Atención")
+visualizeAttention(abmilModel, bag)
+
+"""### Visualizar atención — SmABMIL"""
+
+print("SmABMIL – Atención suavizada")
+visualizeAttention(smabmilModel, bag)
+
+"""## Visualizar TOP-K parches"""
+
+def getAttentionScores(model, bag):
+    model.eval()
+    bag = bag.to(device)
+
+    with torch.no_grad():
+        logits, A = model(bag)
+        prob = torch.sigmoid(logits).item()
+        A = A.squeeze().cpu().numpy()
+
+    return A, prob
+
+def plotTopKAttentionBars(model, bag, topK=20, title="Top-K Attention Weights"):
+    A, prob = getAttentionScores(model, bag)
+
+    idx = np.argsort(A)[::-1][:topK]
+
+    plt.figure(figsize=(8, 4))
+    plt.bar(range(topK), A[idx])
+    plt.xlabel("Top instances (patch embeddings)")
+    plt.ylabel("Attention weight")
+    plt.title(f"{title} | P(bag=1)={prob:.3f}")
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+    return idx
+
+plotTopKAttentionBars(abmilModel, bag, title="ABMIL – Attention Distribution")
+plotTopKAttentionBars(smabmilModel, bag, title="SmABMIL – Smoothed Attention")
+
+def plotAttentionHistogram(model, bag, title):
+    A, _ = getAttentionScores(model, bag)
+
+    plt.figure(figsize=(6,4))
+    plt.hist(A, bins=30)
+    plt.xlabel("Attention weight")
+    plt.ylabel("Frequency")
+    plt.title(title)
+    plt.grid(True)
+    plt.tight_layout()
+    plt.show()
+
+plotAttentionHistogram(abmilModel, bag, "ABMIL – Attention Distribution")
+plotAttentionHistogram(smabmilModel, bag, "SmABMIL – Attention Distribution")
+
+"""# **Sprint 5: Interpretabilidad Visual y Correlato Histopatológico**
+
+## Objetivo:
+- Proyectar los pesos de atención aprendidos por modelos MIL basados en atención (ABMIL y SmABMIL) sobre el espacio histopatológico original, permitiendo la identificación de regiones tisulares relevantes y su correlato con patrones morfológicos clínicamente significativos.
+
+## 5.A Reconstrucción del bag enriquecido
+
+### 5.A.1 Función para construir un bag enriquecido
 """
 
-plt.figure(figsize=(8,4))
-sns.barplot(
-    data=resultsClinicalDf,
-    x="fold",
-    y="auc",
-    hue="model"
+def buildEnrichedBag(
+    wsiId,
+    manifestDf,
+    backbone,
+    transform,
+    device,
+    batchSize=64
+):
+    dfWsi = manifestDf[manifestDf.wsiId == wsiId].reset_index(drop=True)
+
+    images = []
+    coords  = []
+
+    for _, row in dfWsi.iterrows():
+        img = Image.open(row.imagePath).convert("RGB")
+        images.append(img)
+        coords.append([row.coordX, row.coordY])
+
+    dataset = [
+        transform(img) for img in images
+    ]
+
+    loader = DataLoader(
+        dataset,
+        batch_size=batchSize,
+        shuffle=False
+    )
+
+    features = []
+
+    backbone.eval()
+    with torch.no_grad():
+        for batch in loader:
+            batch = batch.to(device)
+            emb = backbone(batch).cpu()
+            features.append(emb)
+
+    features = torch.cat(features, dim=0)
+
+    return {
+        "features": features,                 # [N, D]
+        "coords": torch.tensor(coords),        # [N, 2]
+        "images": images,                      # list[PIL.Image]
+        "wsiId": wsiId
+    }
+
+"""### 5.A.2 Construcción del bag"""
+
+wsiId = manifestDf[
+    (manifestDf.fold == "Val1") &
+    (manifestDf.split == "test")
+]["wsiId"].iloc[0]
+
+enrichedBag = buildEnrichedBag(
+    wsiId=wsiId,
+    manifestDf=manifestDf,
+    backbone=backbone,
+    transform=transform,
+    device=device
 )
-plt.title("ROC-AUC por Fold — Clasificación ISUP Binaria")
-plt.ylabel("AUC")
-plt.xlabel("Fold")
-plt.legend(title="Modelo")
+
+print("Bag construido:")
+print("Features:", enrichedBag["features"].shape)
+print("Coords  :", enrichedBag["coords"].shape)
+print("Images  :", len(enrichedBag["images"]))
+
+"""## 5.B Atención + Heatmap espacial sobre la WSI
+
+### 5.B.1 Obtener atención desde ABMIL
+"""
+
+# ————— 5.B.1 Obtener atención desde ABMIL —————
+abmilModel = trainedModels[("ABMIL", "Val1")]
+abmilModel.eval()
+
+with torch.no_grad():
+    logits_ab, A_ab = abmilModel(enrichedBag["features"].to(device))
+    attn_ab = A_ab.squeeze().cpu().numpy()
+    prob_ab = torch.sigmoid(logits_ab).item()
+
+print(f"P(WSI=Maligna) — ABMIL: {prob_ab:.3f}")
+
+"""### 5.B.2 Heatmap de atención espacial (figura tipo journal)"""
+
+coords = enrichedBag["coords"].numpy()
+
+plt.figure(figsize=(6,6))
+plt.scatter(
+    coords[:,0], coords[:,1],
+    c=attn_ab,
+    cmap="hot",
+    s=20
+)
+plt.colorbar(label="Attention weight")
+plt.gca().invert_yaxis()
+plt.title(
+    f"Heatmap de Atención MIL — ABMIL\n"
+    f"P(cáncer clínicamente significativo) = {prob_ab:.3f}"
+)
+plt.xlabel("Coordenada X (px)")
+plt.ylabel("Coordenada Y (px)")
 plt.tight_layout()
 plt.show()
 
-"""Ambos modelos discriminan bien; Attention es más variable."""
+# ————— 5.B.1 Obtener atención desde SmABMIL —————
+smabmilModel = trainedModels[("SmABMIL", "Val1")]
+smabmilModel.eval()
+with torch.no_grad():
+    logits, A = smabmilModel(enrichedBag["features"].to(device))
+    attn = A.squeeze().cpu().numpy()
+    prob = torch.sigmoid(logits).item()
 
-plt.figure(figsize=(6,4))
-sns.boxplot(
-    data=resultsClinicalDf,
-    x="model",
-    y="auc"
+print(f"P(WSI=Maligna) — SmABMIL: {prob:.3f}")
+
+plt.figure(figsize=(6,6))
+plt.scatter(
+    coords[:,0], coords[:,1],
+    c=attn,
+    cmap="hot",
+    s=20
 )
-plt.title("Distribución Global de ROC-AUC por Modelo")
-plt.ylabel("AUC")
-plt.xlabel("Modelo")
+plt.colorbar(label="Attention weight")
+plt.gca().invert_yaxis()
+plt.title(
+    f"Heatmap de Atención MIL sobre la WSI — SmABMIL\n"
+    f"P(cáncer clínicamente significativo) = {prob:.3f}"
+)
+plt.xlabel("Coordenada X (px)")
+plt.ylabel("Coordenada Y (px)")
 plt.tight_layout()
 plt.show()
 
-"""Resume robustez, acuerdo clínico y variabilidad.
+"""## 5.C — Top-K parches reales (evidencia visual)
 
-### Boxplot global de Kappa
+### 5.C.1 Selección de parches más relevantes
 """
 
-plt.figure(figsize=(6,4))
-sns.boxplot(
-    data=resultsClinicalDf,
-    x="model",
-    y="kappa"
+K = 9
+idx = np.argsort(attn)[-K:][::-1]
+
+"""### 5.C.2 Figura tipo journal (3×3)"""
+
+fig, axes = plt.subplots(3, 3, figsize=(7,7))
+
+for ax, i in zip(axes.flatten(), idx):
+    ax.imshow(enrichedBag["images"][i])
+    ax.set_title(f"α={attn[i]:.3f}", fontsize=9)
+    ax.axis("off")
+
+plt.suptitle(
+    f"Top-{K} parches más relevantes (SmABMIL)\nP(WSI=1)={prob:.3f}",
+    fontsize=12
 )
-plt.title("Distribución Global del Coeficiente Kappa")
-plt.ylabel("Kappa")
-plt.xlabel("Modelo")
 plt.tight_layout()
 plt.show()
 
-"""## 📈 Discusión de Resultados y Validación por Folds
 
-### 1. Consistencia del Dataset y Métricas
-La distribución de clases muestra un equilibrio casi óptimo, lo que otorga validez estadística a las métricas globales sin necesidad de técnicas de remuestreo.
 
-* **Clase 1 (High-grade):** 20,380 instancias.
-* **Clase 0 (Low-grade):** 19,456 instancias.
-* **Implicación:** El *Accuracy* y el *F1-Score* son indicadores confiables, ya que no existe un sesgo hacia una clase dominante.
-
----
-
-### 2. Análisis Comparativo: Mean MIL vs. Attention MIL
-A continuación, se detalla el desempeño en los diferentes folds de validación. La variabilidad observada es característica de los problemas de **Multiple Instance Learning (MIL)** en patología digital.
-
-| Fold | Modelo | Accuracy | F1-Score | Observación Crítica |
-| :--- | :--- | :---: | :---: | :--- |
-| **Val 1** | Mean | 0.586 | 0.586 | La señal se diluye al promediar. |
-| | **Attention** | **0.724** | **0.678** | La atención identifica parches discriminativos. |
-| **Val 2** | Mean | **0.778** | **0.762** | Fold con bolsas homogéneas; la atención no es crítica. |
-| | Attention | 0.778 | 0.734 | Desempeño equivalente. |
-| **Val 3** | Mean | 0.833 | 0.778 | Buen desempeño base. |
-| | **Attention** | **0.900** | **0.884** | **Máximo rendimiento:** El modelo generaliza con éxito. |
-| **Val 4** | **Mean** | **0.921** | **0.921** | El promedio actúa como regularizador. |
-| | Attention | 0.632 | 0.622 | Posible sobreajuste a parches ruidosos. |
-
-
-
-#### 💡 Interpretación del Fenómeno en el Fold 4
-El descenso en el desempeño de la atención en el Fold 4 no constituye un error metodológico, sino un hallazgo científico relevante:
-1. **Homogeneidad:** En bolsas con parches muy similares, el *Mean Pooling* es un estimador más estable.
-2. **Sensibilidad al Ruido:** El mecanismo de atención, al ser más expresivo, puede asignar pesos altos a artefactos o características no representativas si el conjunto de validación es muy distinto al de entrenamiento.
-
----
-
-### 3. Conclusiones de la Comparativa Agregada
-| Agregador | Accuracy Global | F1-Score Global |
-| :--- | :---: | :---: |
-| **Mean MIL** | **0.780** | **0.762** |
-| **Attention MIL** | 0.758 | 0.729 |
-
-Aunque el promedio global favorece ligeramente al *Mean MIL*, una conclusión madura para la tesis indica que:
-* **Attention MIL** es superior en escenarios complejos y heterogéneos (como en el Fold 1 y 3), donde la señal relevante está confinada a pocos parches.
-* **Mean MIL** ofrece mayor robustez y estabilidad en folds con distribuciones más uniformes, actuando como un regularizador intrínseco.
-
----
-
-### 4. Rigor Metodológico
-Se confirma la validez del experimento bajo los siguientes criterios:
-1. **Independencia de Datos:** No existe filtración (*leakage*) de WSIs entre los folds de entrenamiento y validación.
-2. **Nivel de Etiquetado:** La clasificación binaria se mantiene estrictamente a nivel de WSI.
-3. **Integridad del Pipeline:** El split de datos se realizó de forma previa a la extracción de embeddings, garantizando una evaluación ciega.
-
-## 🚀 Trabajo Futuro y Líneas de Optimización
-
-La disparidad de rendimiento observada, particularmente en el **Fold 4**, abre una oportunidad de investigación para mejorar la robustez del mecanismo de atención. Se proponen las siguientes líneas de acción:
-
-1. **Regularización del Mecanismo de Atención:** Implementar técnicas de *Attention Dropout* o penalizaciones de entropía sobre los pesos de atención. Esto evitaría que el modelo concentre toda la importancia en unos pocos parches potencialmente ruidosos, forzándolo a explorar una mayor diversidad de instancias dentro de la WSI.
-2. **Atención Multicabeza (Multi-head Attention):** Evolucionar hacia una arquitectura de múltiples cabezas para permitir que el modelo aprenda diferentes representaciones de "relevancia" simultáneamente. Esto podría mitigar el error en folds donde una sola cabeza de atención se sobreajusta a patrones no representativos.
-3. **Análisis de Mapas de Calor (Interpretabilidad):** Realizar una validación cualitativa mediante la visualización de los parches con mayores pesos de atención en el Fold 4. Comparar estos hallazgos con la revisión de un patólogo permitiría identificar si el modelo está sufriendo por artefactos de la imagen o por una morfología celular atípica.
-4. **Estrategias de Agregación Híbrida:** Explorar métodos que combinen dinámicamente *Mean Pooling* y *Attention Pooling* basándose en la varianza de los embeddings, buscando un equilibrio entre la estabilidad del promedio y la especificidad de la atención.
-
-## 🧪 Validación Estadística Avanzada: Coeficiente Kappa
-
-Para una evaluación diagnóstica robusta, no basta con medir el acierto (Accuracy); es fundamental analizar la consistencia del modelo mediante el **Coeficiente Kappa de Cohen ($\kappa$)**. Esta métrica evalúa el acuerdo entre el modelo y el estándar de oro (patólogo), ajustado por la probabilidad de acuerdo puramente aleatorio.
-
-### 1. Tabla Resumen de Desempeño (Media $\pm$ Desviación Estándar)
-
-| Modelo | Accuracy | F1-Score | Coeficiente Kappa ($\kappa$) |
-| :--- | :---: | :---: | :---: |
-| **Mean MIL** | $0.780 \pm 0.142$ | $0.752 \pm 0.145$ | **$0.552 \pm 0.238$** |
-| **Attention MIL** | $0.729 \pm 0.095$ | $0.761 \pm 0.063$ | $0.394 \pm 0.203$ |
-
----
-
-### 2. Interpretación de Resultados
-
-
-
-#### 🔹 Mean MIL: Robustez y Estabilidad Clínica
-* **Mayor Acuerdo:** Un Kappa de **$0.552$** indica un **acuerdo moderado-fuerte**, superando significativamente al azar.
-* **Fiabilidad:** Es el modelo más estable para aplicaciones clínicas, demostrando ser menos sensible a la variabilidad de los folds y a posibles ruidos en los parches de las imágenes.
-* **Comportamiento:** Al promediar las características de la WSI, actúa como un filtro de ruido intrínseco, lo que resulta en un diagnóstico más conservador pero acertado.
-
-#### 🔹 Attention MIL: Expresividad con Incertidumbre
-* **Desempeño en F1:** Logra un F1-Score ligeramente superior ($0.761$), lo que indica una buena capacidad para balancear precisión y sensibilidad.
-* **Debilidad en Kappa:** El valor de **$0.394$** sitúa al modelo en un **acuerdo aceptable/discreto**. La brecha entre un F1 alto y un Kappa bajo sugiere que el modelo, aunque detecta casos positivos, tiene una concordancia menos consistente con la realidad clínica.
-* **Sensibilidad:** Su alta variabilidad indica que el mecanismo de atención es altamente dependiente de la distribución de parches en cada fold, lo que lo hace más "expresivo" pero menos predecible.
-
----
-
-### 3. Conclusión Comparativa
-Desde una perspectiva de **patología digital**, el modelo **Mean MIL** se perfila como la opción preferible por su mayor robustez y concordancia clínica. No obstante, el modelo de **Attention MIL** demuestra un potencial superior de aprendizaje que podría estabilizarse mediante las técnicas de regularización y el aumento de datos propuestos en las secciones anteriores.
-"""
-
-
-
-
-
-
-
-"""# **Sprint 8 — Discusión global y conclusiones finales**
-
-## **Objetivo del Sprint 8**
-
-Este sprint tiene como objetivo integrar y analizar de manera crítica todos los resultados obtenidos a lo largo del pipeline de *Multiple Instance Learning (MIL)* propuesto, evaluando:
-
-- La validez metodológica del enfoque completo
-- El impacto de las estrategias de agregación MIL (Mean vs Attention)
-- El efecto de la binarización clínica del sistema ISUP
-- La relación entre desempeño, interpretabilidad y estabilidad
-- Las limitaciones reales del estudio y las oportunidades de investigación futura
-
-Este sprint no introduce nuevo código.
-Se centra exclusivamente en **análisis, interpretación y cierre científico** del trabajo.
-
----
-
-## **8.1 Discusión global de resultados**
-
-### **8.1.1 Consistencia metodológica del pipeline**
-
-El pipeline desarrollado mantiene una coherencia metodológica estricta desde la extracción de embeddings hasta la evaluación final de los modelos, garantizando que:
-
-- El etiquetado se realiza exclusivamente a nivel de *Whole Slide Image (WSI)*.
-- No existe filtración de información (*data leakage*) entre los conjuntos de entrenamiento y validación.
-- Los embeddings son extraídos antes de la partición por folds, preservando una evaluación completamente ciega.
-- El mismo esquema de validación cruzada se mantiene en todos los experimentos, permitiendo comparaciones justas.
-
-Esta consistencia asegura que las diferencias observadas entre modelos, estrategias de agregación y configuraciones de etiquetas reflejan **comportamientos reales del aprendizaje**, y no artefactos del diseño experimental.
-
----
-
-### **8.1.2 Comparación global: Mean MIL vs Attention MIL**
-
-Los resultados obtenidos evidencian que no existe un agregador universalmente superior. En su lugar, se observa un **trade-off claro entre expresividad y estabilidad**, característico de los modelos MIL.
-
-#### **Mean MIL**
-- Presenta mayor estabilidad entre folds.
-- Exhibe menor varianza en métricas clínicas y estadísticas.
-- Obtiene un coeficiente Kappa superior en el escenario binario.
-- Muestra un comportamiento conservador y robusto, adecuado para entornos clínicos.
-
-#### **Attention MIL**
-- Ofrece mayor capacidad expresiva.
-- Alcanza mejor desempeño en folds con bolsas altamente heterogéneas.
-- Permite identificar regiones relevantes dentro de la WSI.
-- Es más sensible al ruido y a cambios en la distribución de parches.
-
-**Conclusión clave:**  
-El mecanismo de atención aporta valor cuando la señal diagnóstica está localizada en subconjuntos pequeños de parches. Sin embargo, su expresividad incrementa la varianza del modelo cuando las bolsas son homogéneas o contienen ruido estructural, afectando la estabilidad global.
-
----
-
-### **8.1.3 Interpretabilidad y coherencia clínica (Sprint 6)**
-
-El análisis de interpretabilidad realizado mediante los pesos de atención reveló patrones clínicamente coherentes:
-
-- Distribuciones de atención altamente sesgadas.
-- Concentración del peso en un subconjunto reducido de parches.
-- Reducción sistemática de la entropía de atención en WSIs de mayor grado ISUP.
-
-Estos resultados son consistentes con la naturaleza localizada de las regiones tumorales en histopatología prostática y refuerzan la validez interpretativa del modelo Attention MIL.
-
-Además, la identificación de parches *Top-K* habilita aplicaciones futuras como:
-- Validación cualitativa por patólogos.
-- Generación de visualizaciones interpretables.
-- Uso del modelo como sistema de apoyo al diagnóstico clínico.
-
----
-
-### **8.1.4 Impacto de la binarización ISUP (Sprint 7)**
-
-La reformulación del problema desde un escenario multiclase ISUP hacia una clasificación binaria clínicamente relevante produjo efectos significativos:
-
-- Incremento general del desempeño predictivo.
-- Reducción de la ambigüedad diagnóstica.
-- Mejora de la estabilidad estadística entre folds.
-- Evaluación más alineada con decisiones clínicas reales.
-
-El uso del coeficiente **Cohen’s Kappa** resultó fundamental para identificar diferencias de concordancia clínica que no son evidentes únicamente mediante *Accuracy* o *F1-score*.
-
-**Hallazgo central:**  
-Aunque Attention MIL alcanza F1-scores competitivos, Mean MIL presenta una concordancia clínica superior, posicionándose como una alternativa más confiable para escenarios diagnósticos reales.
-
----
-
-## **8.2 Limitaciones del estudio**
-
-Este trabajo presenta limitaciones que deben ser consideradas para una correcta interpretación de los resultados:
-
-1. **Dependencia de embeddings preentrenados:**  
-   El modelo no se entrena de forma *end-to-end* desde píxeles, lo que limita la adaptación completa al dominio prostático.
-
-2. **Sensibilidad del mecanismo de atención:**  
-   La atención puede amplificar artefactos o ruido cuando la distribución de parches difiere entre entrenamiento y validación.
-
-3. **Ausencia de validación externa:**  
-   Los resultados se basan en validación cruzada interna; su generalización a otros centros o cohortes debe evaluarse en trabajos futuros.
-
-4. **Interpretabilidad cualitativa limitada:**  
-   Aunque se identifican parches relevantes, no se realizó una validación clínica formal con patólogos expertos.
-
-Estas limitaciones no invalidan el estudio, sino que delimitan claramente su alcance científico.
-
----
-
-## **8.3 Trabajo futuro**
-
-A partir de los hallazgos obtenidos, se proponen las siguientes líneas de investigación:
-
-1. **Regularización del mecanismo de atención**
-   - Penalización por entropía.
-   - Attention Dropout.
-   - Suavizado de pesos de atención.
-
-2. **Atención multicabeza**
-   - Captura de múltiples patrones de relevancia.
-   - Reducción del sobreajuste local.
-
-3. **Estrategias de agregación híbrida**
-   - Combinación dinámica entre Mean y Attention.
-   - Dependiente de la varianza intra-bolsa.
-
-4. **Validación clínica cualitativa**
-   - Revisión de parches *Top-K* por patólogos.
-   - Comparación con anotaciones humanas.
-
-5. **Extensión end-to-end**
-   - Integración del extractor visual con el modelo MIL.
-   - *Fine-tuning* específico para histopatología prostática.
-
----
-
-## **8.4 Conclusiones finales**
-
-Este trabajo demuestra que los enfoques de *Multiple Instance Learning* son adecuados para el análisis de WSIs en cáncer de próstata, permitiendo modelar de forma correcta la naturaleza débilmente supervisada del problema.
-
-Los resultados indican que:
-
-- Mean MIL ofrece mayor estabilidad y concordancia clínica.
-- Attention MIL aporta interpretabilidad y mayor expresividad.
-- La binarización ISUP mejora la alineación clínica del modelo.
-- El coeficiente Cohen’s Kappa es esencial para evaluar la fiabilidad diagnóstica.
-
-**Conclusión principal:**  
-No existe una única estrategia óptima de agregación MIL; la elección depende del equilibrio deseado entre interpretabilidad, estabilidad y desempeño clínico.
-
-Este trabajo establece una base sólida para futuras investigaciones en patología digital basada en MIL, combinando rigor metodológico, análisis interpretativo y relevancia clínica.
-
-"""
-
-
-
-
-
-
-
+"""##"""
