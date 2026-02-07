@@ -1,283 +1,166 @@
+% ======================
+% DISEÑO DEL PIPELINE
+% ======================
 
-%%%%%%%%%%%%%%%%%%%%%%
-% Diseño del Pipeline
-%%%%%%%%%%%%%%%%%%%%%%
+\section{Diseño del Pipeline Experimental}
 
-\section{Sprint 0: Infraestructura, Entorno y Reproducibilidad} 
+Este capítulo describe de manera detallada el diseño del sistema de clasificación de WSIs mediante Aprendizaje de Instancias Múltiples (MIL). El objetivo es presentar un flujo de procesamiento de datos, extracción de características y modelado que permita una evaluación reproducible del problema médico de clasificación binaria de tejido prostático.
 
-El objetivo es establecer un entorno de desarrollo robusto, determinista y escalable en la nube, capaz de soportar la carga computacional del procesamiento de imágenes gigapíxel.
+El diseño sigue una metodología incremental basada en Sprints, la cual facilita la organización del desarrollo, la gestión de riesgos y la trazabilidad entre los objetivos del proyecto y la implementación computacional.
 
-\subsection{ Actividades Técnicas Realizadas}
+\subsection{Sprint 0: Infraestructura, Entorno y Reproducibilidad}
 
-\begin{itemize}
-    \item Aprovisionamiento de Hardware (Google Colab Pro): Se configuró el entorno de ejecución sobre instancias Linux con aceleración por GPU (NVIDIA T4/V100). Se verificó la disponibilidad de CUDA para asegurar que torch pudiera descargar tensores a la memoria de video.
-\end{itemize}
+El propósito de este Sprint fue establecer un entorno de desarrollo robusto, escalable y reproducible, preparado para procesar imágenes de resolución gigapíxel sin comprometer la consistencia de los resultados.
 
-\begin{itemize}
-    \item Gestión de Dependencias Críticas: Instalación del stack tecnológico específico para patología digital:
-\end{itemize}
+\subsubsection{Infraestructura Computacional}
 
-\begin{itemize}
-    \item openslide-python: Para la lectura de pirámides de imágenes (WSI) sin desbordar la RAM.
-\end{itemize}
+Se configuró un entorno de ejecución basado en instancias con aceleración por GPU (p. ej., NVIDIA T4/V100) para cumplir con los requerimientos computacionales del procesamiento de WSIs. La compatibilidad con CUDA se verificó mediante pruebas de ejecución en PyTorch \cite{paszke2019pytorch}.
 
-\begin{itemize}
-    \item Albumentations: Para la preparación de pipelines de aumento de datos. 
-\end{itemize}
+\subsubsection{Gestión de Dependencias}
+
+Se instaló el conjunto de librerías necesarias para manipulación de imágenes médicas y machine learning:
 
 \begin{itemize}
-    \item Ingesta Automatizada de Datos: Se implementó un script de descompresión y verificación del dataset SICAPv2.
+    \item \textbf{openslide-python:} Lectura eficiente de pirámides de imágenes WSI sin saturar la memoria principal.
+    \item \textbf{Albumentations:} Generación de transformaciones de datos para aumentación durante entrenamiento.
+    \item \textbf{OpenCV / scikit-image:} Procesamiento de imágenes y filtrado de contenido útil.
 \end{itemize}
+
+\subsubsection{Reproducibilidad Científica}
+
+Se estableció un protocolo de reproducibilidad a nivel de código y entrenamiento con el fijado de una semilla global:
 
 \begin{itemize}
-    \item Ajuste de Ruta: Se corrigió la lógica de rutas estáticas a dinámicas (os.path.join), solucionando errores previos de "File Not Found" al cambiar entre entornos de Drive local y en la nube. 
+    \item Función de fijación de semilla (\texttt{set\_seed(42)}) para controlar la aleatoriedad en \texttt{numpy}, \texttt{random} y \texttt{torch}.
+    \item Uso de entornos virtuales y definición explícita de versiones de librerías para garantizar reproducibilidad completa de resultados.
 \end{itemize}
 
-\textbf{Protocolo de Reproducibilidad Científica:}
+\subsection{Sprint 1: Preprocesamiento y Refinamiento de Datos}
 
-\textbf{Acción:} Se definió la función set\_seed(42).\newline
+El objetivo de este Sprint fue transformar los datos crudos (WSIs + anotaciones) en un conjunto de tensores limpios, coherentes y libres de inconsistencias, listos para extracción de características y modelado.
 
-\textbf{Justificación: }Esto fuerza el determinismo en las librerías numpy, random y torch, garantizando que la inicialización de pesos y la mezcla de datos sean idénticas en cada ejecución, un requisito auditor para la tesis.
+\subsubsection{Ajuste de Etiquetado Binario}
 
-\section{Sprint 1: Preprocesamiento y Refinamiento de Datos} 
-
-En este Sprint se transforma la data cruda (imágenes y Excels) en tensores limpios, aplicando correcciones en la lógica de etiquetado para abordar el problema de clasificación. \newline
-
-\subsection{ Ajuste Crítico: Lógica de Etiquetado ("Binario Correcto")}
-
-En versiones anteriores, existía ambigüedad en cómo se trataban las clases minoritarias. En este Sprint se implementó una corrección en el mapeo de clases:\newline
-
-\textbf{Problema Detectado:} La lectura original del Excel partition/Test/Train.xlsx podía interpretar erróneamente las subclases de Gleason o mezclar etiquetas de control.\newline
-
-\textbf{Solución Implementada:} Se reescribió la función de carga de etiquetas para mapear estrictamente:\newline
+Se detectó ambigüedad en la lógica original de lectura de etiquetas desde archivos Excel de particiones. Para resolverlo:
 
 \begin{itemize}
-    \item \textbf{Clase 0 (Negativo):} Muestras etiquetadas como 'NC' (Non-Cancer).
+    \item \textbf{Clase 0 (Negativo):} WSIs etiquetadas como 'NC' (No Cancer).
+    \item \textbf{Clase 1 (Positivo):} WSIs con Gleason Score $\ge 6$ (G3, G4, G5), acorde con definiciones clínicas \cite{epstein2016gleason, SILVARODRIGUEZ2020105637}.
 \end{itemize}
+
+Esta binarización elimina ruido de clases intermedias mal etiquetadas y permite que la definición de la verdad terreno (ground truth) sea consistente para el entrenamiento y la evaluación.
+
+\subsubsection{Filtrado de Tejido Relevante}
+
+Debido al gran tamaño y variabilidad de las WSI, se implementó un enfoque de segmentación basado en umbrales de color:
 
 \begin{itemize}
-    \item \textbf{Clase 1 (Positivo): }Cualquier muestra con Gleason Score $\ge 6$ (G3, G4, G5). 
+    \item \textbf{Espacio de Color HSV:} Se calcula una máscara de saturación ($S>0.05$) para separar tejido de fondo.
+    \item \textbf{Umbral de Descarte:} Un parche se retiene sólo si contiene $\ge 50\%$ de tejido útil, reduciendo la inclusión de parches vacíos o artefactos.
 \end{itemize}
 
-\textbf{Impacto:} Esto garantiza una clasificación binaria limpia, eliminando el ruido de etiquetas intermedias mal formateadas y asegurando la integridad de la "Verdad Terreno" (Ground Truth). \newline
+Este filtrado optimiza el entrenamiento al garantizar que sólo parches relevantes sean procesados en etapas posteriores.
 
-\subsection{ Filtrado de Tejido (Tissue Masking)} 
+\subsection{Sprint 2: Ingeniería de Características}
+
+Este Sprint se centró en la reducción de dimensionalidad y la representación de cada parche mediante vectores numéricos densos (embeddings), evitando la fuga de información entre conjuntos.
+
+\subsubsection{Extracción de Características (Feature Extraction)}
+
+Se empleó un modelo de referencia pre-entrenado para obtener representaciones de cada parche:
 
 \begin{itemize}
-    \item \textbf{Algoritmo:} Se desarrolló un filtro basado en el espacio de color HSV (Hue, Saturation, Value). 
+    \item \textbf{Backbone:} ResNet50 pre-entrenado en ImageNet, truncado eliminando la última capa totalmente conectada.
+    \item \textbf{Entrada:} Tensores de dimensión $(3, 512, 512)$.
+    \item \textbf{Salida:} Vectores de características de dimensión $(2048)$ por parche.
 \end{itemize}
+
+Este enfoque de transfer learning facilita la captura de patrones relevantes sin requerir entrenamiento desde cero \cite{Litjens2017Survey}.
+
+\subsubsection{Prevención de Fuga de Datos (Group-aware Split)}
+
+Para evitar que parches del mismo paciente se distribuyan entre conjuntos de entrenamiento y prueba, se empleó un esquema de validación estratificada por paciente:
 
 \begin{itemize}
-    \item \textbf{Lógica de Descarte:}Se calcula la máscara de saturación ($S > 0.05$) para diferenciar tejido (coloreado) del fondo (blanco/transparente). 
+    \item Se usó \textbf{GroupKFold} para generar particiones donde todos los parches de un mismo patient\_id permanecen en el mismo fold.
+    \item Esto garantiza una evaluación honesta y clínicamente válida del modelo.
 \end{itemize}
+
+\subsubsection{Optimización de Almacenamiento}
+
+Para mejorar la eficiencia computacional:
 
 \begin{itemize}
-    \item \textbf{Ajuste de Umbral:} Se estableció que cualquier parche con menos del 50(porciento) de contenido de tejido útil es descartado automáticamente. Esto optimiza el entrenamiento al evitar que la red aprenda de espacios vacíos. 
+    \item Se serializaron los embeddings en formatos binarios (.npy, .pt) para acelerar la carga durante entrenamiento y validación.
+    \item Esto evita repetidas decodificaciones de imágenes en disco durante cada ciclo de entrenamiento.
 \end{itemize}
 
-\section{Sprint 2: Ingeniería de Características} 
+\subsection{Sprint 3: Modelado MIL y Validación}
 
-El objetivo es reducir la dimensionalidad del problema, pasando de imágenes pesadas a vectores matemáticos compactos, y prevenir la fuga de datos (Data Leakage).\newline
+Este Sprint corresponde al núcleo del pipeline: la definición del modelo MIL basado en atención y su entrenamiento riguroso.
 
-\subsection{Extracción de Características (Feature Extraction)}
+\subsubsection{Arquitectura de Atención (Gated Attention MIL)}
+
+Se implementó una variante de MIL con atención que:
 
 \begin{itemize}
-    \item \textbf{Arquitectura:} Se instanció un modelo ResNet50 pre-entrenado en ImageNet.
+    \item Procesa bolsas de instancias de tamaño variable.
+    \item Asigna pesos de importancia a cada parche.
+    \item Facilita interpretabilidad al evidenciar qué parches son más determinantes para la predicción final \cite{ilse2018attention}.
 \end{itemize}
+
+La elección de un mecanismo de atención específico responde a la necesidad de interpretabilidad clínica y coherencia con la supervisión débil.
+
+\subsubsection{Entrenamiento y Validación}
 
 \begin{itemize}
-    \item \textbf{Modificación del Backbone:} Se truncó la red eliminando la última capa totalmente conectada (Fully Connected Layer).
+    \item Se entrenó el modelo bajo una estrategia de validación cruzada estratificada por paciente (GroupKFold).
+    \item La evaluación se realizó a nivel de WSI/bag, utilizando métricas coherentes con lo definido en el Marco Teórico.
 \end{itemize}
 
-\subsubsection{Proceso}
+\subsection{Sprint 4: Interpretación y Mapas de Atención}
+
+La generación de mapas de atención permite:
 
 \begin{itemize}
-    \item Entrada: Tensor de imagen $(3, 512, 512)$.
+    \item Identificar regiones de tejido que más aportan a la decisión.
+    \item Relacionar las predicciones del modelo con hallazgos clínicamente relevantes.
+    \item Validar la interpretabilidad del modelo en bases de datos reales, como SICAPv2.
 \end{itemize}
+
+La interpretación de estos mapas se complementa con análisis cuantitativos y visuales presentados en el capítulo de Resultados y Análisis.
+
+\subsection{Sprint 5: Puesta a Punto y Ajuste Final}
+
+Este Sprint se dedicó a:
 
 \begin{itemize}
-    \item Salida: Vector de características (Embedding) de dimensión $(2048, 1)$.
+    \item Ajuste de hiperparámetros mediante búsqueda estructurada.
+    \item Evaluación del impacto de preprocesamientos alternativos.
+    \item Validación con diferentes particiones de grupos para confirmar robustez de desempeño.
 \end{itemize}
 
-Este proceso convierte la morfología visual (formas de glándulas, núcleos) en una representación numérica densa.\newline
+\section{Resumen del Diseño del Pipeline}
 
-\subsection{Ajuste Crítico: Prevención de Fuga de Datos (GroupKFold)}
+Este pipeline combina una ingeniería de características cuidadosamente diseñada y un modelo MIL con atención interpretativa. La estrategia de validación, la prevención de fuga de datos y la serialización de embeddings aseguran resultados reproducibles y clínicamente relevantes.
 
-\begin{itemize}
-    \item \textbf{Problema Anterior:} La división aleatoria simple (train\_test\_split) podía enviar parches de un mismo paciente tanto al conjunto de Train como al de Test, inflando falsamente las métricas.
-\end{itemize}
+\subsection{Matriz de trazabilidad entre objetivos y requisitos}
 
-\begin{itemize}
-    \item \textbf{Corrección Implementada:} Se integró la lógica de división basada en pacientes (Group-aware split).
-\end{itemize}
+Con el fin de garantizar la coherencia entre los objetivos específicos del proyecto y su implementación técnica, se construyó una matriz de trazabilidad que relaciona cada objetivo con los requisitos funcionales correspondientes y el componente del pipeline en el que estos son abordados. Esta matriz permite verificar que todas las decisiones metodológicas y de diseño experimental están directamente alineadas con los objetivos planteados.
 
-Se asegura que todos los parches pertenecientes al Patient\_ID: X estén exclusivamente en un pliegue.\newline
-
-\subsection{ Optimización de Almacenamiento (Serialización)}
-
-\textbf{Acción:} En lugar de guardar imágenes procesadas, el sistema ahora guarda los embeddings resultantes en archivos binarios formato .npy o diccionarios serializados (pickle/torch.save). \newline
-
-\textbf{Beneficio:} Reducción drástica del tiempo de E/S (Entrada/Salida) en el Sprint 3. El modelo MIL leerá vectores ligeros en lugar de decodificar miles de imágenes JPG repetidamente.
-
-
-
-
-
-
-
-
-\subsection{Introducción y Metodología de Elicitación} 
-
-El presente capítulo establece las especificaciones técnicas y funcionales para el sistema de clasificación de imágenes histopatológicas mediante Aprendizaje de Instancias Múltiples (MIL). La definición de estos requisitos sigue la metodología CDIO, garantizando que la solución computacional responda efectivamente a la problemática clínica de la variabilidad en la graduación de Gleason. \newline
-
-Los requisitos se han estructurado para guiar el desarrollo incremental a través de los Sprints de ingeniería, asegurando la trazabilidad entre los objetivos del proyecto y el código implementado.
-
-\subsection{Requisitos Funcionales (RF)}
-
-Los requisitos funcionales detallan las capacidades operativas del sistema. Se dividen en tres módulos críticos: Gestión de Datos, Ingeniería de Características y Modelado. 
-
-\subsection{Módulo de Ingesta y Preprocesamiento (Data Curation)}
-
-\textbf{RF-01: Gestión Automatizada del Dataset SICAPv2}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} El sistema debe poseer un mecanismo automatizado para la descarga, descompresión y verificación de integridad del conjunto de datos SICAPv2.
-\end{itemize}
-
-\begin{itemize}
-    \item \textbf{Criterio de Aceptación:} El script debe identificar dinámicamente las rutas de los archivos (os.path.join) independientemente del entorno de ejecución (Local o Cloud), gestionando las 18,783 imágenes de parches y sus máscaras correspondientes.
-\end{itemize}
-
-\textbf{RF-02: Normalización y Mapeo Estricto de Etiquetas}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} El sistema debe implementar una lógica de mapeo de etiquetas robusta que elimine la ambigüedad en las clases minoritarias.\newline
-\end{itemize}
-
-\textbf{Especificación Técnica:}\newline
-
-\begin{itemize}
-    \item Se debe garantizar la correcta binarización o clasificación multiclase según el esquema experimental: Clase 0 (Benigno/NC) vs Clase 1 (Gleason $\ge$ 6).
-\end{itemize}
-
-El sistema debe cruzar la información de los archivos Excel (Train.xlsx, Test.xlsx) con la existencia física de las imágenes para asegurar la consistencia del Ground Truth.\newline
-
-\textbf{RF-03: Filtrado de Tejido por Contenido (Tissue Content Filtering)}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} Para optimizar el entrenamiento, el sistema debe descartar parches que no contengan información biológica relevante (fondo o ruido).
-\end{itemize}
-
-\textbf{Especificación Técnica:}\newline
-
-\begin{itemize}
-    \item Implementación de segmentación basada en el espacio de color HSV.
-\end{itemize}
-
-\begin{itemize}
-    \item Umbral de Corte: Se deben descartar automáticamente los parches cuyo contenido de tejido sea inferior al 50 (Porciento) del área total de la imagen ($512 \times 512$ px), basándose en máscaras de saturación ($S > 0.05$).
-\end{itemize}
-
-\subsection{ Módulo de Ingeniería de Características (Feature Engineering)}
-
-\textbf{RF-04: Extracción de Características mediante Transfer Learning}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} El sistema debe transformar las imágenes de alta dimensionalidad en vectores numéricos compactos (embeddings).
-\end{itemize}
-
-\textbf{Especificación Técnica:}\newline
-
-\begin{itemize}
-    \item Uso de una arquitectura ResNet50 (o superior) pre-entrenada en ImageNet.
-\end{itemize}
-
-\begin{itemize}
-    \item Truncamiento de la red: Eliminación de la última capa fully-connected para obtener un vector de características de dimensión $2048 \times 1$ por parche.
-\end{itemize}
-
-\textbf{RF-05: Serialización y Persistencia de Embeddings}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} Para cumplir con los requisitos de eficiencia, el sistema no debe procesar imágenes crudas durante el entrenamiento del modelo MIL. 
-\end{itemize}
-
-\begin{itemize}
-    \item \textbf{Criterio de Aceptación: }Los embeddings generados deben guardarse en almacenamiento persistente bajo formato binario optimizado (.npy o .pt), permitiendo una carga en memoria RAM inmediata en etapas posteriores.
-\end{itemize}
-
-\subsection{ Módulo de Aprendizaje y Validación (MIL Core)}
-
-\textbf{RF-06: Arquitectura de Atención (Attention-based MIL)}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} El modelo debe ser capaz de procesar "bolsas" de instancias de tamaño variable y asignar pesos de importancia a cada parche.
-\end{itemize}
-
-\begin{itemize}
-    \item \textbf{Especificación Técnica: }Implementación de un mecanismo de Gated Attention que permita la interpretabilidad del modelo (identificar qué parches contribuyeron más al diagnóstico).
-\end{itemize}
-
-\textbf{RF-07: Validación Cruzada Estratificada por Paciente (GroupKFold)}\newline
-
-\begin{itemize}
-    \item \textbf{Descripción:} Es un requisito crítico de validez clínica evitar la fuga de datos (data leakage).
-\end{itemize}
-
-\begin{itemize}
-    \item \textbf{Restricción Obligatoria:} El sistema debe implementar una estrategia de validación donde todos los parches pertenecientes a un mismo paciente (patient\_id) se mantengan estrictamente en el mismo pliegue (Fold). No se admite división aleatoria simple.
-\end{itemize}
-
-\subsection{Requisitos No Funcionales (RNF)}
-
-Estos requisitos definen los atributos de calidad y restricciones operativas del sistema.\newline
-
-\textbf{RNF-01: Reproducibilidad Científica (Determinismo)}
-
-\begin{itemize}
-    \item El sistema debe garantizar que los resultados sean exactamente reproducibles en diferentes ejecuciones.
-\end{itemize}
-
-\begin{itemize}
-    \item Implementación: Fijación obligatoria de una Semilla Aleatoria Global (Seed = 42) que controle la inicialización de pesos en PyTorch, la división de datos en Numpy y las transformaciones aleatorias.
-\end{itemize}
-
-\textbf{RNF-02: Eficiencia Computacional y Aceleración}\newline
-
-\begin{itemize}
-    \item El sistema debe estar diseñado para ejecutarse en entornos con aceleración por GPU (CUDA).
-\end{itemize}
-
-\begin{itemize}
-    \item La carga de datos durante el entrenamiento debe utilizar prefetching y paralelismo (workers) para evitar cuellos de botella en la transferencia CPU-GPU.
-\end{itemize}
-
-\textbf{RNF-03: Modularidad del Código}\newline
-
-El software debe seguir principios de diseño modular, separando claramente la lógica de:\newline
-
-1. Preparación de Datos (Dataset Class).\newline
-
-2. Arquitectura del Modelo (nn.Module).\newline
-
-3. Bucle de Entrenamiento y Validación (Trainer).\newline
-
-\newpage
-\subsection{Restricciones del Sistema}
-\begin{itemize}
-    \item \textbf{Hardware:} El modelo debe ser entrenable dentro de los límites de memoria de una GPU estándar de investigación (ej. NVIDIA T4 con 16GB VRAM o V100).
-\end{itemize}
-
-\begin{itemize}
-    \item \textbf{Privacidad:} El sistema debe operar exclusivamente con identificadores anonimizados, sin procesar Información de Identificación Personal (PII).
-\end{itemize}
-
-\subsection{Matriz de Trazabilidad}
-Relación entre los Objetivos Específicos (OE) y los Requisitos Funcionales (RF):
-
-\begin{figure}[h!]
+\begin{table}[h!]
     \centering
-    \includegraphics[width=0.5\linewidth]{Requisitos/image.png}
-    \caption{Matriz de trazabilidad}
-    \label{fig:placeholder}
-\end{figure}
+    \caption{Matriz de trazabilidad entre objetivos específicos, requisitos funcionales y componentes del pipeline}
+    \label{tab:matriz_trazabilidad}
+    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
+        \hline
+        \textbf{Objetivo Específico} & \textbf{Requisito Funcional} & \textbf{Componente del Pipeline} \\
+        \hline
+        OE1: Preprocesamiento y estructuración de datos. & RF-01, RF-02, RF-03 & Sprint 0 y Sprint 1 \\
+        \hline
+        OE2: Diseño de modelos de aprendizaje profundo. & RF-04, RF-05, RF-06 & Sprint 2 y Sprint 3 \\
+        \hline
+        OE3: Validación y evaluación diagnóstica. & RF-07 & Sprint 4 \\
+        \hline
+    \end{tabular}
+\end{table}
