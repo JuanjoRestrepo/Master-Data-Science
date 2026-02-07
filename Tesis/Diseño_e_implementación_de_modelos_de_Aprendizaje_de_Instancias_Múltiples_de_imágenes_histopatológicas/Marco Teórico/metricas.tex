@@ -1,16 +1,31 @@
-La validación rigurosa de modelos en histopatología digital va más allá del simple desempeño numérico, requiriendo métricas que reflejen tanto la utilidad técnica como la relevancia clínica del sistema \cite{Géron_2022}. En este contexto, la evaluación se basa en un conjunto de indicadores clave, cada uno de los cuales ofrece una perspectiva diferente sobre el comportamiento del modelo:
+% ====================== MÉTRICAS DE EVALUACIÓN Y ANÁLISIS ======================
+
+La evaluación de modelos de aprendizaje profundo en histopatología digital requiere un enfoque que trascienda métricas puramente técnicas y considere su impacto clínico real. En escenarios de \textit{supervisión débil}, como aquellos abordados mediante \textit{Multiple Instance Learning} (MIL), las predicciones se realizan a nivel de \textit{bag}, es decir, a nivel de \textit{Whole Slide Image} (WSI), mientras que las instancias individuales (parches) carecen de etiquetas explícitas. Por esta razón, todas las métricas empleadas en este trabajo se definen y analizan exclusivamente a nivel de WSI, en coherencia con la formulación del problema y con la práctica clínica real \cite{zhou2018brief, campanella2019clinical}.\newline
+
+Dado que las tareas de clasificación histopatológica suelen presentar desbalance entre clases y consecuencias clínicas asimétricas, la evaluación se fundamenta en un conjunto complementario de métricas que capturan distintos aspectos del desempeño del modelo:
 
 \begin{itemize}
-    \item \textbf{AUC (Área bajo la curva ROC):} evalúa la capacidad de discriminación del modelo para distinguir entre las clases positivas y negativas a través de todos los posibles umbrales de clasificación. Un valor de AUC cercano a 1 indica una excelente capacidad para rankear correctamente los casos.
-    
-    \item \textbf{Precisión:} mide la proporción de diagnósticos positivos correctos sobre el total de casos clasificados como positivos. En un escenario clínico, una alta precisión es crucial, ya que minimiza los falsos positivos que podrían llevar a tratamientos innecesarios.
-    
-    \item \textbf{Recall o sensibilidad:} cuantifica la proporción de casos positivos que el modelo identificó correctamente. Una alta sensibilidad es vital para evitar los falsos negativos, que representan el riesgo de no detectar una enfermedad en su etapa inicial.
-    
-    \item \textbf{F1-score:} representa la media armónica entre precisión y recall. Esta métrica es especialmente útil en conjuntos de datos desbalanceados, ya que proporciona un solo valor que resume el equilibrio entre evitar falsos positivos y falsos negativos.
-    
-    \item \textbf{Coeficiente Kappa de Cohen:} permite cuantificar el grado de acuerdo entre las predicciones del modelo y las etiquetas reales, corrigiendo el acuerdo que podría ocurrir por azar. A diferencia de la precisión simple, el coeficiente Kappa es particularmente relevante para comparar el desempeño del modelo con el grado de acuerdo interobservador entre especialistas humanos.
-    
+
+    \item \textbf{Área bajo la curva ROC (AUC-ROC):}  
+    La AUC mide la capacidad discriminativa del modelo para ordenar correctamente las WSIs positivas y negativas a lo largo de todos los posibles umbrales de decisión. Esta métrica resulta particularmente adecuada en contextos clínicos, ya que es independiente del umbral de clasificación y robusta frente al desbalance de clases. Un valor de AUC cercano a 1 indica una alta capacidad del modelo para distinguir entre casos patológicos y no patológicos a nivel de WSI.
+
+    \item \textbf{Precisión (Precision):}  
+    Define la proporción de WSIs clasificadas como positivas que son efectivamente positivas. En aplicaciones clínicas, una alta precisión reduce la incidencia de falsos positivos, los cuales pueden derivar en procedimientos invasivos innecesarios, ansiedad en el paciente y sobrecarga del sistema de salud.
+
+    \item \textbf{Sensibilidad (Recall):}  
+    También conocida como tasa de verdaderos positivos, cuantifica la proporción de WSIs positivas correctamente identificadas por el modelo. Desde una perspectiva clínica, la sensibilidad es una métrica crítica, ya que los falsos negativos representan el riesgo de omitir un diagnóstico relevante, con potencial impacto directo en el pronóstico del paciente.
+
+    \item \textbf{F1-score:}  
+    Corresponde a la media armónica entre precisión y sensibilidad, proporcionando una medida balanceada del desempeño del modelo. Esta métrica es especialmente útil en escenarios con clases desbalanceadas, ya que penaliza simultáneamente tanto los falsos positivos como los falsos negativos, ofreciendo una visión más estable del rendimiento global del sistema.
+
+    \item \textbf{Coeficiente de concordancia de Cohen (Kappa):}  
+    El coeficiente Kappa cuantifica el grado de acuerdo entre las predicciones del modelo y las etiquetas reales de las WSIs, corrigiendo el acuerdo esperado por azar. A diferencia de métricas como la exactitud, Kappa permite evaluar el desempeño del modelo en relación con el nivel de concordancia que típicamente se observa entre observadores humanos, lo cual resulta particularmente relevante en histopatología, donde existe variabilidad interobservador incluso entre patólogos expertos \cite{mchugh2012interrater}.
+
 \end{itemize}
-    
-Más allá de las métricas numéricas, la interpretabilidad se erige como un pilar fundamental para la integración de estos sistemas en la práctica clínica. En este sentido, el uso de mecanismos de atención permite trascender la naturaleza de 'caja negra' de los modelos de aprendizaje profundo al identificar explícitamente las regiones histológicas que fundamentan la predicción. Complementariamente, la cuantificación de la incertidumbre actúa como un mecanismo de seguridad, permitiendo discriminar entre inferencias de alta confianza y casos ambiguos que exigen la intervención de un patólogo experto.\cite{Géron_2022}.
+
+Más allá de las métricas cuantitativas tradicionales, la \textbf{interpretabilidad} constituye un requisito fundamental para la adopción clínica de modelos basados en MIL. En este contexto, los mecanismos de atención permiten identificar qué subconjuntos de parches dentro de una WSI contribuyen de manera más significativa a la predicción final, generando mapas de atención que facilitan el análisis visual y la validación por parte de especialistas humanos \cite{ilse2018attention, lu2021data}. Esta capacidad interpretativa no solo incrementa la confianza en el sistema, sino que también alinea el proceso de inferencia del modelo con el razonamiento diagnóstico del patólogo.\newline
+
+Adicionalmente, la evaluación del modelo se complementa con el análisis de la \textbf{incertidumbre en la predicción}, lo cual resulta crucial en aplicaciones clínicas de alto impacto. La identificación de casos con baja confianza permite establecer mecanismos de derivación a revisión manual, reforzando la seguridad del sistema y promoviendo un uso responsable de modelos de aprendizaje automático en entornos médicos \cite{rudin2019stop}.\newline
+
+En conjunto, este esquema de evaluación garantiza que el desempeño del modelo sea analizado no solo desde una perspectiva computacional, sino también desde su viabilidad clínica, coherencia con el paradigma MIL y alineación con prácticas diagnósticas reales en histopatología digital.
+
