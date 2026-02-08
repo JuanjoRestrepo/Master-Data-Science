@@ -4,20 +4,18 @@
 
 \section{Diseño del Pipeline Experimental}
 
-Este capítulo describe de manera detallada el diseño del sistema de clasificación de WSIs mediante Aprendizaje de Instancias Múltiples (MIL). El objetivo es presentar un flujo de procesamiento de datos, extracción de características y modelado que permita una evaluación reproducible del problema médico de clasificación binaria de tejido prostático.
+Este capítulo describe de manera detallada el diseño del sistema de clasificación de WSIs mediante Aprendizaje de Instancias Múltiples (MIL). El objetivo es presentar un flujo de procesamiento de datos, extracción de características y modelado que permita una evaluación reproducible del problema médico de clasificación binaria de tejido prostático.\newline
 
 El diseño sigue una metodología incremental basada en Sprints, la cual facilita la organización del desarrollo, la gestión de riesgos y la trazabilidad entre los objetivos del proyecto y la implementación computacional.
 
+% ====================== SPRINT 0: INFRAESTRUCTURA, ENTORNO Y REPRODUCIBILIDAD ====================
 \subsection{Sprint 0: Infraestructura, Entorno y Reproducibilidad}
-
 El propósito de este Sprint fue establecer un entorno de desarrollo robusto, escalable y reproducible, preparado para procesar imágenes de resolución gigapíxel sin comprometer la consistencia de los resultados.
 
 \subsubsection{Infraestructura Computacional}
-
 Se configuró un entorno de ejecución basado en instancias con aceleración por GPU (p. ej., NVIDIA T4/V100) para cumplir con los requerimientos computacionales del procesamiento de WSIs. La compatibilidad con CUDA se verificó mediante pruebas de ejecución en PyTorch \cite{paszke2019pytorch}.
 
 \subsubsection{Gestión de Dependencias}
-
 Se instaló el conjunto de librerías necesarias para manipulación de imágenes médicas y machine learning:
 
 \begin{itemize}
@@ -27,7 +25,6 @@ Se instaló el conjunto de librerías necesarias para manipulación de imágenes
 \end{itemize}
 
 \subsubsection{Reproducibilidad Científica}
-
 Se estableció un protocolo de reproducibilidad a nivel de código y entrenamiento con el fijado de una semilla global:
 
 \begin{itemize}
@@ -35,23 +32,21 @@ Se estableció un protocolo de reproducibilidad a nivel de código y entrenamien
     \item Uso de entornos virtuales y definición explícita de versiones de librerías para garantizar reproducibilidad completa de resultados.
 \end{itemize}
 
+% ====================== SPRINT 1: PREPROCESAMIENTO Y REFINAMIENTO DE DATOS ====================
 \subsection{Sprint 1: Preprocesamiento y Refinamiento de Datos}
-
 El objetivo de este Sprint fue transformar los datos crudos (WSIs + anotaciones) en un conjunto de tensores limpios, coherentes y libres de inconsistencias, listos para extracción de características y modelado.
 
 \subsubsection{Ajuste de Etiquetado Binario}
-
 Se detectó ambigüedad en la lógica original de lectura de etiquetas desde archivos Excel de particiones. Para resolverlo:
 
 \begin{itemize}
     \item \textbf{Clase 0 (Negativo):} WSIs etiquetadas como 'NC' (No Cancer).
-    \item \textbf{Clase 1 (Positivo):} WSIs con Gleason Score $\ge 6$ (G3, G4, G5), acorde con definiciones clínicas \cite{epstein2016gleason, SILVARODRIGUEZ2020105637}.
+    \item \textbf{Clase 1 (Positivo):} WSIs con Gleason Score $\ge 6$ (G3, G4, G5), acorde con definiciones clínicas \cite{epstein2016gleason} \cite{SILVARODRIGUEZ2020105637}.
 \end{itemize}
 
 Esta binarización elimina ruido de clases intermedias mal etiquetadas y permite que la definición de la verdad terreno (ground truth) sea consistente para el entrenamiento y la evaluación.
 
 \subsubsection{Filtrado de Tejido Relevante}
-
 Debido al gran tamaño y variabilidad de las WSI, se implementó un enfoque de segmentación basado en umbrales de color:
 
 \begin{itemize}
@@ -61,12 +56,11 @@ Debido al gran tamaño y variabilidad de las WSI, se implementó un enfoque de s
 
 Este filtrado optimiza el entrenamiento al garantizar que sólo parches relevantes sean procesados en etapas posteriores.
 
+% ====================== SPRINT 2: INGENIERÍA DE CARACTERÍSTICAS Y PREVENCIÓN DE FUGA DE DATOS ====================
 \subsection{Sprint 2: Ingeniería de Características}
-
 Este Sprint se centró en la reducción de dimensionalidad y la representación de cada parche mediante vectores numéricos densos (embeddings), evitando la fuga de información entre conjuntos.
 
 \subsubsection{Extracción de Características (Feature Extraction)}
-
 Se empleó un modelo de referencia pre-entrenado para obtener representaciones de cada parche:
 
 \begin{itemize}
@@ -78,7 +72,6 @@ Se empleó un modelo de referencia pre-entrenado para obtener representaciones d
 Este enfoque de transfer learning facilita la captura de patrones relevantes sin requerir entrenamiento desde cero \cite{Litjens2017Survey}.
 
 \subsubsection{Prevención de Fuga de Datos (Group-aware Split)}
-
 Para evitar que parches del mismo paciente se distribuyan entre conjuntos de entrenamiento y prueba, se empleó un esquema de validación estratificada por paciente:
 
 \begin{itemize}
@@ -87,7 +80,6 @@ Para evitar que parches del mismo paciente se distribuyan entre conjuntos de ent
 \end{itemize}
 
 \subsubsection{Optimización de Almacenamiento}
-
 Para mejorar la eficiencia computacional:
 
 \begin{itemize}
@@ -95,12 +87,11 @@ Para mejorar la eficiencia computacional:
     \item Esto evita repetidas decodificaciones de imágenes en disco durante cada ciclo de entrenamiento.
 \end{itemize}
 
+% ====================== SPRINT 3: MODELADO MIL Y VALIDACIÓN ====================
 \subsection{Sprint 3: Modelado MIL y Validación}
-
 Este Sprint corresponde al núcleo del pipeline: la definición del modelo MIL basado en atención y su entrenamiento riguroso.
 
 \subsubsection{Arquitectura de Atención (Gated Attention MIL)}
-
 Se implementó una variante de MIL con atención que:
 
 \begin{itemize}
@@ -118,8 +109,8 @@ La elección de un mecanismo de atención específico responde a la necesidad de
     \item La evaluación se realizó a nivel de WSI/bag, utilizando métricas coherentes con lo definido en el Marco Teórico.
 \end{itemize}
 
+% ====================== SPRINT 4: INTERPRETACIÓN Y MAPAS DE ATENCIÓN ====================
 \subsection{Sprint 4: Interpretación y Mapas de Atención}
-
 La generación de mapas de atención permite:
 
 \begin{itemize}
@@ -130,8 +121,8 @@ La generación de mapas de atención permite:
 
 La interpretación de estos mapas se complementa con análisis cuantitativos y visuales presentados en el capítulo de Resultados y Análisis.
 
+% ====================== SPRINT 5: AJUSTE FINAL Y OPTIMIZACIÓN
 \subsection{Sprint 5: Puesta a Punto y Ajuste Final}
-
 Este Sprint se dedicó a:
 
 \begin{itemize}
@@ -144,17 +135,15 @@ Este Sprint se dedicó a:
 
 Este pipeline combina una ingeniería de características cuidadosamente diseñada y un modelo MIL con atención interpretativa. La estrategia de validación, la prevención de fuga de datos y la serialización de embeddings aseguran resultados reproducibles y clínicamente relevantes.
 
-\subsection{Matriz de trazabilidad entre objetivos y requisitos}
-
-Con el fin de garantizar la coherencia entre los objetivos específicos del proyecto y su implementación técnica, se construyó una matriz de trazabilidad que relaciona cada objetivo con los requisitos funcionales correspondientes y el componente del pipeline en el que estos son abordados. Esta matriz permite verificar que todas las decisiones metodológicas y de diseño experimental están directamente alineadas con los objetivos planteados.
+\subsection{Matriz de Trazabilidad}
+Con el fin de garantizar la coherencia entre los objetivos específicos del proyecto, los requisitos funcionales definidos y los componentes implementados en el pipeline experimental, se establece la matriz de trazabilidad presentada en la Tabla~\ref{tab:trazabilidad}. Esta matriz permite verificar que cada objetivo del sistema se encuentra respaldado por decisiones técnicas concretas y plenamente implementadas en el desarrollo experimental.
 
 \begin{table}[h!]
     \centering
-    \caption{Matriz de trazabilidad entre objetivos específicos, requisitos funcionales y componentes del pipeline}
-    \label{tab:matriz_trazabilidad}
-    \begin{tabular}{|p{4cm}|p{4cm}|p{4cm}|}
+    \renewcommand{\arraystretch}{1.3}
+    \begin{tabular}{|c|c|c|}
         \hline
-        \textbf{Objetivo Específico} & \textbf{Requisito Funcional} & \textbf{Componente del Pipeline} \\
+        \textbf{Objetivo Específico} & \textbf{Requisitos Funcionales} & \textbf{Componente del Pipeline} \\
         \hline
         OE1: Preprocesamiento y estructuración de datos. & RF-01, RF-02, RF-03 & Sprint 0 y Sprint 1 \\
         \hline
@@ -163,4 +152,7 @@ Con el fin de garantizar la coherencia entre los objetivos específicos del proy
         OE3: Validación y evaluación diagnóstica. & RF-07 & Sprint 4 \\
         \hline
     \end{tabular}
+    \caption{Matriz de trazabilidad entre objetivos específicos, requisitos funcionales y componentes del pipeline.}
+    \label{tab:trazabilidad}
 \end{table}
+
