@@ -1,0 +1,48 @@
+% ===============================================================
+
+La presente metodología experimental fue diseñada con el objetivo de evaluar modelos de Multiple Instance Learning (MIL) aplicados a imágenes de histopatología digital bajo un esquema de supervisión débil, garantizando coherencia entre la formulación teórica del problema, la implementación computacional y el contexto clínico real. Todas las decisiones metodológicas descritas a continuación se encuentran directamente respaldadas por la implementación desarrollada en el notebook experimental.\newline
+
+\subsection{Configuración experimental y entorno de ejecución}
+Los experimentos fueron desarrollados en un entorno de computación acelerada por GPU, utilizando Google Colaboratory como plataforma de ejecución. El entrenamiento e inferencia de los modelos se realizó mediante la librería PyTorch, haciendo uso de capacidades de cómputo CUDA cuando estuvieron disponibles. Con el fin de garantizar la reproducibilidad de los experimentos, se fijaron semillas aleatorias para los generadores de números pseudoaleatorios de Python, NumPy y PyTorch, incluyendo tanto CPU como GPU.\newline
+
+La gestión de dependencias, rutas de archivos y control de versiones de datos se implementó de manera explícita en el código, asegurando la trazabilidad completa de cada experimento realizado
+
+% -------------------------------------------------------------------------
+
+\subsection{Conjunto de datos y definición del problema}
+El conjunto de datos está compuesto por Whole Slide Images (WSI) de histopatología, acompañadas de etiquetas clínicas a nivel de paciente. Debido a la naturaleza del problema, no se dispone de anotaciones explícitas a nivel de parche, lo cual motiva el uso del paradigma de Multiple Instance Learning.\newline
+
+El conjunto de datos está compuesto por Whole Slide Images (WSI) de histopatología, acompañadas de etiquetas clínicas a nivel de paciente. Debido a la naturaleza del problema, no se dispone de anotaciones explícitas a nivel de parche, lo cual motiva el uso del paradigma de Multiple Instance Learning.\newline
+
+% -------------------------------------------------------------------------
+
+\subsection{Preprocesamiento  y control de calidad de datos}
+El preprocesamiento de los datos se realiza en múltiples etapas, con el objetivo de garantizar la calidad del tejido analizado y evitar la inclusión de regiones irrelevantes o artefactos. En primer lugar, se valida la correspondencia entre los identificadores presentes en los archivos de anotaciones y la existencia física de los parches en el sistema de archivos. \newline
+
+Posteriormente, se aplica un proceso de filtrado de tejido basado en el espacio de color HSV, utilizando el canal de saturación para discriminar regiones con contenido histológico significativo. Los parches que no cumplen un umbral mínimo de proporción de tejido son descartados, evitando así la incorporación de fondo, espacios en blanco o ruido en el proceso de aprendizaje.\newline
+
+Este proceso se realiza de manera previa al entrenamiento y no introduce ningún tipo de información de las etiquetas durante la selección de instancias, preservando así la validez experimental del enfoque.
+
+% -------------------------------------------------------------------------
+
+\subsection{Extracción de características profundas}
+Con el fin de reducir la complejidad computacional y desacoplar la extracción de características del entrenamiento del modelo MIL, se implementa una etapa explícita de feature engineering. Cada parche válido es procesado mediante una red convolucional profunda ResNet50 preentrenada sobre ImageNet, eliminando su capa de clasificación final.\newline
+
+Como resultado, cada parche es representado por un vector de características de dimensión fija, capturando patrones morfológicos relevantes del tejido histopatológico. Los embeddings generados se almacenan de manera persistente, permitiendo su reutilización en múltiples experimentos sin necesidad de reprocesar las imágenes originales.\newline
+
+Esta estrategia mejora la eficiencia del pipeline y reduce el riesgo de inconsistencias durante el entrenamiento de los modelos MIL.
+
+% -------------------------------------------------------------------------
+\subsection{Arquitectura MIL y mecanismo de atención}
+El modelo de aprendizaje se basa en arquitecturas de Multiple Instance Learning con mecanismos de atención, diseñadas para operar sobre conjuntos de instancias de tamaño variable. En este enfoque, el modelo aprende una representación agregada del bag mediante la asignación de pesos de atención a cada instancia, permitiendo identificar aquellas regiones que contribuyen de manera más significativa a la predicción final.\newline
+
+Se implementan variantes de atención estándar y atención con compuertas (gated attention), las cuales permiten modelar interacciones no lineales entre las instancias y mejorar la capacidad expresiva del modelo. La salida del modelo corresponde a una probabilidad a nivel de bag, asociada directamente a la WSI o paciente, sin producir predicciones explícitas a nivel de parche.\newline
+
+% -------------------------------------------------------------------------
+\subsection{Estrategia de validación experimental}
+La validación del modelo se realiza mediante un esquema de validación cruzada estratificada por paciente, utilizando particiones que garantizan que las WSIs pertenecientes a un mismo individuo no aparezcan simultáneamente en los conjuntos de entrenamiento y validación. Este diseño evita fugas de información y asegura una evaluación realista del desempeño del modelo.\newline
+
+Cada partición de validación se entrena y evalúa de forma independiente, permitiendo analizar la estabilidad del modelo frente a variaciones en los datos. Todas las métricas y análisis posteriores se calculan exclusivamente a nivel de bag o WSI, en coherencia con la definición del problema y el diseño del pipeline.
+
+\subsection{Consideraciones éticas y clínicas}
+La metodología experimental está orientada a aplicaciones clínicas de apoyo al diagnóstico, priorizando interpretabilidad, robustez y alineación con el flujo de trabajo del patólogo. El uso de mecanismos de atención permite complementar las predicciones globales con información visual interpretativa, facilitando la validación experta y promoviendo una integración responsable de modelos de aprendizaje profundo en entornos médicos.\newline
