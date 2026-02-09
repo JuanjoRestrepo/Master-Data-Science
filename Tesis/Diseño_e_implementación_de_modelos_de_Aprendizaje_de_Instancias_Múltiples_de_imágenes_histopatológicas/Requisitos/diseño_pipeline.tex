@@ -4,155 +4,72 @@
 
 \section{Diseño del Pipeline Experimental}
 
-Este capítulo describe de manera detallada el diseño del sistema de clasificación de WSIs mediante Aprendizaje de Instancias Múltiples (MIL). El objetivo es presentar un flujo de procesamiento de datos, extracción de características y modelado que permita una evaluación reproducible del problema médico de clasificación binaria de tejido prostático.\newline
+Este capítulo describe de manera sistemática el diseño, implementación y validación del pipeline experimental desarrollado para el análisis de imágenes histopatológicas de próstata mediante Aprendizaje de Instancias Múltiples (MIL). La metodología fue estructurada siguiendo un enfoque incremental por sprints, lo cual permitió garantizar trazabilidad, reproducibilidad y control riguroso de cada etapa del flujo de datos, desde la adquisición del dataset hasta la generación de modelos interpretables.\newline
 
-El diseño sigue una metodología incremental basada en Sprints, la cual facilita la organización del desarrollo, la gestión de riesgos y la trazabilidad entre los objetivos del proyecto y la implementación computacional.
+Cada sprint corresponde a un conjunto de tareas claramente delimitadas, alineadas de forma estricta con la implementación realizada en los notebooks experimentales, asegurando coherencia entre el diseño conceptual y la ejecución computacional.
 
-% ====================== SPRINT 0: INFRAESTRUCTURA, ENTORNO Y REPRODUCIBILIDAD ====================
 \subsection{Sprint 0: Infraestructura, Entorno y Reproducibilidad}
-El propósito de este Sprint fue establecer un entorno de desarrollo robusto, escalable y reproducible, preparado para procesar imágenes de resolución gigapíxel sin comprometer la consistencia de los resultados.
 
-\subsubsection{Infraestructura Computacional}
-Se configuró un entorno de ejecución basado en instancias con aceleración por GPU (p. ej., NVIDIA T4/V100) para cumplir con los requerimientos computacionales del procesamiento de WSIs. La compatibilidad con CUDA se verificó mediante pruebas de ejecución en PyTorch \cite{paszke2019pytorch}.
+El Sprint 0 estuvo orientado a la preparación del entorno computacional y la definición de una infraestructura reproducible que soportara el procesamiento de imágenes histopatológicas a gran escala.\newline
 
-\subsubsection{Gestión de Dependencias}
-Se instaló el conjunto de librerías necesarias para manipulación de imágenes médicas y machine learning:
+Se configuró un entorno de ejecución basado en GPU (NVIDIA T4) utilizando Google Colaboratory, junto con bibliotecas especializadas como PyTorch, NumPy, Pandas y OpenSlide. La gestión de dependencias se realizó de forma explícita para evitar conflictos entre versiones, particularmente en librerías críticas para patología digital.\newline
 
-\begin{itemize}
-    \item \textbf{openslide-python:} Lectura eficiente de pirámides de imágenes WSI sin saturar la memoria principal.
-    \item \textbf{Albumentations:} Generación de transformaciones de datos para aumentación durante entrenamiento.
-    \item \textbf{OpenCV / scikit-image:} Procesamiento de imágenes y filtrado de contenido útil.
-\end{itemize}
+Adicionalmente, se estableció una estructura de directorios estandarizada para la organización de datos crudos, datos procesados, artefactos intermedios y resultados experimentales. Esta organización permitió garantizar trazabilidad completa desde el dataset original hasta los resultados finales, facilitando la auditoría del pipeline y la replicación de los experimentos.
 
-\subsubsection{Reproducibilidad Científica}
-Se estableció un protocolo de reproducibilidad a nivel de código y entrenamiento con el fijado de una semilla global:
+\subsection{Sprint 1: Comprensión del Dataset y Particiones Experimentales}
 
-\begin{itemize}
-    \item Función de fijación de semilla (\texttt{set\_seed(42)}) para controlar la aleatoriedad en \texttt{numpy}, \texttt{random} y \texttt{torch}.
-    \item Uso de entornos virtuales y definición explícita de versiones de librerías para garantizar reproducibilidad completa de resultados.
-\end{itemize}
+El Sprint 1 se centró en la comprensión exhaustiva del dataset SICAPv2 y en la definición rigurosa de las particiones experimentales.\newline
 
-% ====================== SPRINT 1: PREPROCESAMIENTO Y REFINAMIENTO DE DATOS ====================
-\subsection{Sprint 1: Preprocesamiento y Refinamiento de Datos}
-El objetivo de este Sprint fue transformar los datos crudos (WSIs + anotaciones) en un conjunto de tensores limpios, coherentes y libres de inconsistencias, listos para extracción de características y modelado.
+Aunque SICAPv2 corresponde a una versión ya preprocesada de imágenes histopatológicas, se realizó una verificación estructural completa del conjunto de datos, confirmando la integridad de los archivos, la correspondencia entre imágenes y máscaras, y la ausencia de archivos corruptos o inconsistentes.\newline
 
-\subsubsection{Ajuste de Etiquetado Binario}
-Se detectó ambigüedad en la lógica original de lectura de etiquetas desde archivos Excel de particiones. Para resolverlo:
+Se contabilizaron un total de 18{,}783 parches histopatológicos derivados de láminas completas (WSI), garantizando que cada parche contara con información válida tanto a nivel visual como de anotación clínica.\newline
 
-\begin{itemize}
-    \item \textbf{Clase 0 (Negativo):} WSIs etiquetadas como 'NC' (No Cancer).
-    \item \textbf{Clase 1 (Positivo):} WSIs con Gleason Score $\ge 6$ (G3, G4, G5), acorde con definiciones clínicas \cite{epstein2016gleason} \cite{SILVARODRIGUEZ2020105637}.
-\end{itemize}
+Uno de los aspectos más críticos de este sprint fue la prevención de fuga de datos (\textit{data leakage}). Para ello, se descartaron divisiones aleatorias convencionales y se implementó una estrategia de validación cruzada basada en \textit{GroupKFold}, utilizando el identificador de paciente como grupo exclusivo. Esta decisión aseguró que ningún parche o lámina de un mismo paciente apareciera simultáneamente en conjuntos de entrenamiento y validación.\newline
 
-Esta binarización elimina ruido de clases intermedias mal etiquetadas y permite que la definición de la verdad terreno (ground truth) sea consistente para el entrenamiento y la evaluación.
+Se verificó explícitamente que los folds generados fueran mutuamente excluyentes a nivel de paciente, estableciendo así una base metodológica sólida para la evaluación clínica posterior.
 
-\subsubsection{Filtrado de Tejido Relevante}
-Debido al gran tamaño y variabilidad de las WSI, se implementó un enfoque de segmentación basado en umbrales de color:
+\subsection{Sprint 2: Construcción del \textit{Dataset Manifest}}
 
-\begin{itemize}
-    \item \textbf{Espacio de Color HSV:} Se calcula una máscara de saturación ($S>0.05$) para separar tejido de fondo.
-    \item \textbf{Umbral de Descarte:} Un parche se retiene sólo si contiene $\ge 50\%$ de tejido útil, reduciendo la inclusión de parches vacíos o artefactos.
-\end{itemize}
+El Sprint 2 constituyó el núcleo estructural del pipeline experimental mediante la construcción del archivo \texttt{dataset\_manifest.csv}, el cual actúa como la fuente única de verdad del sistema.\newline
 
-Este filtrado optimiza el entrenamiento al garantizar que sólo parches relevantes sean procesados en etapas posteriores.
+Este manifiesto consolidó toda la información relevante de cada parche, incluyendo identificadores de paciente, lámina, partición experimental (fold), conjunto (entrenamiento o validación), etiqueta clínica y ruta al archivo correspondiente. De esta forma, se desacopló explícitamente la lógica de partición y anotación del procesamiento visual, permitiendo un control total del flujo de datos.\newline
 
-% ====================== SPRINT 2: INGENIERÍA DE CARACTERÍSTICAS Y PREVENCIÓN DE FUGA DE DATOS ====================
-\subsection{Sprint 2: Ingeniería de Características}
-Este Sprint se centró en la reducción de dimensionalidad y la representación de cada parche mediante vectores numéricos densos (embeddings), evitando la fuga de información entre conjuntos.
+Se realizaron validaciones exhaustivas para garantizar la consistencia del manifiesto, incluyendo conteos por fold, verificación de balance entre clases, y comprobación de que cada paciente estuviera asignado a un único fold. Estas verificaciones fueron implementadas mediante comprobaciones programáticas explícitas, eliminando ambigüedades en la definición del dataset.\newline
 
-\subsubsection{Extracción de Características (Feature Extraction)}
-Se empleó un modelo de referencia pre-entrenado para obtener representaciones de cada parche:
+La existencia del manifiesto permitió además auditar fácilmente el experimento, replicar resultados y modificar configuraciones sin alterar los datos originales.\newline
 
-\begin{itemize}
-    \item \textbf{Backbone:} ResNet50 pre-entrenado en ImageNet, truncado eliminando la última capa totalmente conectada.
-    \item \textbf{Entrada:} Tensores de dimensión $(3, 512, 512)$.
-    \item \textbf{Salida:} Vectores de características de dimensión $(2048)$ por parche.
-\end{itemize}
+\subsection{Sprint 3: Ingeniería de Características y Construcción de Bolsas MIL}
 
-Este enfoque de transfer learning facilita la captura de patrones relevantes sin requerir entrenamiento desde cero \cite{Litjens2017Survey}.
+En el Sprint 3 se llevó a cabo la ingeniería de características y la construcción formal de las bolsas de instancias (bags) requeridas por el paradigma MIL.\newline
 
-\subsubsection{Prevención de Fuga de Datos (Group-aware Split)}
-Para evitar que parches del mismo paciente se distribuyan entre conjuntos de entrenamiento y prueba, se empleó un esquema de validación estratificada por paciente:
+Cada parche fue procesado mediante un extractor de características basado en ResNet-50 preentrenado en ImageNet. Previamente, se aplicaron filtros en el espacio de color HSV y umbrales de cobertura tisular para descartar regiones no informativas, asegurando que el modelo aprendiera patrones morfológicos relevantes.\newline
 
-\begin{itemize}
-    \item Se usó \textbf{GroupKFold} para generar particiones donde todos los parches de un mismo patient\_id permanecen en el mismo fold.
-    \item Esto garantiza una evaluación honesta y clínicamente válida del modelo.
-\end{itemize}
+Las representaciones extraídas fueron serializadas y agrupadas en bolsas a nivel de lámina, donde cada bolsa corresponde a una WSI y contiene un número variable de instancias. Se analizaron estadísticas descriptivas de las bolsas, incluyendo número mínimo, máximo y promedio de instancias por lámina, confirmando la heterogeneidad inherente al problema clínico.\newline
 
-\subsubsection{Optimización de Almacenamiento}
-Para mejorar la eficiencia computacional:
+Este sprint incluyó validaciones explícitas para asegurar que todas las instancias de una bolsa pertenecieran al mismo paciente y fold, reforzando la integridad experimental.
 
-\begin{itemize}
-    \item Se serializaron los embeddings en formatos binarios (.npy, .pt) para acelerar la carga durante entrenamiento y validación.
-    \item Esto evita repetidas decodificaciones de imágenes en disco durante cada ciclo de entrenamiento.
-\end{itemize}
+\subsection{Sprint 4: Modelado mediante Aprendizaje de Instancias Múltiples}
 
-% ====================== SPRINT 3: MODELADO MIL Y VALIDACIÓN ====================
-\subsection{Sprint 3: Modelado MIL y Validación}
-Este Sprint corresponde al núcleo del pipeline: la definición del modelo MIL basado en atención y su entrenamiento riguroso.
+El Sprint 4 estuvo dedicado al entrenamiento y evaluación de modelos MIL utilizando diferentes estrategias de agregación.\newline
 
-\subsubsection{Arquitectura de Atención (Gated Attention MIL)}
-Se implementó una variante de MIL con atención que:
+Se implementaron y compararon cuatro arquitecturas: MeanMIL, MaxMIL, Attention-based MIL (ABMIL) y una variante suavizada de atención (SmABMIL). Todas las arquitecturas operaron sobre las mismas bolsas y particiones definidas previamente, garantizando una comparación justa.\newline
 
-\begin{itemize}
-    \item Procesa bolsas de instancias de tamaño variable.
-    \item Asigna pesos de importancia a cada parche.
-    \item Facilita interpretabilidad al evidenciar qué parches son más determinantes para la predicción final \cite{ilse2018attention}.
-\end{itemize}
+El entrenamiento se realizó de forma independiente para cada fold, respetando estrictamente las particiones establecidas en el manifiesto. Se registraron métricas clínicas relevantes a nivel de lámina, permitiendo evaluar el desempeño real del sistema en un contexto diagnóstico.\newline
 
-La elección de un mecanismo de atención específico responde a la necesidad de interpretabilidad clínica y coherencia con la supervisión débil.
+Durante este sprint se controlaron aspectos críticos como el consumo de memoria GPU, la estabilidad del entrenamiento y la convergencia de las funciones de pérdida.
 
-\subsubsection{Entrenamiento y Validación}
+\subsection{Sprint 5: Interpretabilidad, Análisis y Robustez}
 
-\begin{itemize}
-    \item Se entrenó el modelo bajo una estrategia de validación cruzada estratificada por paciente (GroupKFold).
-    \item La evaluación se realizó a nivel de WSI/bag, utilizando métricas coherentes con lo definido en el Marco Teórico.
-\end{itemize}
+El Sprint 5 se enfocó en el análisis de interpretabilidad y la evaluación de la robustez clínica del sistema.\newline
 
-% ====================== SPRINT 4: INTERPRETACIÓN Y MAPAS DE ATENCIÓN ====================
-\subsection{Sprint 4: Interpretación y Mapas de Atención}
-La generación de mapas de atención permite:
+En particular, los modelos basados en atención permitieron extraer pesos de importancia asociados a cada parche dentro de una bolsa. Estos pesos fueron utilizados para identificar regiones histopatológicas relevantes, facilitando una interpretación visual alineada con criterios diagnósticos reales.\newline
 
-\begin{itemize}
-    \item Identificar regiones de tejido que más aportan a la decisión.
-    \item Relacionar las predicciones del modelo con hallazgos clínicamente relevantes.
-    \item Validar la interpretabilidad del modelo en bases de datos reales, como SICAPv2.
-\end{itemize}
+Se analizaron además matrices de confusión, curvas de entrenamiento y métricas promedio por fold, proporcionando una visión integral del comportamiento de cada arquitectura.\newline
 
-La interpretación de estos mapas se complementa con análisis cuantitativos y visuales presentados en el capítulo de Resultados y Análisis.
+Este sprint cerró el pipeline experimental, estableciendo una conexión directa entre los resultados cuantitativos obtenidos y su significado clínico potencial.
 
-% ====================== SPRINT 5: AJUSTE FINAL Y OPTIMIZACIÓN
-\subsection{Sprint 5: Puesta a Punto y Ajuste Final}
-Este Sprint se dedicó a:
+\subsection{Resumen del Pipeline}
 
-\begin{itemize}
-    \item Ajuste de hiperparámetros mediante búsqueda estructurada.
-    \item Evaluación del impacto de preprocesamientos alternativos.
-    \item Validación con diferentes particiones de grupos para confirmar robustez de desempeño.
-\end{itemize}
+En conjunto, el pipeline diseñado garantiza un flujo de trabajo reproducible, trazable y clínicamente relevante para el análisis de imágenes histopatológicas mediante MIL. La separación clara por sprints permitió controlar la complejidad del sistema, minimizar riesgos metodológicos y asegurar que cada decisión técnica estuviera respaldada por validaciones explícitas.\newline
 
-\section{Resumen del Diseño del Pipeline}
-
-Este pipeline combina una ingeniería de características cuidadosamente diseñada y un modelo MIL con atención interpretativa. La estrategia de validación, la prevención de fuga de datos y la serialización de embeddings aseguran resultados reproducibles y clínicamente relevantes.
-
-\subsection{Matriz de Trazabilidad}
-Con el fin de garantizar la coherencia entre los objetivos específicos del proyecto, los requisitos funcionales definidos y los componentes implementados en el pipeline experimental, se establece la matriz de trazabilidad presentada en la Tabla~\ref{tab:trazabilidad}. Esta matriz permite verificar que cada objetivo del sistema se encuentra respaldado por decisiones técnicas concretas y plenamente implementadas en el desarrollo experimental.
-
-\begin{table}[h!]
-    \centering
-    \renewcommand{\arraystretch}{1.3}
-    \begin{tabular}{|c|c|c|}
-        \hline
-        \textbf{Objetivo Específico} & \textbf{Requisitos Funcionales} & \textbf{Componente del Pipeline} \\
-        \hline
-        OE1: Preprocesamiento y estructuración de datos. & RF-01, RF-02, RF-03 & Sprint 0 y Sprint 1 \\
-        \hline
-        OE2: Diseño de modelos de aprendizaje profundo. & RF-04, RF-05, RF-06 & Sprint 2 y Sprint 3 \\
-        \hline
-        OE3: Validación y evaluación diagnóstica. & RF-07 & Sprint 4 \\
-        \hline
-    \end{tabular}
-    \caption{Matriz de trazabilidad entre objetivos específicos, requisitos funcionales y componentes del pipeline.}
-    \label{tab:trazabilidad}
-\end{table}
-
+Este diseño constituye la base metodológica sobre la cual se presentan y analizan los resultados experimentales en los capítulos siguientes.
