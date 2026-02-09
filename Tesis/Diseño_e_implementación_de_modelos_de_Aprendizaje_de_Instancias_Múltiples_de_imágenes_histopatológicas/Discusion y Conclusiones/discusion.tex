@@ -1,0 +1,57 @@
+\chapter{Discusión y Consideraciones Clínicas}
+
+Este capítulo presenta un análisis crítico e integrador de los resultados obtenidos a lo largo del desarrollo del sistema de clasificación histopatológica basado en aprendizaje profundo y \textit{Multiple Instance Learning} (MIL). La discusión se estructura en torno a la interpretación del desempeño cuantitativo de los modelos evaluados, sus implicaciones clínicas, el análisis de sus capacidades de interpretabilidad y, finalmente, las limitaciones metodológicas y computacionales identificadas durante el estudio.
+
+\section{Síntesis de los Principales Hallazgos}
+
+Los resultados experimentales evidencian diferencias sustanciales entre los enfoques MIL evaluados. En particular, los modelos basados en mecanismos de atención (ABMIL y SmABMIL) mostraron un desempeño consistentemente superior frente a los métodos de agregación clásicos (MeanMIL y MaxMIL), tanto en métricas discriminativas globales como en estabilidad inter-fold.\newline
+
+Desde el punto de vista clínico, SmABMIL destacó por presentar una combinación favorable de sensibilidad, especificidad y AUC, manteniendo además una varianza reducida entre los distintos folds de validación cruzada. Este comportamiento sugiere una mayor capacidad de generalización frente a la heterogeneidad morfológica inherente a las biopsias prostáticas.\newline
+
+Por el contrario, el modelo MaxMIL evidenció un sesgo marcado hacia la clase negativa, reflejado en valores elevados de verdaderos negativos pero una tasa significativamente alta de falsos negativos, lo cual limita su aplicabilidad en escenarios clínicos donde la omisión de lesiones malignas tiene consecuencias críticas.
+
+\section{Comparación Crítica entre Estrategias MIL}
+
+El análisis comparativo entre MeanMIL y MaxMIL confirma limitaciones conocidas de los esquemas de pooling no adaptativos. MeanMIL tiende a diluir señales relevantes provenientes de regiones tumorales pequeñas al promediar indiscriminadamente todas las instancias del bag, mientras que MaxMIL depende excesivamente de una única instancia extrema, lo que lo hace vulnerable a ruido y artefactos.\newline
+
+En contraste, los modelos de atención aprenden de forma explícita una distribución de relevancia sobre las instancias, permitiendo ponderar diferencialmente las regiones más informativas. Esta propiedad se refleja directamente en la mejora observada en métricas clínicas clave y en la estabilidad del entrenamiento, tal como se aprecia en las curvas de pérdida y en los resultados por fold.\newline
+
+La versión suavizada del mecanismo de atención (SmABMIL) mostró ventajas adicionales en términos de regularización implícita, evitando distribuciones de atención excesivamente concentradas y favoreciendo una interpretación más coherente desde el punto de vista histopatológico.
+
+\section{Implicaciones Clínicas de los Resultados}
+
+Desde una perspectiva diagnóstica, los resultados sugieren que los modelos MIL basados en atención son particularmente adecuados para el análisis de biopsias prostáticas digitalizadas, donde la señal patológica suele estar localizada en regiones específicas del tejido.\newline
+
+La priorización de la sensibilidad y del PR AUC en la evaluación responde a un escenario clínico realista, en el cual la detección temprana de lesiones malignas clínicamente significativas tiene mayor relevancia que la optimización de la exactitud global. En este contexto, SmABMIL ofrece un equilibrio favorable entre detección de casos positivos y control de falsos positivos.\newline
+
+Adicionalmente, la disponibilidad de mecanismos de interpretabilidad basados en atención abre la puerta a su integración como sistemas de apoyo a la decisión clínica, permitiendo al patólogo identificar regiones tisulares relevantes y contrastar visualmente la predicción del modelo con la evidencia morfológica subyacente.
+
+\section{Interpretabilidad y Correlato Histopatológico}
+
+Uno de los aportes más relevantes del presente trabajo es la incorporación de análisis de interpretabilidad a nivel de instancia y de WSI. La visualización de los pesos de atención, tanto mediante histogramas como a través de mapas de calor espaciales, demostró que los modelos ABMIL y SmABMIL concentran su atención en regiones coherentes con patrones histopatológicos asociados a malignidad.\newline
+
+La reconstrucción del bag enriquecido permitió proyectar los pesos de atención directamente sobre las coordenadas originales de la WSI, generando mapas visuales que facilitan el correlato entre predicción algorítmica y estructura tisular. Asimismo, la inspección de los parches Top-K más relevantes evidenció la capacidad del modelo para identificar regiones con arquitectura glandular alterada y densidad celular anómala.\newline
+
+Estos resultados refuerzan la interpretabilidad del enfoque propuesto y lo alinean con los principios de transparencia y explicabilidad exigidos en aplicaciones clínicas basadas en inteligencia artificial.
+
+\section{Limitaciones y Dificultades del Estudio}
+
+A pesar de los resultados obtenidos, el estudio presenta una serie de limitaciones técnicas y metodológicas que deben ser consideradas al interpretar sus conclusiones.
+
+\subsection{Gestión de Imágenes Gigapíxel y Volumen de Datos}
+
+El manejo de imágenes WSI, incluso en su versión fragmentada en parches, impuso restricciones significativas en términos de almacenamiento, transferencia y procesamiento. La necesidad de extraer características de más de 18,000 parches requirió estrategias específicas de serialización y procesamiento por lotes para garantizar la viabilidad computacional del sistema.
+
+\subsection{Variabilidad Cromática y Heterogeneidad del Tejido}
+
+Las variaciones en la tinción H\&E introducen una fuente de ruido que puede afectar la robustez del aprendizaje. Aunque se aplicaron estrategias de normalización y filtrado, esta variabilidad sigue siendo un desafío abierto en patología digital y podría abordarse de manera más explícita mediante técnicas de normalización de tinción avanzadas.
+
+\subsection{Restricciones Computacionales}
+
+El entrenamiento de modelos MIL con bolsas de tamaño variable generó limitaciones de memoria en GPU, particularmente al trabajar con arquitecturas basadas en atención. Si bien se implementaron optimizaciones para mitigar estos efectos, el tamaño de las bolsas y la dimensionalidad de las características siguen condicionando la escalabilidad del enfoque.
+
+\subsection{Consideraciones Metodológicas}
+
+El riesgo de fuga de datos fue abordado mediante particiones estrictas a nivel de paciente utilizando \textit{GroupKFold}, lo cual fortaleció el rigor experimental del estudio. No obstante, el tamaño limitado del dataset y la dicotomización diagnóstica representan simplificaciones que podrían ser refinadas en trabajos futuros mediante esquemas multiclase o análisis longitudinales.\newline
+
+En conjunto, estas limitaciones no invalidan los resultados obtenidos, pero sí delimitan su alcance y señalan oportunidades claras de mejora y extensión del sistema propuesto.
