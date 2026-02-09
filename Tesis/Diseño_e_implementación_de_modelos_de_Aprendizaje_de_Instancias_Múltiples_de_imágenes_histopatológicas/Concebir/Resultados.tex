@@ -5,7 +5,7 @@ A partir del conjunto original de imágenes histopatológicas SICAPv2, se constr
 
 El manifest final contiene un total de \textbf{39,836} parches, organizados en \textbf{496} WSIs, distribuidos en cuatro folds de validación cruzada (Val1–Val4). Cada WSI posee un único conjunto de labels clínicos (Gleason primario, Gleason secundario e ISUP), los cuales se derivan una sola vez a nivel WSI y posteriormente se propagan a todos los parches asociados, garantizando coherencia clínica y evitando inconsistencias a nivel de instancia.\newline
 
-Durante la construcción del manifest se realizaron validaciones críticas automáticas que confirmaron:
+Durante la construcción del manifest se realizaron validaciones automáticas críticas orientadas a garantizar la integridad estructural, la coherencia clínica y la trazabilidad completa de los datos experimentales. En particular, se verificó que:
 
 \begin{itemize}
     \item Durante la construcción del manifest se realizaron validaciones críticas automáticas que confirmaron:
@@ -14,7 +14,7 @@ Durante la construcción del manifest se realizaron validaciones críticas autom
     \item Consistencia estricta de los labels ISUP a nivel WSI (un único valor ISUP por WSI).
 \end{itemize}
 
-Todas las validaciones fueron superadas satisfactoriamente, por lo que el archivo \textit{dataset_manifest.csv} se considera estable y se utiliza como base para la construcción de bags MIL, análisis exploratorio y entrenamiento de modelos.
+Todas las validaciones fueron superadas satisfactoriamente, por lo que el archivo \textit{dataset\_manifest.csv} se considera estable, coherente y clínicamente consistente, y se utiliza como base única para la construcción de bags MIL, el análisis estructural y el entrenamiento de los modelos.
 
 \subsection{Preparación de Bags MIL y análisis estructural}
 A partir del \textit{dataset_manifest.csv}, se construyó una representación basada en Aprendizaje de Instancias Múltiples (Multiple Instance Learning, MIL), donde \textbf{cada bag corresponde a una WSI} y \textbf{cada instancia corresponde a un parche histopatológico}. El label del bag se definió como el grado ISUP asociado a la WSI, mientras que las instancias conservan información local relacionada con la presencia de patrones histológicos (NC, G3, G4, G5 y G4C), utilizada únicamente con fines de trazabilidad.\newline
@@ -37,12 +37,13 @@ El número de instancias por bag presenta una variabilidad considerable, refleja
     \item Promedio de instancias por bag: 80.31
 \end{itemize}
 
-La Figura correspondiente muestra la distribución del número de instancias por WSI, evidenciando una asimetría hacia la derecha, con la mayoría de WSIs concentradas en rangos bajos y medios de número de parches, y un número reducido de WSIs con una cantidad significativamente mayor de instancias. Esta heterogeneidad justifica el uso de enfoques MIL, los cuales permiten manejar bags de tamaño variable sin imponer un número fijo de instancias.
-
+La Figura \ref{fig:distribucion_instancias} ilustra la distribución del número de instancias por WSI, evidenciando una marcada asimetría hacia la derecha. La mayoría de las WSIs presentan un número bajo o intermedio de parches, mientras que un subconjunto reducido concentra una cantidad significativamente mayor de instancias. Este comportamiento refleja la heterogeneidad espacial inherente a la histopatología digital, donde la extensión del tejido tumoral, la variabilidad morfológica y el tamaño efectivo de la región anotada pueden diferir considerablemente entre pacientes. Desde el punto de vista metodológico, esta variabilidad justifica plenamente el uso del paradigma MIL, el cual permite manejar bags de tamaño variable sin imponer restricciones artificiales sobre el número de instancias, preservando así la información clínica y morfológica relevante contenida en cada WSI.\newline
 
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\textwidth]{images/Distribucion_de_instancias_por_WSI.png}
+    \caption{Distribución del número de instancias por WSI. Se observa una marcada asimetría hacia la derecha.}
+    \label{fig:distribucion_instancias}
 \end{figure}
 
 \subsection{Estrategia experimental para el modelado MIL binario}
@@ -63,44 +64,68 @@ El entrenamiento se realizó durante 10 épocas para cada modelo y cada fold, ut
 La evolución de la función de pérdida durante el entrenamiento se analizó tanto de forma agregada (promedio sobre folds) como individualmente por fold y modelo.
 
 \subsubsection{Curvas de pérdida promedio}
-La Figura correspondiente muestra la evolución promedio de la pérdida (Binary Cross-Entropy) para los cuatro modelos MIL a lo largo de las épocas de entrenamiento. Se observa que:
+La Figura \ref{fig:curvas_entrenamiento_mil} muestra la evolución promedio de la pérdida (Binary Cross-Entropy) para los cuatro modelos MIL a lo largo de las épocas de entrenamiento. Se observa que:
 \begin{itemize}
     \item \textbf{MeanMIL} presenta una convergencia estable pero relativamente lenta.
     \item \textbf{MaxMIL} exhibe inestabilidad en las primeras épocas, seguida de una reducción progresiva de la pérdida.
     \item \textbf{ABMIL} y \textbf{SmABMIL} muestran una convergencia más pronunciada y consistente, con reducciones sustanciales de la pérdida desde las primeras épocas.
 \end{itemize}
 
-Estas diferencias sugieren que los mecanismos de atención permiten una agregación más informativa de las instancias relevantes dentro de cada bag, facilitando el proceso de optimización.
+Estas diferencias en las curvas de pérdida sugieren que los modelos basados en mecanismos de atención son capaces de identificar y ponderar de manera más eficiente las instancias relevantes dentro de cada bag desde etapas tempranas del entrenamiento. En consecuencia, el proceso de optimización resulta más estable y consistente, reduciendo la variabilidad inter-época observada en los enfoques basados exclusivamente en operaciones de pooling.\newline
+
 
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/Curvas_de_entrenamiento_MIL_(promedio_sobre_folds).png}
+    \includegraphics[width=0.5\textwidth]{images/Curvas_de_entrenamiento_MIL_(promedio_sobre_folds).png}
+    \caption{Curvas de pérdida promedio (Binary Cross-Entropy) por modelo MIL. Se observa una convergencia más rápida y estable en los modelos basados en atención (ABMIL y SmABMIL).}
+    \label{fig:curvas_entrenamiento_mil}
 \end{figure}
 
 \subsubsection{Curvas de pérdida por fold}
-El análisis detallado por fold confirma patrones similares de convergencia en los cuatro subconjuntos de validación cruzada. En particular, los modelos basados en atención mantienen una reducción sostenida de la pérdida en todos los folds, mientras que los enfoques basados únicamente en pooling muestran mayor sensibilidad a la partición específica de los datos.
+Con el fin de analizar la estabilidad del proceso de entrenamiento y la robustez de cada arquitectura frente a distintas particiones del conjunto de datos, se examinaron las curvas de pérdida (\textit{Binary Cross-Entropy}) de manera individual para cada fold de validación cruzada y cada modelo MIL considerado.\newline
 
-\begin{figure}
+Este análisis resulta particularmente relevante en el contexto de histopatología digital basada en \textit{Whole Slide Images}, donde la heterogeneidad inter-WSI y la variabilidad en el número de instancias por bag pueden inducir comportamientos de entrenamiento distintos dependiendo de la composición específica de cada fold.\newline
+
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/Training_Loss_MeanMIL.png}
+    \includegraphics[width=0.5\textwidth]{images/Training_Loss_MeanMIL.png}
+    \caption{Curvas de pérdida por fold para el modelo Mean Pooling MIL. Cada curva representa la evolución de la pérdida durante el entrenamiento en un fold distinto de validación cruzada.}
+    \label{fig:training_loss_meanmil}
 \end{figure}
 
-\begin{figure}
+En el caso de \textbf{MeanMIL} (Figura~\ref{fig:training_loss_meanmil}), se observa una convergencia relativamente estable en los cuatro folds, aunque con diferencias moderadas en la pendiente inicial y en el valor final de la pérdida. Este comportamiento refleja la naturaleza del promedio como operador de agregación, el cual incorpora información de todas las instancias del bag de forma uniforme, pero puede verse afectado por la presencia de instancias no informativas o ruidosas, particularmente en WSIs con alta heterogeneidad histológica.\newline
+
+\newpage
+\begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\textwidth]{images/Training_Loss_MaxMIL.png}
+    \caption{Curvas de pérdida por fold para el modelo Max Pooling MIL. Se evidencia una mayor variabilidad entre folds durante las primeras épocas de entrenamiento.}
+    \label{fig:training_loss_maxmil}
 \end{figure}
 
-\begin{figure}
+Para el modelo \textbf{MaxMIL} (Figura~\ref{fig:training_loss_maxmil}), las curvas de pérdida muestran una mayor sensibilidad a la partición de los datos, especialmente durante las primeras épocas. Esta inestabilidad es consistente con el mecanismo de max pooling, que basa la predicción del bag en una única instancia dominante, lo cual puede amplificar el impacto de instancias atípicas o poco representativas en determinados folds.\newline
+
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/Training_Loss_ABMIL.png}
+    \includegraphics[width=0.5\textwidth]{images/Training_Loss_ABMIL.png}
+    \caption{Curvas de pérdida por fold para el modelo Attention-based MIL (ABMIL). Se observa una convergencia rápida y consistente entre folds.}
+    \label{fig:training_loss_abmil}
 \end{figure}
 
-\begin{figure}
+El modelo \textbf{ABMIL} (Figura~\ref{fig:training_loss_abmil}) presenta un patrón de convergencia más uniforme entre folds, con reducciones pronunciadas de la pérdida desde las primeras épocas y valores finales similares. Este comportamiento sugiere que el mecanismo de atención aprende de manera efectiva a ponderar las instancias más relevantes dentro de cada bag, mitigando el efecto del ruido y favoreciendo una optimización más estable independientemente de la partición de los datos.\newline
+
+\newpage
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=0.6\textwidth]{images/Training_Loss_SmABMIL.png}
+    \includegraphics[width=0.5\textwidth]{images/Training_Loss_SmABMIL.png}
+    \caption{Curvas de pérdida por fold para el modelo Gated Attention MIL (SmABMIL). La convergencia es consistente y ligeramente más estable que en ABMIL.}
+    \label{fig:training_loss_smabmil}
 \end{figure}
 
-% ----------------------------------------------------------------------
+Finalmente, el modelo \textbf{SmABMIL} (Figura~\ref{fig:training_loss_smabmil}) exhibe el comportamiento más estable entre folds, con trayectorias de pérdida altamente consistentes y una convergencia suave. La incorporación del mecanismo de compuertas (\textit{gated attention}) permite modelar interacciones más complejas entre instancias, lo cual se traduce en un proceso de entrenamiento menos sensible a la variabilidad estructural entre WSIs y folds.\newline
+
+Este análisis confirma que los modelos basados en mecanismos de atención no solo convergen más rápidamente, sino que también presentan una mayor robustez frente a las diferentes particiones de validación cruzada, un aspecto clave en escenarios clínicos donde la variabilidad interpaciente y la heterogeneidad tisular son inherentes al problema.
+
 
 % ====================== 5.5 RESULTADOS CLÍNICOS CUANTITATIVOS ======================
 
@@ -111,6 +136,7 @@ La evaluación del desempeño de los modelos de \textit{Multiple Instance Learni
 Para cada fold de validación cruzada (\texttt{Val1--Val4}), se entrenaron y evaluaron de forma independiente los cuatro modelos considerados: \textbf{MeanMIL}, \textbf{MaxMIL}, \textbf{ABMIL} y \textbf{SmABMIL}. Las métricas reportadas incluyen \textit{accuracy}, sensibilidad, especificidad, precisión, F1-score y AUC-ROC, todas calculadas sobre el conjunto de prueba de cada fold.
 
 % ---------------------- VAL1 ----------------------
+\newpage
 \subsubsection*{Fold Val1}
 
 \begin{table}[h!]
@@ -185,32 +211,42 @@ SmABMIL & 0.711 & 0.960 & 0.231 & 0.706 & 0.813 & 0.818 \\
 % ---------------------- RESUMEN GLOBAL ----------------------
 \subsubsection*{Resumen estadístico global}
 
-Con el fin de comparar el desempeño global de los modelos, se calcularon el promedio y la desviación estándar de cada métrica a lo largo de los cuatro folds de validación cruzada.
+Los resultados clínicos cuantitativos obtenidos para cada fold de validación cruzada permiten evaluar no solo el desempeño promedio de los modelos, sino también su estabilidad frente a variaciones en la partición de los datos. Dado el número limitado de WSIs y la heterogeneidad intrínseca del tejido prostático, esta evaluación por fold resulta particularmente relevante en un contexto clínico.\newline
+
+En las Tablas siguientes se reportan métricas ampliamente utilizadas en clasificación médica, donde la sensibilidad refleja la capacidad del modelo para identificar correctamente casos clínicamente relevantes, mientras que la especificidad cuantifica la correcta identificación de casos no relevantes. Métricas como F1-score y AUC-ROC permiten evaluar el equilibrio global entre detección y precisión, proporcionando una visión integral del comportamiento diagnóstico de cada arquitectura.\newline
+
 
 \begin{table}[h!]
-\centering
-\caption{Resumen estadístico (media $\pm$ desviación estándar) de métricas clínicas a nivel WSI}
-\begin{tabular}{|l|c|c|c|c|c|c|}
-\hline
-\textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
-\hline
-MeanMIL & 0.704$\pm$0.088 & 0.815$\pm$0.155 & 0.576$\pm$0.363 & 0.785$\pm$0.201 & 0.777$\pm$0.096 & 0.850$\pm$0.136 \\
-MaxMIL  & 0.399$\pm$0.199 & 0.118$\pm$0.123 & 1.000$\pm$0.000 & 0.750$\pm$0.500 & 0.196$\pm$0.191 & 0.848$\pm$0.159 \\
-ABMIL   & 0.754$\pm$0.095 & 0.849$\pm$0.071 & 0.541$\pm$0.123 & 0.788$\pm$0.139 & 0.814$\pm$0.102 & 0.787$\pm$0.128 \\
-SmABMIL & 0.782$\pm$0.131 & 0.903$\pm$0.080 & 0.561$\pm$0.254 & 0.787$\pm$0.176 & 0.836$\pm$0.126 & 0.856$\pm$0.098 \\
-\hline
-\end{tabular}
+    \centering
+    \caption{Resumen estadístico (media $\pm$ desviación estándar) de métricas clínicas a nivel WSI}
+    \begin{tabular}{|l|c|c|c|c|c|c|}
+        \hline
+        \textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
+        \hline
+        MeanMIL & 0.704$\pm$0.088 & 0.815$\pm$0.155 & 0.576$\pm$0.363 & 0.785$\pm$0.201 & 0.777$\pm$0.096 & 0.850$\pm$0.136 \\
+        MaxMIL  & 0.399$\pm$0.199 & 0.118$\pm$0.123 & 1.000$\pm$0.000 & 0.750$\pm$0.500 & 0.196$\pm$0.191 & 0.848$\pm$0.159 \\
+        ABMIL   & 0.754$\pm$0.095 & 0.849$\pm$0.071 & 0.541$\pm$0.123 & 0.788$\pm$0.139 & 0.814$\pm$0.102 & 0.787$\pm$0.128 \\
+        SmABMIL & 0.782$\pm$0.131 & 0.903$\pm$0.080 & 0.561$\pm$0.254 & 0.787$\pm$0.176 & 0.836$\pm$0.126 & 0.856$\pm$0.098 \\
+        \hline
+    \end{tabular}
 \end{table}
+
+El resumen estadístico global pone de manifiesto diferencias claras entre las arquitecturas evaluadas. En particular, los modelos basados en atención muestran, en promedio, valores superiores de sensibilidad y F1-score, así como una menor variabilidad inter-fold, lo cual sugiere un comportamiento más robusto frente a la heterogeneidad de las WSIs.\newline
+
+Por el contrario, el modelo MaxMIL presenta una alta especificidad acompañada de una sensibilidad consistentemente baja, indicando una tendencia a clasificar correctamente los casos negativos a costa de omitir una proporción significativa de casos positivos, un comportamiento clínicamente desfavorable en escenarios de detección de patología.\newline
+
 
 \subsection{Matrices de confusión promedio por modelo}
 Con el objetivo de complementar los resultados cuantitativos reportados en la sección anterior, se presentan las matrices de confusión promedio obtenidas para cada modelo de \textit{Multiple Instance Learning}. Estas matrices se construyeron agregando los resultados de los cuatro folds de validación cruzada y se reportan exclusivamente a nivel de \textit{Whole Slide Image} (WSI).\newline
 
-Las matrices de confusión permiten visualizar la distribución de verdaderos positivos (TP), verdaderos negativos (TN), falsos positivos (FP) y falsos negativos (FN), proporcionando una representación directa del comportamiento clínico de cada modelo en términos de aciertos y errores de clasificación.
+Las matrices de confusión promedio proporcionan una representación directa y clínicamente interpretable del comportamiento de cada modelo, al descomponer explícitamente las predicciones correctas e incorrectas a nivel de WSI. En un contexto diagnóstico, este tipo de análisis resulta fundamental, ya que permite evaluar no solo el desempeño global, sino también la naturaleza de los errores cometidos.\newline
+
+En particular, la relación entre falsos negativos y verdaderos positivos adquiere especial relevancia clínica, dado que un falso negativo implica la omisión de un caso patológico potencialmente significativo. Las Figuras correspondientes permiten observar patrones diferenciados entre modelos, evidenciando cómo las distintas estrategias de agregación de instancias influyen directamente en la distribución de errores y aciertos.\newline
 
 % ---------------------- MeanMIL ----------------------
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_meanmil.png}
+    \includegraphics[width=0.4\textwidth]{images/confusion_meanmil.png}
     \caption{Matriz de confusión promedio a nivel WSI para el modelo MeanMIL.}
     \label{fig:confusion_meanmil}
 \end{figure}
@@ -218,15 +254,16 @@ Las matrices de confusión permiten visualizar la distribución de verdaderos po
 % ---------------------- MaxMIL ----------------------
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_maxmil.png}
+    \includegraphics[width=0.4\textwidth]{images/confusion_maxmil.png}
     \caption{Matriz de confusión promedio a nivel WSI para el modelo MaxMIL.}
     \label{fig:confusion_maxmil}
 \end{figure}
 
+\newpage
 % ---------------------- ABMIL ----------------------
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_abmil.png}
+    \includegraphics[width=0.4\textwidth]{images/confusion_abmil.png}
     \caption{Matriz de confusión promedio a nivel WSI para el modelo ABMIL.}
     \label{fig:confusion_abmil}
 \end{figure}
@@ -234,10 +271,29 @@ Las matrices de confusión permiten visualizar la distribución de verdaderos po
 % ---------------------- SmABMIL ----------------------
 \begin{figure}[h!]
     \centering
-    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_smabmil.png}
+    \includegraphics[width=0.4\textwidth]{images/confusion_smabmil.png}
     \caption{Matriz de confusión promedio a nivel WSI para el modelo SmABMIL.}
     \label{fig:confusion_smabmil}
 \end{figure}
+
+
+% ---------------------- Resumen global de matrices de confusión ----------------------
+\begin{table}[H]
+    \centering
+    \caption{Resumen de matrices de confusión (media $\pm$ desviación estándar) por modelo}
+    \label{tab:confusion_summary}
+    \begin{tabular}{lcccc}
+        \toprule
+        Modelo & TN & FP & FN & TP \\
+        \midrule
+        MeanMIL  & $4.75 \pm 2.06$ & $5.50 \pm 5.32$ & $3.75 \pm 3.77$ & $17.00 \pm 5.89$ \\
+        MaxMIL   & $10.25 \pm 5.12$ & $0.00 \pm 0.00$ & $18.25 \pm 4.92$ & $2.50 \pm 3.11$ \\
+        ABMIL    & $5.75 \pm 3.30$ & $4.50 \pm 2.38$ & $3.00 \pm 1.41$ & $17.75 \pm 4.99$ \\
+        SmABMIL  & $5.00 \pm 2.16$ & $5.25 \pm 4.43$ & $1.75 \pm 0.96$ & $19.00 \pm 5.72$ \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 
 
 
