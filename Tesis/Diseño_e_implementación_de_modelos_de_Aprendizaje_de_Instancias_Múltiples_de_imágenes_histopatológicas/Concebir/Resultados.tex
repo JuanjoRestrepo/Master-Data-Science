@@ -99,3 +99,145 @@ El análisis detallado por fold confirma patrones similares de convergencia en l
     \centering
     \includegraphics[width=0.6\textwidth]{images/Training_Loss_SmABMIL.png}
 \end{figure}
+
+% ----------------------------------------------------------------------
+
+% ====================== 5.5 RESULTADOS CLÍNICOS CUANTITATIVOS ======================
+
+\subsection{Resultados clínicos cuantitativos por modelo y fold}
+
+La evaluación del desempeño de los modelos de \textit{Multiple Instance Learning} se realizó de manera estricta a nivel de \textit{Whole Slide Image} (WSI), en coherencia con la formulación del problema, el paradigma MIL adoptado y las métricas definidas en la Sección correspondiente. En ningún caso se evaluaron predicciones a nivel de parche.\newline
+
+Para cada fold de validación cruzada (\texttt{Val1--Val4}), se entrenaron y evaluaron de forma independiente los cuatro modelos considerados: \textbf{MeanMIL}, \textbf{MaxMIL}, \textbf{ABMIL} y \textbf{SmABMIL}. Las métricas reportadas incluyen \textit{accuracy}, sensibilidad, especificidad, precisión, F1-score y AUC-ROC, todas calculadas sobre el conjunto de prueba de cada fold.
+
+% ---------------------- VAL1 ----------------------
+\subsubsection*{Fold Val1}
+
+\begin{table}[h!]
+\centering
+\caption{Resultados clínicos a nivel WSI para el fold Val1}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
+\hline
+MeanMIL & 0.690 & 0.625 & 1.000 & 1.000 & 0.769 & 0.850 \\
+MaxMIL  & 0.172 & 0.000 & 1.000 & 0.000 & 0.000 & 0.942 \\
+ABMIL   & 0.724 & 0.792 & 0.400 & 0.864 & 0.826 & 0.708 \\
+SmABMIL & 0.897 & 0.917 & 0.800 & 0.957 & 0.936 & 0.975 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ---------------------- VAL2 ----------------------
+\subsubsection*{Fold Val2}
+
+\begin{table}[h!]
+\centering
+\caption{Resultados clínicos a nivel WSI para el fold Val2}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
+\hline
+MeanMIL & 0.815 & 0.850 & 0.714 & 0.895 & 0.872 & 0.914 \\
+MaxMIL  & 0.296 & 0.050 & 1.000 & 1.000 & 0.095 & 0.900 \\
+ABMIL   & 0.815 & 0.900 & 0.571 & 0.857 & 0.878 & 0.836 \\
+SmABMIL & 0.889 & 0.950 & 0.714 & 0.905 & 0.927 & 0.886 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ---------------------- VAL3 ----------------------
+\subsubsection*{Fold Val3}
+
+\begin{table}[h!]
+\centering
+\caption{Resultados clínicos a nivel WSI para el fold Val3}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
+\hline
+MeanMIL & 0.600 & 0.786 & 0.438 & 0.647 & 0.710 & 0.661 \\
+MaxMIL  & 0.600 & 0.143 & 1.000 & 1.000 & 0.250 & 0.612 \\
+ABMIL   & 0.633 & 0.786 & 0.500 & 0.688 & 0.733 & 0.661 \\
+SmABMIL & 0.633 & 0.786 & 0.500 & 0.688 & 0.733 & 0.746 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ---------------------- VAL4 ----------------------
+\subsubsection*{Fold Val4}
+
+\begin{table}[h!]
+\centering
+\caption{Resultados clínicos a nivel WSI para el fold Val4}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
+\hline
+MeanMIL & 0.711 & 1.000 & 0.154 & 0.694 & 0.820 & 0.975 \\
+MaxMIL  & 0.526 & 0.280 & 1.000 & 1.000 & 0.438 & 0.938 \\
+ABMIL   & 0.842 & 0.920 & 0.692 & 0.885 & 0.902 & 0.945 \\
+SmABMIL & 0.711 & 0.960 & 0.231 & 0.706 & 0.813 & 0.818 \\
+\hline
+\end{tabular}
+\end{table}
+
+% ---------------------- RESUMEN GLOBAL ----------------------
+\subsubsection*{Resumen estadístico global}
+
+Con el fin de comparar el desempeño global de los modelos, se calcularon el promedio y la desviación estándar de cada métrica a lo largo de los cuatro folds de validación cruzada.
+
+\begin{table}[h!]
+\centering
+\caption{Resumen estadístico (media $\pm$ desviación estándar) de métricas clínicas a nivel WSI}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Modelo} & \textbf{Acc} & \textbf{Sens} & \textbf{Spec} & \textbf{Prec} & \textbf{F1} & \textbf{AUC} \\
+\hline
+MeanMIL & 0.704$\pm$0.088 & 0.815$\pm$0.155 & 0.576$\pm$0.363 & 0.785$\pm$0.201 & 0.777$\pm$0.096 & 0.850$\pm$0.136 \\
+MaxMIL  & 0.399$\pm$0.199 & 0.118$\pm$0.123 & 1.000$\pm$0.000 & 0.750$\pm$0.500 & 0.196$\pm$0.191 & 0.848$\pm$0.159 \\
+ABMIL   & 0.754$\pm$0.095 & 0.849$\pm$0.071 & 0.541$\pm$0.123 & 0.788$\pm$0.139 & 0.814$\pm$0.102 & 0.787$\pm$0.128 \\
+SmABMIL & 0.782$\pm$0.131 & 0.903$\pm$0.080 & 0.561$\pm$0.254 & 0.787$\pm$0.176 & 0.836$\pm$0.126 & 0.856$\pm$0.098 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Matrices de confusión promedio por modelo}
+Con el objetivo de complementar los resultados cuantitativos reportados en la sección anterior, se presentan las matrices de confusión promedio obtenidas para cada modelo de \textit{Multiple Instance Learning}. Estas matrices se construyeron agregando los resultados de los cuatro folds de validación cruzada y se reportan exclusivamente a nivel de \textit{Whole Slide Image} (WSI).\newline
+
+Las matrices de confusión permiten visualizar la distribución de verdaderos positivos (TP), verdaderos negativos (TN), falsos positivos (FP) y falsos negativos (FN), proporcionando una representación directa del comportamiento clínico de cada modelo en términos de aciertos y errores de clasificación.
+
+% ---------------------- MeanMIL ----------------------
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_meanmil.png}
+    \caption{Matriz de confusión promedio a nivel WSI para el modelo MeanMIL.}
+    \label{fig:confusion_meanmil}
+\end{figure}
+
+% ---------------------- MaxMIL ----------------------
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_maxmil.png}
+    \caption{Matriz de confusión promedio a nivel WSI para el modelo MaxMIL.}
+    \label{fig:confusion_maxmil}
+\end{figure}
+
+% ---------------------- ABMIL ----------------------
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_abmil.png}
+    \caption{Matriz de confusión promedio a nivel WSI para el modelo ABMIL.}
+    \label{fig:confusion_abmil}
+\end{figure}
+
+% ---------------------- SmABMIL ----------------------
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.55\textwidth]{images/confusion/confusion_smabmil.png}
+    \caption{Matriz de confusión promedio a nivel WSI para el modelo SmABMIL.}
+    \label{fig:confusion_smabmil}
+\end{figure}
+
+
+
