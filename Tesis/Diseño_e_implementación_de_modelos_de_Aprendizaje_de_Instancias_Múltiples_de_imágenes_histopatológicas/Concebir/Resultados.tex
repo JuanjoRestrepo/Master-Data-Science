@@ -1,120 +1,100 @@
+% ====================== RESULTADOS ======================
 
-Este capítulo describe de manera detallada la metodología experimental empleada en el desarrollo del proyecto, así como el diseño del pipeline computacional utilizado para el análisis de imágenes histopatológicas prostáticas. El objetivo principal es garantizar la trazabilidad entre los requisitos definidos previamente, las decisiones metodológicas adoptadas y los resultados obtenidos, proporcionando un marco reproducible, coherente y clínicamente relevante para la evaluación del modelo propuesto.\newline
+\section{Construcción y validación del dataset experimental}
+A partir del conjunto original de imágenes histopatológicas SICAPv2, se construyó un archivo \textit{dataset_manifest.csv} que actúa como única fuente de verdad para todos los experimentos posteriores. En este manifest, cada fila corresponde a un parche histopatológico y queda asociado de forma explícita a su Whole Slide Image (WSI), fold de validación cruzada, subconjunto (entrenamiento o prueba), rutas a imagen y máscara, así como a los labels clínicos globales derivados a nivel WSI.\newline
 
-La estructura del capítulo sigue una progresión lógica desde la descripción general del pipeline experimental hasta el detalle de cada una de sus etapas, incluyendo la preparación de los datos, la extracción de características profundas, el modelado mediante Aprendizaje de Instancias Múltiples (MIL) y el protocolo de evaluación empleado para cuantificar el desempeño del sistema.
+El manifest final contiene un total de \textbf{39,836} parches, organizados en \textbf{496} WSIs, distribuidos en cuatro folds de validación cruzada (Val1–Val4). Cada WSI posee un único conjunto de labels clínicos (Gleason primario, Gleason secundario e ISUP), los cuales se derivan una sola vez a nivel WSI y posteriormente se propagan a todos los parches asociados, garantizando coherencia clínica y evitando inconsistencias a nivel de instancia.\newline
 
-%-------------------------------------------------------------
-
-\section{Visión general del pipeline experimental}
-
-El \textit{pipeline} desarrollado se fundamenta en un diseño modular, desacoplado y determinista, concebido para gestionar la complejidad computacional inherente a las imágenes histopatológicas de gigapíxeles y, simultáneamente, garantizar rigor metodológico y trazabilidad diagnóstica. Cada etapa del flujo de trabajo se implementó como un módulo independiente, con interfaces claramente definidas, lo que facilita tanto la reproducibilidad experimental como el análisis sistemático de cada componente.\newline
-
-Con el fin de asegurar la consistencia de los resultados, se estableció un control estricto de la aleatoriedad mediante la fijación de semillas globales, garantizando que la inicialización de los modelos y la partición de los datos en los distintos \textit{folds} produzcan resultados idénticos ante ejecuciones sucesivas bajo las mismas condiciones experimentales.\newline
-
-Para mejorar la legibilidad del flujo de trabajo completo y resaltar la separación conceptual entre las etapas de preprocesamiento y extracción de representaciones, por un lado, y las fases de modelado MIL y evaluación, por otro, el pipeline experimental se presenta en dos bloques complementarios. Como se ilustra en la Figura~\ref{fig:pipelineProcesamiento} y la Figura~\ref{fig:pipelineModelado}, el proceso completo se organiza en siete fases principales.
-
-
-\newpage
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/PipelineDiag1.png}
-    \caption{Diagrama integral del \textit{pipeline} experimental propuesto: procesamiento y extracción de representaciones.}
-    \label{fig:pipelineProcesamiento}
-\end{figure}
-
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.8\textwidth]{images/PipelineDiag2.png}
-    \caption{Diagrama integral del \textit{pipeline} experimental propuesto: modelado MIL y evaluación.}
-    \label{fig:pipelineModelado}
-\end{figure}
-
-\newpage
-\begin{enumerate}
-    \item \textbf{Modelado de la entrada y supervisión débil:} Cada \textit{Whole Slide Image} (WSI) se conceptualiza como una entidad compuesta por múltiples instancias locales (parches). La etiqueta diagnóstica, derivada del grado de Gleason, se asocia exclusivamente al nivel global de la lámina, evitando el uso de anotaciones manuales a nivel de parche. Esta formulación refleja fielmente las condiciones reales de la práctica clínica y define un escenario de supervisión débil.
-
-    \item \textbf{Segmentación, filtrado y generación de parches:} Las WSIs del conjunto SICAPv2 se subdividen en parches de H\&E mediante un proceso de \textit{tiling}. Se aplica un filtrado automático basado en contenido tisular para descartar regiones dominadas por fondo o artefactos, garantizando que el modelo procese exclusivamente información morfológica relevante.
-
-    \item \textbf{Codificación semántica mediante transferencia de aprendizaje:} Cada parche filtrado se transforma en un vector de características de dimensión fija utilizando una red convolucional profunda preentrenada (ResNet-50). En esta etapa no se realiza clasificación local; la CNN actúa únicamente como extractor de representaciones semánticas.
-
-    \item \textbf{Estructuración de bolsas MIL y separación clínica:} Los \textit{embeddings} generados se agrupan según el identificador de la lámina (\texttt{slide\_id}) para conformar las bolsas MIL. Se garantiza la separación estricta por paciente durante la validación cruzada, evitando cualquier forma de fuga de información.
-
-    \item \textbf{Modelado MIL con mecanismos de atención:} El núcleo predictivo se basa en un modelo \textit{Attention-based MIL}, capaz de asignar pesos de importancia a cada instancia dentro de una bolsa. Este mecanismo permite que las regiones patológicamente relevantes contribuyan en mayor medida a la representación global de la WSI.
-
-    \item \textbf{Inferencia diagnóstica a nivel de slide:} La representación agregada de la lámina se proyecta a través de una capa totalmente conectada para obtener una probabilidad diagnóstica global, correspondiente a la presencia o ausencia de malignidad.
-
-    \item \textbf{Validación robusta y evaluación del desempeño:} El desempeño del sistema se evalúa exclusivamente a nivel de WSI mediante validación cruzada por paciente, reportando métricas alineadas con el contexto clínico y el paradigma MIL.
-\end{enumerate}
-
-%-------------------------------------------------------------
-
-\section{Descripción del conjunto de datos}
-El desarrollo experimental de este trabajo se sustenta en la base de datos pública \textbf{SICAPv2}, un referente en el estudio del adenocarcinoma de próstata mediante patología digital. El conjunto de datos está compuesto por $155$ WSIs correspondientes a biopsias prostáticas provenientes de $95$ pacientes únicos, adquiridas mediante escáneres de alta resolución y teñidas con Hematoxilina y Eosina (H\&E).\newline
-
-Originalmente, las muestras se clasifican en cinco categorías diagnósticas (NC, G3, G4 y G5). No obstante, para los fines de este estudio, se adoptó un esquema de clasificación binaria que distingue entre tejido benigno (NC) y tejido maligno (Gleason $\geq 6$). Esta dicotomización permite evaluar la capacidad del modelo para detectar malignidad en un escenario clínico realista, caracterizado por desbalance de clases y heterogeneidad morfológica.\newline
-
-Cada WSI se asocia exclusivamente a una etiqueta global, sin anotaciones a nivel de parche, lo que define explícitamente un escenario de supervisión débil. Esta característica motiva la adopción de arquitecturas MIL, diseñadas para inferir patrones discriminativos a partir de información agregada.\newline
-
-Dado que SICAPv2 mantiene una jerarquía estricta paciente--lámina, las particiones experimentales respetaron esta estructura para evitar fuga de información. De este modo, las métricas reportadas reflejan la capacidad real de generalización del sistema ante pacientes no observados durante el entrenamiento.
-
-\begin{center}
-    \captionof{table}{Configuración de hiperparámetros y entorno de entrenamiento.}
-    \label{tab:hiperparametros}
-    \vspace{2mm}
-    \begin{tabular}{ll}
-        \hline
-        \textbf{Parámetro} & \textbf{Valor / Configuración} \\
-        \hline
-        Optimizador & Adam \\
-        Tasa de aprendizaje & $1 \times 10^{-4}$ \\
-        Función de pérdida & \texttt{BCEWithLogitsLoss} \\
-        Tamaño de lote & 1 (nivel de bolsa) \\
-        Número de épocas & 20 \\
-        Entorno de cómputo & PyTorch / GPU (NVIDIA T4) \\
-        \hline
-    \end{tabular}
-\end{center}
-
-%-------------------------------------------------------------
-
-\section{Extracción de características profundas}
-Cada parche tisular fue procesado de manera independiente mediante una CNN para transformar la información visual de alta dimensionalidad en representaciones vectoriales compactas. Se empleó la arquitectura ResNet-50 preentrenada en ImageNet, truncando su capa totalmente conectada para obtener \textit{embeddings} de dimensión $2048$.\newline
-
-Las representaciones resultantes se almacenaron de forma persistente, desacoplando explícitamente la etapa de extracción visual del proceso de entrenamiento MIL. Este diseño reduce significativamente el costo computacional y permite una experimentación eficiente con distintos esquemas de agregación.
-
-%-------------------------------------------------------------
-\section{Modelado mediante Aprendizaje de Instancias Múltiples}
-
-Cada WSI se representa como una bolsa $\mathcal{B} = \{h_1, h_2, \ldots, h_n\}$ de vectores $h_i \in \mathbb{R}^{2048}$. El modelo MIL implementado utiliza un mecanismo de atención que asigna un coeficiente de importancia $\alpha_i$ a cada instancia, permitiendo una agregación ponderada de las regiones más relevantes desde el punto de vista diagnóstico.\newline
-
-\begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.6\textwidth]{images/DiagTeoricoArqMIL.png}
-    \caption{Arquitectura del modelo MIL basado en atención implementado.}
-    \label{fig:arquitectura_mil}
-\end{figure}
-
-Este marco de trabajo resulta particularmente adecuado para escenarios de supervisión débil, ya que evita que señales tumorales focales se diluyan dentro de grandes volúmenes de tejido benigno. Asimismo, los pesos de atención proporcionan una base sólida para la interpretabilidad clínica del modelo.
-
-%-------------------------------------------------------------
-\section{Configuración experimental y protocolo de entrenamiento}
-
-Se implementó una estrategia de validación cruzada \textit{GroupKFold} con $k=5$ particiones, agrupando estrictamente los datos a nivel de paciente. Para cada iteración, el modelo se entrenó desde cero y se evaluó exclusivamente sobre WSIs pertenecientes a pacientes no observados durante el entrenamiento.\newline
-
-El entrenamiento se realizó con un tamaño de lote unitario, coherente con la naturaleza variable del número de instancias por bolsa. Esta decisión evita el uso de técnicas de relleno artificial que podrían distorsionar la distribución real de los datos.
-
-%-------------------------------------------------------------
-
-\section{Métricas de evaluación del desempeño}
-La evaluación del desempeño del modelo se realizó exclusivamente a nivel de WSI, en coherencia con el paradigma MIL y el contexto clínico del problema. Las métricas seleccionadas se alinean estrictamente con las definidas en el marco teórico:
+Durante la construcción del manifest se realizaron validaciones críticas automáticas que confirmaron:
 
 \begin{itemize}
-    \item \textbf{F1-score:} Métrica principal para evaluar el equilibrio entre precisión y sensibilidad en escenarios con desbalance de clases.
-    \item \textbf{AUC-ROC:} Evalúa la capacidad discriminativa del modelo para ordenar correctamente WSIs benignas y malignas, independientemente del umbral de decisión.
-    \item \textbf{Coeficiente de Cohen (Kappa):} Cuantifica el grado de concordancia entre las predicciones del modelo y las etiquetas clínicas reales, corrigiendo el acuerdo esperado por azar.
+    \item Durante la construcción del manifest se realizaron validaciones críticas automáticas que confirmaron:
+    \item Ausencia de valores nulos en columnas clave.
+    \item Existencia y trazabilidad de las máscaras asociadas a los parches.
+    \item Consistencia estricta de los labels ISUP a nivel WSI (un único valor ISUP por WSI).
 \end{itemize}
 
-En todos los casos, las métricas se calcularon a partir de una única predicción agregada por WSI, obtenida mediante el mecanismo de atención MIL, sin realizar evaluaciones ni promedios a nivel de parche. Este esquema garantiza que los resultados reportados reflejen fielmente el desempeño clínico del sistema bajo condiciones de supervisión débil.\newline
+Todas las validaciones fueron superadas satisfactoriamente, por lo que el archivo \textit{dataset_manifest.csv} se considera estable y se utiliza como base para la construcción de bags MIL, análisis exploratorio y entrenamiento de modelos.
 
-Las métricas obtenidas a través de los cinco \textit{folds} se agregaron mediante estadísticos descriptivos (media y desviación estándar), proporcionando una estimación robusta del desempeño global del modelo. El análisis detallado de los resultados cuantitativos, las curvas de evaluación y los mapas de atención se presenta en el capítulo siguiente.
+\subsection{Preparación de Bags MIL y análisis estructural}
+A partir del \textit{dataset_manifest.csv}, se construyó una representación basada en Aprendizaje de Instancias Múltiples (Multiple Instance Learning, MIL), donde \textbf{cada bag corresponde a una WSI} y \textbf{cada instancia corresponde a un parche histopatológico}. El label del bag se definió como el grado ISUP asociado a la WSI, mientras que las instancias conservan información local relacionada con la presencia de patrones histológicos (NC, G3, G4, G5 y G4C), utilizada únicamente con fines de trazabilidad.\newline
 
+El conjunto final contiene un total de \textbf{496 bags MIL}, distribuidos de forma consistente entre folds y subconjuntos de entrenamiento y prueba. Se verificó que:
+
+\begin{itemize}
+    \item Cada bag contiene exclusivamente instancias pertenecientes a una única WSI.
+    \item No existe solapamiento entre bags de entrenamiento y prueba.
+    \item Todos los bags presentan un único label ISUP válido.
+    \item No existen bags vacíos ni instancias huérfanas.
+\end{itemize}
+
+\subsection{Distribución de instancias por bag}
+El número de instancias por bag presenta una variabilidad considerable, reflejando la heterogeneidad espacial inherente a las imágenes histopatológicas. En particular, se observa:
+
+\begin{itemize}
+    \item Número mínimo de instancias por bag: 7
+    \item Número máximo de instancias por bag: 347
+    \item Promedio de instancias por bag: 80.31
+\end{itemize}
+
+La Figura correspondiente muestra la distribución del número de instancias por WSI, evidenciando una asimetría hacia la derecha, con la mayoría de WSIs concentradas en rangos bajos y medios de número de parches, y un número reducido de WSIs con una cantidad significativamente mayor de instancias. Esta heterogeneidad justifica el uso de enfoques MIL, los cuales permiten manejar bags de tamaño variable sin imponer un número fijo de instancias.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Distribucion_de_instancias_por_WSI.png}
+\end{figure}
+
+\subsection{Estrategia experimental para el modelado MIL binario}
+Sobre los bags MIL construidos, se planteó un problema de clasificación binaria a nivel WSI, donde el objetivo consiste en discriminar entre casos clínicamente relevantes y no relevantes a partir del grado ISUP. Para ello, se entrenaron y compararon cuatro arquitecturas MIL ampliamente utilizadas:
+
+\begin{itemize}
+    \item Mean Pooling MIL
+    \item Max Pooling MIL
+    \item Attention-based MIL (ABMIL)
+    \item Gated Attention MIL (SmABMIL)
+\end{itemize}
+
+Las características de los parches se extrajeron previamente mediante una ResNet50 preentrenada en ImageNet, utilizada exclusivamente como extractor de características, manteniendo todos sus pesos congelados. Esta decisión reduce el riesgo de sobreajuste dado el número limitado de WSIs y sigue prácticas estándar en histopatología digital basada en MIL. \newline
+
+El entrenamiento se realizó durante 10 épocas para cada modelo y cada fold, utilizando validación cruzada estricta, sin solapamiento entre WSIs de entrenamiento y prueba.
+
+\subsection{Dinámica de entrenamiento y convergencia}
+La evolución de la función de pérdida durante el entrenamiento se analizó tanto de forma agregada (promedio sobre folds) como individualmente por fold y modelo.
+
+\subsubsection{Curvas de pérdida promedio}
+La Figura correspondiente muestra la evolución promedio de la pérdida (Binary Cross-Entropy) para los cuatro modelos MIL a lo largo de las épocas de entrenamiento. Se observa que:
+\begin{itemize}
+    \item \textbf{MeanMIL} presenta una convergencia estable pero relativamente lenta.
+    \item \textbf{MaxMIL} exhibe inestabilidad en las primeras épocas, seguida de una reducción progresiva de la pérdida.
+    \item \textbf{ABMIL} y \textbf{SmABMIL} muestran una convergencia más pronunciada y consistente, con reducciones sustanciales de la pérdida desde las primeras épocas.
+\end{itemize}
+
+Estas diferencias sugieren que los mecanismos de atención permiten una agregación más informativa de las instancias relevantes dentro de cada bag, facilitando el proceso de optimización.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Curvas_de_entrenamiento_MIL_(promedio_sobre_folds).png}
+\end{figure}
+
+\subsubsection{Curvas de pérdida por fold}
+El análisis detallado por fold confirma patrones similares de convergencia en los cuatro subconjuntos de validación cruzada. En particular, los modelos basados en atención mantienen una reducción sostenida de la pérdida en todos los folds, mientras que los enfoques basados únicamente en pooling muestran mayor sensibilidad a la partición específica de los datos.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Training_Loss_MeanMIL.png}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Training_Loss_MaxMIL.png}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Training_Loss_ABMIL.png}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/Training_Loss_SmABMIL.png}
+\end{figure}
