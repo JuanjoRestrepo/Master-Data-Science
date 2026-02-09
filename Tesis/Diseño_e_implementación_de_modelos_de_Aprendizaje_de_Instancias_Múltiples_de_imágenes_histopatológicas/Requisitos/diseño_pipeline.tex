@@ -3,73 +3,103 @@
 % ======================
 
 \section{Diseño del Pipeline Experimental}
+\label{sec:diseno_pipeline}
 
-Este capítulo describe de manera sistemática el diseño, implementación y validación del pipeline experimental desarrollado para el análisis de imágenes histopatológicas de próstata mediante Aprendizaje de Instancias Múltiples (MIL). La metodología fue estructurada siguiendo un enfoque incremental por sprints, lo cual permitió garantizar trazabilidad, reproducibilidad y control riguroso de cada etapa del flujo de datos, desde la adquisición del dataset hasta la generación de modelos interpretables.\newline
+Este capítulo presenta el diseño conceptual y técnico del pipeline experimental propuesto para el análisis de imágenes histopatológicas de próstata mediante el paradigma de Aprendizaje de Instancias Múltiples (MIL).\newline
 
-Cada sprint corresponde a un conjunto de tareas claramente delimitadas, alineadas de forma estricta con la implementación realizada en los notebooks experimentales, asegurando coherencia entre el diseño conceptual y la ejecución computacional.
+Su propósito es describir de forma estructurada cómo se concibió la solución, qué componentes la conforman y cómo se organiza el flujo de datos desde la adquisición de las Whole Slide Images (WSI) hasta la generación de predicciones a nivel de lámina, sin anticipar resultados cuantitativos ni interpretaciones empíricas.\newline
+
+El diseño del pipeline fue desarrollado siguiendo un enfoque incremental basado en sprints, lo que permitió descomponer el problema en etapas claramente delimitadas, garantizar trazabilidad entre decisiones técnicas y facilitar la alineación entre el diseño metodológico y la implementación computacional realizada posteriormente en los notebooks experimentales.\newline
+
+Cada sprint representa una unidad lógica de diseño, estableciendo responsabilidades precisas dentro del sistema y definiendo explícitamente qué aspectos quedan fijados en esta etapa y cuáles serán abordados operativamente en el capítulo de Metodología Experimental y Resultados.\newline
+
+\subsection{Visión General del Pipeline Metodológico}
+\label{subsec:vision_general_pipeline}
+
+El pipeline completo fue representado gráficamente con el fin de proporcionar una visión global del flujo de procesamiento y de las interacciones entre sus distintos componentes.\newline
+
+Debido a su complejidad y nivel de detalle, el diagrama fue dividido en dos partes complementarias que, en conjunto, describen el proceso completo desde los datos crudos hasta la salida del modelo.\newline
+
+La Figura~\ref{fig:pipeline_part1} ilustra la primera parte del pipeline, abarcando la adquisición de las WSI, su partición en parches, el preprocesamiento inicial y la extracción de características a nivel de instancia.\newline
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/PipelineDiag1.png}
+    \caption{Primera parte del pipeline propuesto: adquisición de WSI, partición en patches, preprocesamiento y extracción de características a nivel de instancia.}
+    \label{fig:pipeline_part1}
+\end{figure}
+
+La Figura~\ref{fig:pipeline_part2} presenta la segunda parte del pipeline, correspondiente a la organización de instancias en bolsas MIL, el mecanismo de atención, la agregación de información y la generación de predicciones a nivel de lámina.\newline
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{images/PipelineDiag2.png}
+    \caption{Segunda parte del pipeline: modelo MIL con mecanismo de atención, agregación de instancias, predicción y evaluación conceptual.}
+    \label{fig:pipeline_part2}
+\end{figure}
+
+Ambos diagramas deben interpretarse como un único flujo continuo de procesamiento, en el cual cada etapa transforma progresivamente la información histopatológica desde su representación cruda hasta una decisión clínica modelada.\newline
 
 \subsection{Sprint 0: Infraestructura, Entorno y Reproducibilidad}
 
-El Sprint 0 estuvo orientado a la preparación del entorno computacional y la definición de una infraestructura reproducible que soportara el procesamiento de imágenes histopatológicas a gran escala.\newline
+El Sprint 0 tuvo como objetivo establecer una infraestructura computacional reproducible y adecuada para el procesamiento de imágenes histopatológicas a gran escala.\newline
 
-Se configuró un entorno de ejecución basado en GPU (NVIDIA T4) utilizando Google Colaboratory, junto con bibliotecas especializadas como PyTorch, NumPy, Pandas y OpenSlide. La gestión de dependencias se realizó de forma explícita para evitar conflictos entre versiones, particularmente en librerías críticas para patología digital.\newline
+Se definió un entorno de ejecución basado en GPU utilizando Google Colaboratory, seleccionando explícitamente bibliotecas y versiones compatibles con patología digital y aprendizaje profundo, tales como PyTorch, NumPy, Pandas y OpenSlide.\newline
 
-Adicionalmente, se estableció una estructura de directorios estandarizada para la organización de datos crudos, datos procesados, artefactos intermedios y resultados experimentales. Esta organización permitió garantizar trazabilidad completa desde el dataset original hasta los resultados finales, facilitando la auditoría del pipeline y la replicación de los experimentos.
+Asimismo, se diseñó una estructura de directorios estandarizada que separa datos crudos, datos procesados, artefactos intermedios y salidas experimentales, garantizando trazabilidad completa del flujo de datos y facilitando la replicación de los experimentos.\newline
 
-\subsection{Sprint 1: Comprensión del Dataset y Particiones Experimentales}
+En este sprint no se ejecutan experimentos ni se generan métricas, sino que se fijan las bases técnicas sobre las cuales se construye todo el pipeline experimental.\newline
 
-El Sprint 1 se centró en la comprensión exhaustiva del dataset SICAPv2 y en la definición rigurosa de las particiones experimentales.\newline
+\subsection{Sprint 1: Comprensión del Dataset y Diseño de Particiones}
 
-Aunque SICAPv2 corresponde a una versión ya preprocesada de imágenes histopatológicas, se realizó una verificación estructural completa del conjunto de datos, confirmando la integridad de los archivos, la correspondencia entre imágenes y máscaras, y la ausencia de archivos corruptos o inconsistentes.\newline
+El Sprint 1 estuvo orientado al análisis estructural del dataset SICAPv2 y al diseño de una estrategia de partición experimental clínicamente válida.\newline
 
-Se contabilizaron un total de 18{,}783 parches histopatológicos derivados de láminas completas (WSI), garantizando que cada parche contara con información válida tanto a nivel visual como de anotación clínica.\newline
+Se realizó una revisión exhaustiva de la estructura del conjunto de datos, verificando la correspondencia entre parches, anotaciones clínicas y metadatos asociados, así como la relación jerárquica entre pacientes, láminas y parches.\newline
 
-Uno de los aspectos más críticos de este sprint fue la prevención de fuga de datos (\textit{data leakage}). Para ello, se descartaron divisiones aleatorias convencionales y se implementó una estrategia de validación cruzada basada en \textit{GroupKFold}, utilizando el identificador de paciente como grupo exclusivo. Esta decisión aseguró que ningún parche o lámina de un mismo paciente apareciera simultáneamente en conjuntos de entrenamiento y validación.\newline
+Un aspecto central de este sprint fue el diseño de una estrategia de validación que evitara explícitamente la fuga de datos (\textit{data leakage}), definiendo particiones basadas en identificadores de paciente como unidad indivisible.\newline
 
-Se verificó explícitamente que los folds generados fueran mutuamente excluyentes a nivel de paciente, estableciendo así una base metodológica sólida para la evaluación clínica posterior.
+Este diseño garantiza que ninguna información de un mismo paciente esté presente simultáneamente en conjuntos de entrenamiento y validación, alineando la evaluación con escenarios clínicos realistas.\newline
 
 \subsection{Sprint 2: Construcción del \textit{Dataset Manifest}}
 
-El Sprint 2 constituyó el núcleo estructural del pipeline experimental mediante la construcción del archivo \texttt{dataset\_manifest.csv}, el cual actúa como la fuente única de verdad del sistema.\newline
+El Sprint 2 definió el mecanismo central de control del flujo de datos mediante la construcción del archivo \texttt{dataset\_manifest.csv}, concebido como la fuente única de verdad del pipeline experimental.\newline
 
-Este manifiesto consolidó toda la información relevante de cada parche, incluyendo identificadores de paciente, lámina, partición experimental (fold), conjunto (entrenamiento o validación), etiqueta clínica y ruta al archivo correspondiente. De esta forma, se desacopló explícitamente la lógica de partición y anotación del procesamiento visual, permitiendo un control total del flujo de datos.\newline
+El manifiesto fue diseñado para consolidar toda la información relevante de cada parche, incluyendo identificadores de paciente y lámina, asignación a fold, conjunto experimental, etiqueta clínica global y rutas a los archivos correspondientes.\newline
 
-Se realizaron validaciones exhaustivas para garantizar la consistencia del manifiesto, incluyendo conteos por fold, verificación de balance entre clases, y comprobación de que cada paciente estuviera asignado a un único fold. Estas verificaciones fueron implementadas mediante comprobaciones programáticas explícitas, eliminando ambigüedades en la definición del dataset.\newline
+Desde el punto de vista metodológico, este archivo actúa como un contrato formal entre las distintas etapas del pipeline, asegurando consistencia, trazabilidad y control total de las particiones experimentales.\newline
 
-La existencia del manifiesto permitió además auditar fácilmente el experimento, replicar resultados y modificar configuraciones sin alterar los datos originales.\newline
+Las validaciones estructurales asociadas a este manifiesto fueron definidas conceptualmente en este sprint, dejando su ejecución concreta para la metodología experimental.\newline
 
 \subsection{Sprint 3: Ingeniería de Características y Construcción de Bolsas MIL}
 
-En el Sprint 3 se llevó a cabo la ingeniería de características y la construcción formal de las bolsas de instancias (bags) requeridas por el paradigma MIL.\newline
+El Sprint 3 se enfocó en el diseño del proceso de ingeniería de características y en la definición formal de las bolsas de instancias requeridas por el paradigma MIL.\newline
 
-Cada parche fue procesado mediante un extractor de características basado en ResNet-50 preentrenado en ImageNet. Previamente, se aplicaron filtros en el espacio de color HSV y umbrales de cobertura tisular para descartar regiones no informativas, asegurando que el modelo aprendiera patrones morfológicos relevantes.\newline
+Se estableció el uso de un extractor de características basado en una red neuronal convolucional profunda preentrenada, con el objetivo de transformar cada parche histopatológico en una representación vectorial compacta y semánticamente rica.\newline
 
-Las representaciones extraídas fueron serializadas y agrupadas en bolsas a nivel de lámina, donde cada bolsa corresponde a una WSI y contiene un número variable de instancias. Se analizaron estadísticas descriptivas de las bolsas, incluyendo número mínimo, máximo y promedio de instancias por lámina, confirmando la heterogeneidad inherente al problema clínico.\newline
+Previamente, se definieron criterios de filtrado visual para descartar regiones no informativas, reduciendo ruido y optimizando el uso de recursos computacionales.\newline
 
-Este sprint incluyó validaciones explícitas para asegurar que todas las instancias de una bolsa pertenecieran al mismo paciente y fold, reforzando la integridad experimental.
+A nivel conceptual, se definió que cada bolsa MIL corresponde a una WSI completa, agrupando un número variable de instancias, lo cual refleja la heterogeneidad inherente al tejido prostático.\newline
 
-\subsection{Sprint 4: Modelado mediante Aprendizaje de Instancias Múltiples}
+\subsection{Sprint 4: Diseño de Modelos MIL}
 
-El Sprint 4 estuvo dedicado al entrenamiento y evaluación de modelos MIL utilizando diferentes estrategias de agregación.\newline
+El Sprint 4 abordó el diseño de las arquitecturas de Aprendizaje de Instancias Múltiples empleadas en el sistema.\newline
 
-Se implementaron y compararon cuatro arquitecturas: MeanMIL, MaxMIL, Attention-based MIL (ABMIL) y una variante suavizada de atención (SmABMIL). Todas las arquitecturas operaron sobre las mismas bolsas y particiones definidas previamente, garantizando una comparación justa.\newline
+Se definieron múltiples estrategias de agregación a nivel de bolsa, incluyendo enfoques basados en promedios, máximos y mecanismos de atención, todas concebidas para operar sobre las mismas representaciones y particiones.\newline
 
-El entrenamiento se realizó de forma independiente para cada fold, respetando estrictamente las particiones establecidas en el manifiesto. Se registraron métricas clínicas relevantes a nivel de lámina, permitiendo evaluar el desempeño real del sistema en un contexto diagnóstico.\newline
+Desde el punto de vista de diseño, se estableció que el entrenamiento y la evaluación de los modelos se realicen de forma independiente por fold, respetando estrictamente las particiones definidas en el manifiesto.\newline
 
-Durante este sprint se controlaron aspectos críticos como el consumo de memoria GPU, la estabilidad del entrenamiento y la convergencia de las funciones de pérdida.
+Este sprint describe el espacio de modelos considerado, sin introducir comparaciones empíricas ni resultados cuantitativos.\newline
 
-\subsection{Sprint 5: Interpretabilidad, Análisis y Robustez}
+\subsection{Sprint 5: Interpretabilidad y Análisis Conceptual}
 
-El Sprint 5 se enfocó en el análisis de interpretabilidad y la evaluación de la robustez clínica del sistema.\newline
+El Sprint 5 definió el componente de interpretabilidad del pipeline, concebido como un requisito fundamental para aplicaciones clínicas.\newline
 
-En particular, los modelos basados en atención permitieron extraer pesos de importancia asociados a cada parche dentro de una bolsa. Estos pesos fueron utilizados para identificar regiones histopatológicas relevantes, facilitando una interpretación visual alineada con criterios diagnósticos reales.\newline
+En particular, se diseñó el uso de mecanismos de atención como herramienta para asignar pesos de importancia a las instancias dentro de cada bolsa, permitiendo identificar regiones histopatológicas relevantes desde un punto de vista conceptual.\newline
 
-Se analizaron además matrices de confusión, curvas de entrenamiento y métricas promedio por fold, proporcionando una visión integral del comportamiento de cada arquitectura.\newline
+Asimismo, se estableció que el análisis del comportamiento del sistema incluya herramientas visuales y métricas agregadas que permitan evaluar estabilidad y coherencia, dejando su cálculo y análisis detallado para capítulos posteriores.\newline
 
-Este sprint cerró el pipeline experimental, estableciendo una conexión directa entre los resultados cuantitativos obtenidos y su significado clínico potencial.
+\subsection{Resumen del Diseño del Pipeline}
 
-\subsection{Resumen del Pipeline}
+En conjunto, el pipeline diseñado establece un flujo de trabajo modular, reproducible y clínicamente alineado para el análisis de imágenes histopatológicas mediante MIL.\newline
 
-En conjunto, el pipeline diseñado garantiza un flujo de trabajo reproducible, trazable y clínicamente relevante para el análisis de imágenes histopatológicas mediante MIL. La separación clara por sprints permitió controlar la complejidad del sistema, minimizar riesgos metodológicos y asegurar que cada decisión técnica estuviera respaldada por validaciones explícitas.\newline
-
-Este diseño constituye la base metodológica sobre la cual se presentan y analizan los resultados experimentales en los capítulos siguientes.
+La separación explícita por sprints permite distinguir con claridad entre decisiones de diseño y ejecución experimental, minimizando ambigüedades metodológicas y preparando una transición natural hacia el capítulo de Metodología Experimental y Resultados.\newline
