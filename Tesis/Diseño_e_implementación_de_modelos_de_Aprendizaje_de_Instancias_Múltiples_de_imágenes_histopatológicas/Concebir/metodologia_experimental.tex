@@ -1,48 +1,164 @@
 % ===============================================================
+% METODOLOGÍA EXPERIMENTAL
+% ===============================================================
 
-La presente metodología experimental fue diseñada con el objetivo de evaluar modelos de Multiple Instance Learning (MIL) aplicados a imágenes de histopatología digital bajo un esquema de supervisión débil, garantizando coherencia entre la formulación teórica del problema, la implementación computacional y el contexto clínico real. Todas las decisiones metodológicas descritas a continuación se encuentran directamente respaldadas por la implementación desarrollada en el notebook experimental.\newline
+\section{Metodología Experimental}
+\label{sec:metodologia_experimental}
+La presente metodología experimental describe de manera detallada el procedimiento seguido para implementar, ejecutar y validar el pipeline propuesto para el análisis de imágenes histopatológicas prostáticas bajo el paradigma de Aprendizaje de Instancias Múltiples (MIL).\newline
 
-\subsection{Configuración experimental y entorno de ejecución}
-Los experimentos fueron desarrollados en un entorno de computación acelerada por GPU, utilizando Google Colaboratory como plataforma de ejecución. El entrenamiento e inferencia de los modelos se realizó mediante la librería PyTorch, haciendo uso de capacidades de cómputo CUDA cuando estuvieron disponibles. Con el fin de garantizar la reproducibilidad de los experimentos, se fijaron semillas aleatorias para los generadores de números pseudoaleatorios de Python, NumPy y PyTorch, incluyendo tanto CPU como GPU.\newline
+Esta sección se enfoca exclusivamente en la ejecución operativa del diseño metodológico previamente definido, estableciendo con precisión cómo se procesaron los datos, cómo se construyeron las estructuras experimentales y bajo qué condiciones se entrenaron los modelos, sin anticipar resultados cuantitativos ni interpretaciones clínicas.\newline
 
-La gestión de dependencias, rutas de archivos y control de versiones de datos se implementó de manera explícita en el código, asegurando la trazabilidad completa de cada experimento realizado
+Todas las decisiones metodológicas descritas en este capítulo se encuentran directamente respaldadas por la implementación realizada en los notebooks experimentales, garantizando coherencia, trazabilidad y reproducibilidad del proceso completo.
 
-% -------------------------------------------------------------------------
+\subsection{Configuración Experimental y Entorno de Ejecución}
+\label{subsec:entorno_ejecucion}
+Los experimentos fueron desarrollados en un entorno de computación acelerada por GPU, utilizando la plataforma Google Colaboratory como infraestructura principal de ejecución.\newline
 
-\subsection{Conjunto de datos y definición del problema}
-El conjunto de datos está compuesto por Whole Slide Images (WSI) de histopatología, acompañadas de etiquetas clínicas a nivel de paciente. Debido a la naturaleza del problema, no se dispone de anotaciones explícitas a nivel de parche, lo cual motiva el uso del paradigma de Multiple Instance Learning.\newline
+El entrenamiento y la inferencia de los modelos se realizaron mediante la librería PyTorch, aprovechando capacidades de cómputo CUDA cuando estuvieron disponibles, lo cual permitió manejar de forma eficiente grandes volúmenes de datos y modelos con un número elevado de parámetros.\newline
 
-El conjunto de datos está compuesto por Whole Slide Images (WSI) de histopatología, acompañadas de etiquetas clínicas a nivel de paciente. Debido a la naturaleza del problema, no se dispone de anotaciones explícitas a nivel de parche, lo cual motiva el uso del paradigma de Multiple Instance Learning.\newline
+Con el fin de garantizar la reproducibilidad de los experimentos, se fijaron semillas aleatorias para los generadores de números pseudoaleatorios de Python, NumPy y PyTorch, incluyendo tanto ejecuciones en CPU como en GPU.\newline
 
-% -------------------------------------------------------------------------
+Adicionalmente, la gestión explícita de dependencias, rutas de archivos y organización del espacio de trabajo fue implementada directamente en el código, asegurando que cada experimento pudiera ser replicado de manera determinística bajo las mismas condiciones computacionales.
 
-\subsection{Preprocesamiento  y control de calidad de datos}
-El preprocesamiento de los datos se realiza en múltiples etapas, con el objetivo de garantizar la calidad del tejido analizado y evitar la inclusión de regiones irrelevantes o artefactos. En primer lugar, se valida la correspondencia entre los identificadores presentes en los archivos de anotaciones y la existencia física de los parches en el sistema de archivos. \newline
+\subsection{Conjunto de Datos y Definición Operativa del Problema}
+\label{subsec:dataset_problema}
+El conjunto de datos utilizado está compuesto por Whole Slide Images (WSI) de histopatología prostática teñidas con Hematoxilina y Eosina (H\&E), acompañadas de etiquetas clínicas a nivel de lámina y paciente, correspondientes al grado ISUP derivado de la escala de Gleason \cite{Silva-Rodríguez_2020Data}.\newline
 
-Posteriormente, se aplica un proceso de filtrado de tejido basado en el espacio de color HSV, utilizando el canal de saturación para discriminar regiones con contenido histológico significativo. Los parches que no cumplen un umbral mínimo de proporción de tejido son descartados, evitando así la incorporación de fondo, espacios en blanco o ruido en el proceso de aprendizaje.\newline
+Debido a la naturaleza del problema clínico, no se dispone de anotaciones exhaustivas a nivel de parche que indiquen de forma explícita la presencia o ausencia de tejido tumoral en cada región local, lo cual imposibilita el uso de esquemas de aprendizaje supervisado clásico a nivel de instancia.\newline
 
-Este proceso se realiza de manera previa al entrenamiento y no introduce ningún tipo de información de las etiquetas durante la selección de instancias, preservando así la validez experimental del enfoque.
+En consecuencia, el problema se formula bajo el paradigma de Aprendizaje de Instancias Múltiples, donde cada WSI es tratada como una bolsa (\textit{bag}) compuesta por múltiples instancias (\textit{patches}), y la etiqueta global del bag corresponde al diagnóstico clínico asociado a la lámina completa.\newline
 
-% -------------------------------------------------------------------------
+Desde el punto de vista experimental, todas las predicciones, métricas y evaluaciones se realizan estrictamente a nivel de bolsa, en coherencia con esta formulación y con el contexto clínico real del problema.
 
-\subsection{Extracción de características profundas}
-Con el fin de reducir la complejidad computacional y desacoplar la extracción de características del entrenamiento del modelo MIL, se implementa una etapa explícita de feature engineering. Cada parche válido es procesado mediante una red convolucional profunda ResNet50 preentrenada sobre ImageNet, eliminando su capa de clasificación final.\newline
+\subsection{Preparación Inicial del Dataset y Control de Integridad}
+\label{subsec:preparacion_dataset}
+\begin{enumerate}
+    \item \textbf{Descarga y organización:} Se realizó la descarga, descompresión y organización estructurada del dataset SICAPv2, preservando la trazabilidad completa desde el origen de los datos hasta su disposición final en el entorno de trabajo.\newline
+    
+    \item \textbf{Verificación de estructura:} Se verificó la estructura real del conjunto de datos en disco, confirmando la existencia y correspondencia entre imágenes, máscaras y archivos de partición oficiales proporcionados por el dataset.\newline
+    
+    \item \textbf{Validación de consistencia:} Durante esta etapa se validó la integridad del par imagen--máscara, la ausencia de archivos corruptos y la coherencia de los identificadores de lámina utilizados a lo largo de las distintas particiones experimentales.\newline
+    
+    \item \textbf{Consolidación de la base de datos:} Este proceso permitió establecer una base de datos limpia, íntegra y estructuralmente consistente antes de iniciar cualquier fase de transformación o entrenamiento posterior.\newline
+\end{enumerate}
 
-Como resultado, cada parche es representado por un vector de características de dimensión fija, capturando patrones morfológicos relevantes del tejido histopatológico. Los embeddings generados se almacenan de manera persistente, permitiendo su reutilización en múltiples experimentos sin necesidad de reprocesar las imágenes originales.\newline
+\subsection{Estrategia de Partición y Prevención de Fuga de Datos}
+\label{subsec:particiones_validacion}
+El dataset SICAPv2 proporciona particiones oficiales para validación cruzada, las cuales fueron empleadas directamente en este trabajo con el fin de garantizar comparabilidad y rigor metodológico.\newline
 
-Esta estrategia mejora la eficiencia del pipeline y reduce el riesgo de inconsistencias durante el entrenamiento de los modelos MIL.
+Cada partición fue analizada para confirmar que no existiera solapamiento de información entre los conjuntos de entrenamiento y validación a nivel de paciente o lámina, evitando explícitamente escenarios de fuga de datos (\textit{data leakage}).\newline
 
-% -------------------------------------------------------------------------
-\subsection{Arquitectura MIL y mecanismo de atención}
-El modelo de aprendizaje se basa en arquitecturas de Multiple Instance Learning con mecanismos de atención, diseñadas para operar sobre conjuntos de instancias de tamaño variable. En este enfoque, el modelo aprende una representación agregada del bag mediante la asignación de pesos de atención a cada instancia, permitiendo identificar aquellas regiones que contribuyen de manera más significativa a la predicción final.\newline
+La unidad mínima de partición se definió a nivel de WSI, asegurando que todos los parches derivados de una misma lámina permanezcan agrupados dentro del mismo subconjunto experimental.\newline
 
-Se implementan variantes de atención estándar y atención con compuertas (gated attention), las cuales permiten modelar interacciones no lineales entre las instancias y mejorar la capacidad expresiva del modelo. La salida del modelo corresponde a una probabilidad a nivel de bag, asociada directamente a la WSI o paciente, sin producir predicciones explícitas a nivel de parche.\newline
+Este esquema de validación emula de manera más fiel el flujo de trabajo clínico real y permite evaluar la capacidad de generalización del modelo frente a la variabilidad biológica de pacientes no observados previamente.
 
-% -------------------------------------------------------------------------
-\subsection{Estrategia de validación experimental}
-La validación del modelo se realiza mediante un esquema de validación cruzada estratificada por paciente, utilizando particiones que garantizan que las WSIs pertenecientes a un mismo individuo no aparezcan simultáneamente en los conjuntos de entrenamiento y validación. Este diseño evita fugas de información y asegura una evaluación realista del desempeño del modelo.\newline
+\subsection{Construcción del \textit{Dataset Manifest}}
+\label{subsec:dataset_manifest}
+Con el objetivo de centralizar y controlar el flujo de datos del experimento, se construyó un archivo denominado \texttt{dataset\_manifest.csv}, concebido como la fuente única de verdad del sistema.\newline
 
-Cada partición de validación se entrena y evalúa de forma independiente, permitiendo analizar la estabilidad del modelo frente a variaciones en los datos. Todas las métricas y análisis posteriores se calculan exclusivamente a nivel de bag o WSI, en coherencia con la definición del problema y el diseño del pipeline.
+En este manifiesto, cada fila corresponde a un parche histopatológico y consolida información clave como su ruta de acceso, la WSI de origen, el fold de validación, el subconjunto experimental, las etiquetas clínicas globales y metadatos asociados.\newline
 
-\subsection{Consideraciones éticas y clínicas}
-La metodología experimental está orientada a aplicaciones clínicas de apoyo al diagnóstico, priorizando interpretabilidad, robustez y alineación con el flujo de trabajo del patólogo. El uso de mecanismos de atención permite complementar las predicciones globales con información visual interpretativa, facilitando la validación experta y promoviendo una integración responsable de modelos de aprendizaje profundo en entornos médicos.\newline
+El grado ISUP fue calculado una única vez a nivel de WSI a partir de los puntajes de Gleason primario y secundario, y posteriormente propagado a todos los parches asociados a dicha lámina para garantizar coherencia clínica.\newline
+
+Para verificar la integridad de este procedimiento, se implementaron validaciones explícitas que aseguraron la ausencia de valores nulos, la consistencia de las etiquetas clínicas, la validez de las rutas de acceso y la correcta separación por fold y subconjunto experimental.
+
+\subsubsection{Definición Formal y Rol Metodológico del Dataset Manifest}
+\label{subsec:manifest_formal}
+El archivo \texttt{dataset\_manifest.csv} constituye un componente metodológico central del pipeline experimental, actuando como la fuente única de verdad (\textit{single source of truth}) para la gestión, trazabilidad y control de los datos utilizados en todos los experimentos.\newline
+
+Desde una perspectiva formal, el manifiesto define una correspondencia unívoca entre cada instancia (parche histopatológico) y su contexto experimental, encapsulando en una única estructura toda la información necesaria para garantizar coherencia entre datos, particiones, etiquetas clínicas y rutas de acceso a los archivos.\newline
+
+Cada fila del manifiesto representa exactamente un parche extraído de una Whole Slide Image, estableciendo explícitamente su pertenencia a una lámina específica, a un paciente determinado y a una partición experimental concreta.\newline
+
+Este diseño permite desacoplar de manera estricta las decisiones metodológicas relacionadas con la construcción del dataset de la implementación de los modelos de aprendizaje automático, evitando dependencias implícitas entre notebooks, scripts o configuraciones particulares.\newline
+
+Desde el punto de vista experimental, el manifiesto actúa como un contrato formal entre todas las etapas del pipeline, asegurando que cualquier experimento posterior utilice exactamente las mismas particiones, definiciones de bolsas MIL y etiquetas clínicas.\newline
+
+Asimismo, esta estrategia facilita la auditoría tanto técnica como clínica del proceso experimental, permitiendo verificar de forma explícita la procedencia de cada instancia, su asignación a folds de validación y su contribución a las predicciones a nivel de lámina.
+
+\subsubsection{Estructura del Archivo \texttt{dataset\_manifest.csv}}
+\label{subsec:manifest_structure}
+La estructura del archivo \texttt{dataset\_manifest.csv} fue diseñada para capturar de manera explícita la información jerárquica inherente a los datos histopatológicos, abarcando niveles de paciente, lámina e instancia.\newline
+
+En la Tabla~\ref{tab:dataset_manifest} se presenta la descripción formal de las columnas que componen el manifiesto, junto con su rol dentro del pipeline experimental.
+
+\begin{table}[H]
+    \centering
+    \caption{Estructura del archivo \texttt{dataset\_manifest.csv} utilizado como fuente única de verdad del pipeline experimental.}
+    \label{tab:dataset_manifest}
+    \begin{tabular}{p{4cm} p{10cm}}
+        \hline
+        \textbf{Columna} & \textbf{Descripción} \\
+        \hline
+        imageName & Nombre del archivo correspondiente al parche histopatológico. \\
+        imagePath & Ruta completa al archivo de imagen del parche. \\
+        maskPath & Ruta a la máscara asociada al parche, en caso de existir. \\
+        maskExists & Indicador booleano que señala la existencia o ausencia de máscara. \\
+        wsiId & Identificador único de la Whole Slide Image de origen. \\
+        patientId & Identificador del paciente al que pertenece la lámina. \\
+        fold & Fold de validación cruzada asignado (Val1--Val4). \\
+        split & Subconjunto experimental al que pertenece la instancia (entrenamiento o prueba). \\
+        gleasonPrimary & Puntaje de Gleason primario asociado a la WSI. \\
+        gleasonSecondary & Puntaje de Gleason secundario asociado a la WSI. \\
+        isup & Grado ISUP derivado de la combinación de Gleason primario y secundario. \\
+        nc, g3, g4, g5, g4c & Indicadores locales de patrones histopatológicos a nivel de parche, utilizados únicamente para trazabilidad y análisis descriptivo. \\
+        \hline
+    \end{tabular}
+\end{table}
+
+Es importante destacar que, aunque el manifiesto incluye información a nivel de parche sobre patrones histológicos locales, dichas variables no son utilizadas como etiquetas supervisadas durante el entrenamiento de los modelos.\newline
+
+Las etiquetas clínicas empleadas por el sistema corresponden exclusivamente a nivel de Whole Slide Image, manteniendo de forma estricta el paradigma de supervisión débil propio del Aprendizaje de Instancias Múltiples.
+
+\subsubsection{Justificación Metodológica del Uso de Supervisión Débil}
+\label{subsec:weak_supervision}
+El diseño del pipeline experimental adopta de forma deliberada un esquema de supervisión débil, en el cual las etiquetas clínicas están disponibles únicamente a nivel de lámina completa y no a nivel de parche individual.\newline
+
+Esta decisión metodológica responde tanto a consideraciones prácticas como clínicas, ya que en escenarios reales de patología digital las anotaciones exhaustivas a nivel de píxel o parche suelen ser costosas, subjetivas y difícilmente escalables.\newline
+
+El uso de información local únicamente con fines de trazabilidad, y no como señal supervisada directa, evita introducir sesgos artificiales en el aprendizaje y garantiza que el modelo aprenda patrones discriminativos relevantes a partir de la agregación de instancias heterogéneas.\newline
+
+De esta manera, el pipeline se alinea con escenarios clínicos realistas, donde la decisión diagnóstica se emite a nivel de lámina, y el sistema debe inferir dicha decisión a partir de múltiples regiones con distintos grados de relevancia histopatológica.\newline
+
+Este enfoque refuerza la validez externa del sistema propuesto y justifica el uso de mecanismos de atención y agregación definidos en etapas posteriores del pipeline.
+
+\subsection{Preprocesamiento y Control de Calidad de Parches}
+\label{subsec:preprocesamiento_patches}
+Previo a la extracción de características, se aplicó un proceso de control de calidad orientado a descartar parches no informativos.\newline
+
+Este filtrado se basó en el análisis del contenido tisular utilizando el espacio de color HSV, empleando el canal de saturación como criterio para identificar regiones con presencia significativa de tejido.\newline
+
+Los parches que no alcanzaron un umbral mínimo de proporción de tejido fueron excluidos del proceso de aprendizaje para reducir ruido y optimizar recursos computacionales.\newline
+
+Este filtrado se ejecutó de manera completamente ciega a las etiquetas clínicas, preservando la validez experimental y evitando cualquier forma de fuga de información.
+
+\subsection{Extracción de Características Profundas}
+\label{subsec:feature_extraction}
+Con el fin de desacoplar la extracción de características del entrenamiento de los modelos MIL, se implementó una etapa explícita de ingeniería de características.\newline
+
+Cada parche válido fue procesado mediante una red neuronal convolucional profunda ResNet-50 preentrenada sobre ImageNet, eliminando su capa de clasificación final.\newline
+
+Como resultado, cada parche fue representado por un vector de características de dimensión fija, capaz de capturar patrones morfológicos complejos asociados a la arquitectura tisular y celular.\newline
+
+Una vez obtenidos, estos embeddings se almacenaron de manera persistente, permitiendo su reutilización en múltiples experimentos sin necesidad de reprocesar las imágenes originales.
+
+\subsection{Construcción Formal de Bolsas MIL}
+\label{subsec:bags_mil}
+A partir del \texttt{dataset\_manifest.csv}, se construyó una representación basada en Aprendizaje de Instancias Múltiples, donde cada bolsa corresponde a una WSI y cada instancia a un parche histopatológico.\newline
+
+El label clínico del bag se definió exclusivamente a partir del grado ISUP asociado a la lámina, mientras que las instancias conservaron información local únicamente con fines descriptivos y de trazabilidad.\newline
+
+Se validó que cada bolsa contuviera instancias de una única WSI, sin mezclas entre conjuntos y con etiquetas clínicas consistentes.\newline
+
+Bajo esta configuración, el conjunto final presenta un número variable de instancias por bolsa, reflejando la heterogeneidad espacial inherente a las imágenes histopatológicas y fundamentando el uso de modelos MIL con mecanismos de agregación flexibles.
+
+\subsection{Resumen de la Metodología Experimental}
+La metodología experimental descrita establece un procedimiento riguroso, reproducible y clínicamente coherente para la evaluación de modelos de Aprendizaje de Instancias Múltiples aplicados a imágenes histopatológicas prostáticas.\newline
+
+La separación explícita entre las etapas de preparación de datos, control de integridad, construcción formal de estructuras MIL y entrenamiento de modelos garantiza que los resultados obtenidos puedan ser atribuidos exclusivamente al comportamiento de los modelos evaluados, y no a artefactos derivados de la manipulación de los datos.\newline
+
+Asimismo, el uso de un \textit{dataset manifest} como fuente única de verdad, junto con la adopción estricta de supervisión débil y particiones a nivel de lámina, asegura condiciones experimentales homogéneas, comparables y auditables a lo largo de todos los experimentos realizados.\newline
+
+Sobre este marco metodológico se ejecutan los experimentos presentados en el capítulo de Resultados, donde se evalúa cuantitativamente el desempeño de las arquitecturas propuestas bajo distintos escenarios experimentales.\newline
+
+Posteriormente, en el capítulo de Discusión, dichos resultados son analizados de manera crítica a la luz del diseño metodológico adoptado, permitiendo interpretar sus implicaciones clínicas, limitaciones y oportunidades de mejora.
