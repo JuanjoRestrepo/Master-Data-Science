@@ -3,7 +3,7 @@
 \section{Construcción y validación del dataset experimental}
 A partir del conjunto original de imágenes histopatológicas SICAPv2, se construyó un archivo \textit{dataset_manifest.csv} que actúa como única fuente de verdad para todos los experimentos posteriores. En este manifest, cada fila corresponde a un parche histopatológico y queda asociado de forma explícita a su Whole Slide Image (WSI), fold de validación cruzada, subconjunto (entrenamiento o prueba), rutas a imagen y máscara, así como a los labels clínicos globales derivados a nivel WSI.\newline
 
-El manifest final contiene un total de \textbf{39,836} parches, organizados en \textbf{496} WSIs, distribuidos en cuatro folds de validación cruzada (Val1–Val4). Cada WSI posee un único conjunto de labels clínicos (Gleason primario, Gleason secundario e ISUP), los cuales se derivan una sola vez a nivel WSI y posteriormente se propagan a todos los parches asociados, garantizando coherencia clínica y evitando inconsistencias a nivel de instancia.\newline
+El manifest final contiene un total de \textbf{39,836} parches, organizados en \textbf{496} WSIs, distribuidos en cuatro folds de validación cruzada (Val1--Val4). Cada WSI posee un único conjunto de labels clínicos (Gleason primario, Gleason secundario e ISUP), los cuales se derivan una sola vez a nivel WSI y posteriormente se propagan a todos los parches asociados, garantizando coherencia clínica y evitando inconsistencias a nivel de instancia.\newline
 
 Durante la construcción del manifest se realizaron validaciones automáticas críticas orientadas a garantizar la integridad estructural, la coherencia clínica y la trazabilidad completa de los datos experimentales. En particular, se verificó que:
 

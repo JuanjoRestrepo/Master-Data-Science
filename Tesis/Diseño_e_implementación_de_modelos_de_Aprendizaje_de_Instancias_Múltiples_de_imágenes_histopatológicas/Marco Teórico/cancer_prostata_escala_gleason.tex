@@ -8,7 +8,7 @@ Este examen produce la asignación de un \textbf{puntaje de Gleason}, un sistema
 La escala de Gleason combina dos patrones arquitecturales, primario y secundario, para obtener un puntaje sumado que refleja la agresividad biológica del tumor.  
 \begin{itemize}
     \item Puntajes bajos (por ejemplo, Gleason 6) se asocian con tumores bien diferenciados y menor agresividad.  
-    \item Puntajes altos (Gleason 8–10) indican tumores más indiferenciados y de mayor agresividad clínica.  
+    \item Puntajes altos (Gleason 8--10) indican tumores más indiferenciados y de mayor agresividad clínica.  
 \end{itemize}
 
 Esta información se resume y agrupa en categorías clínicamente relevantes definidas por la \textbf{International Society of Urological Pathology (ISUP)} \cite{epstein2016gleason, SILVARODRIGUEZ2020105637}.\newline
@@ -28,8 +28,8 @@ A pesar de la importancia clínica de la gradación de Gleason, su asignación p
 Para integrar esta complejidad diagnóstica con métodos computacionales basados en aprendizaje automático, es frecuente reformular el problema en términos clínicos significativos. Una aproximación clínicamente respaldada consiste en \textbf{binarizar las categorías ISUP} en dos grupos de interés:
 
 \begin{itemize}
-    \item \textbf{Bajo grado}: tumores con menor agresividad (ISUP grados 1–2).
-    \item \textbf{Alto grado}: tumores con mayor probabilidad de progresión clínica adversa (ISUP grados ≥3).
+    \item \textbf{Bajo grado}: tumores con menor agresividad (ISUP grados 1--2).
+    \item \textbf{Alto grado}: tumores con mayor probabilidad de progresión clínica adversa (ISUP grados $\geq 3$).
 \end{itemize}
 
 Esta reformulación reduce la ambigüedad diagnóstica en casos limítrofes y se alinea con decisiones clínicas reales, tales como la elección entre tratamientos activos frente a intervenciones más agresivas. Diversos trabajos en patología computacional han adoptado esquemas similares cuando el objetivo es la \textbf{clasificación binaria de riesgo clínico} en cáncer de próstata \cite{campanella2019clinical, MoralesAlvarez2024}. \newline
