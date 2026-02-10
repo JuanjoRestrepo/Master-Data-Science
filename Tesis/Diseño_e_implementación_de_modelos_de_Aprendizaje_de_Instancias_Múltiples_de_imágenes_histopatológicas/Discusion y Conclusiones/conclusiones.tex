@@ -1,42 +1,42 @@
-El presente proyecto abordó el problema de la clasificación de cáncer de próstata a partir de imágenes histopatológicas digitalizadas mediante un enfoque basado en Aprendizaje de Instancias Múltiples (MIL). A lo largo del desarrollo se diseñó, implementó y evaluó un pipeline completo que abarca desde la preparación rigurosa de datos hasta el análisis cuantitativo y la interpretabilidad visual de los modelos entrenados. A partir de los resultados obtenidos, se derivan las siguientes conclusiones principales.
+El presente proyecto abordó el problema de la clasificación de cáncer de próstata a partir de imágenes histopatológicas digitalizadas mediante un enfoque basado en Aprendizaje de Instancias Múltiples (MIL). A lo largo de su desarrollo se diseñó, implementó y evaluó un pipeline experimental integral y reproducible, que abarca desde la preparación rigurosa de los datos hasta el análisis cuantitativo del desempeño y la interpretabilidad visual de los modelos entrenados. En función de los objetivos planteados y de los resultados obtenidos, se derivan las siguientes conclusiones principales.
 
 \section{Conclusiones}
 
 \begin{itemize}
 
     \item \textbf{Viabilidad del Aprendizaje con Supervisión Débil en Histopatología Digital:}  
-    Los resultados demuestran que es posible entrenar modelos con capacidad discriminativa clínicamente relevante utilizando únicamente etiquetas a nivel de Whole Slide Image (WSI), sin requerir anotaciones exhaustivas a nivel de parche. El enfoque MIL permitió capturar patrones tisulares asociados a malignidad prostática de manera efectiva, confirmando su idoneidad para escenarios reales donde la anotación detallada resulta costosa o impracticable.
+    Los resultados confirman que es factible entrenar modelos con capacidad discriminativa clínicamente relevante utilizando exclusivamente etiquetas a nivel de \textit{Whole Slide Image} (WSI), sin requerir anotaciones exhaustivas a nivel de parche. El paradigma MIL permitió capturar patrones tisulares asociados a malignidad prostática de manera efectiva, validando su idoneidad para escenarios clínicos reales donde la anotación detallada resulta costosa, subjetiva o impracticable.
 
     \item \textbf{Superioridad de los Modelos MIL Basados en Atención:}  
-    La comparación entre estrategias de agregación evidenció que los modelos basados en mecanismos de atención (ABMIL y SmABMIL) superan consistentemente a los enfoques de pooling clásico (MeanMIL y MaxMIL) en métricas clínicas clave, como PR AUC, sensibilidad y estabilidad inter-fold. En particular, SmABMIL mostró un equilibrio favorable entre capacidad predictiva y robustez, lo que sugiere una mejor generalización frente a la heterogeneidad morfológica de las biopsias.
+    La comparación sistemática entre estrategias de agregación evidenció que los modelos basados en mecanismos de atención (ABMIL y SmABMIL) superan de forma consistente a los enfoques de pooling clásico (MeanMIL y MaxMIL) en métricas clínicas clave, incluyendo sensibilidad, PR AUC y estabilidad inter-fold. En particular, SmABMIL mostró un equilibrio favorable entre capacidad predictiva y robustez, lo que sugiere una mejor generalización frente a la heterogeneidad morfológica inherente a las biopsias prostáticas.
 
-    \item \textbf{Impacto del Preprocesamiento y la Curaduría de Datos:}  
-    Las decisiones adoptadas en las etapas tempranas del pipeline, incluyendo el filtrado basado en el espacio de color HSV y el umbral de cobertura tisular, resultaron determinantes para reducir ruido y garantizar que el extractor de características se enfocara en regiones con relevancia histopatológica. Este proceso fue clave para estabilizar el entrenamiento y mejorar la calidad de las representaciones aprendidas.
+    \item \textbf{Impacto Crítico del Preprocesamiento y la Curaduría de Datos:}  
+    Las decisiones adoptadas en las etapas iniciales del pipeline, tales como el filtrado basado en el espacio de color HSV y la selección de parches según cobertura tisular, tuvieron un impacto directo sobre la estabilidad del entrenamiento y la calidad de las representaciones aprendidas. Estos procesos resultaron fundamentales para reducir ruido estructural y garantizar que el modelo se enfocara en regiones con relevancia histopatológica, condicionando de manera significativa el desempeño final del sistema.
 
     \item \textbf{Rigor Metodológico y Evaluación Realista del Desempeño:}  
-    La implementación de validación cruzada estricta mediante \textit{GroupKFold}, asegurando la separación completa a nivel de paciente entre los conjuntos de entrenamiento y prueba, permitió evitar la fuga de datos y obtener una estimación realista de la capacidad de generalización del sistema. Este rigor metodológico es esencial para cualquier aplicación clínica basada en aprendizaje automático.
+    La implementación de un esquema de validación cruzada estricta mediante \textit{GroupKFold}, asegurando la separación completa a nivel de paciente entre los conjuntos de entrenamiento y prueba, permitió evitar fugas de información y obtener estimaciones realistas de la capacidad de generalización del modelo. Este rigor metodológico constituye un requisito indispensable para la evaluación confiable de sistemas de apoyo clínico basados en aprendizaje automático.
 
-    \item \textbf{Interpretabilidad y Alineación con Criterios Histopatológicos:}  
-    El uso de mecanismos de atención proporcionó una capa de interpretabilidad fundamental. La visualización de los pesos de atención, tanto a nivel de parches individuales como mediante mapas espaciales sobre la WSI, mostró una correspondencia coherente con regiones tisulares relevantes desde el punto de vista histopatológico, como áreas con desorganización glandular y alta densidad celular. Esta capacidad de explicación fortalece la confianza en el modelo y lo posiciona como una herramienta de apoyo clínico interpretable, más allá de un clasificador de caja negra.
+    \item \textbf{Interpretabilidad y Coherencia con Criterios Histopatológicos:}  
+    La incorporación de mecanismos de atención proporcionó una capa de interpretabilidad esencial para el contexto clínico. La visualización de los pesos de atención, tanto a nivel de parches individuales como mediante mapas espaciales proyectados sobre la WSI, evidenció una correspondencia coherente con regiones tisulares relevantes desde el punto de vista histopatológico. Esta capacidad de explicación fortalece la confianza en el sistema y lo posiciona como una herramienta de apoyo clínico interpretable, más allá de un clasificador de tipo caja negra.
 
 \end{itemize}
 
 \section{Trabajo Futuro}
 
-Si bien los resultados obtenidos son prometedores, existen múltiples líneas de investigación que permitirían ampliar el alcance, la robustez y el impacto clínico del sistema propuesto:
+Si bien los resultados obtenidos son prometedores, existen diversas líneas de investigación que permitirían ampliar el alcance, la robustez y el impacto clínico del sistema propuesto:
 
 \begin{itemize}
 
     \item \textbf{Aprendizaje Auto-Supervisado y Representaciones Especializadas:}  
-    Explorar extractores de características entrenados mediante aprendizaje auto-supervisado (SSL), como DINO o MoCo, así como arquitecturas basadas en \textit{Vision Transformers} (ViT). Estas estrategias podrían generar \textit{embeddings} más específicos para la morfología histopatológica que aquellos preentrenados en conjuntos genéricos como ImageNet.
+    Explorar extractores de características entrenados mediante aprendizaje auto-supervisado (SSL), como DINO o MoCo, así como arquitecturas basadas en \textit{Vision Transformers} (ViT), con el objetivo de obtener representaciones más específicas para la morfología histopatológica que aquellas preentrenadas en conjuntos genéricos como ImageNet.
 
     \item \textbf{Análisis Multi-Resolución:}  
-    Incorporar un esquema MIL multi-escala que procese parches a diferentes aumentos ($10\times$, $20\times$, $40\times$), replicando el flujo de trabajo diagnóstico del patólogo. Esta aproximación permitiría integrar información arquitectónica global y detalles citonucleares locales dentro de un mismo modelo.
+    Incorporar esquemas MIL multi-escala que procesen parches a diferentes aumentos ($10\times$, $20\times$, $40\times$), replicando de manera más fiel el flujo de trabajo diagnóstico del patólogo e integrando información arquitectónica global con detalles citonucleares locales.
 
     \item \textbf{Integración Multimodal y Validación Externa:}  
-    Extender el sistema mediante la fusión de imágenes histopatológicas con variables clínicas (PSA, edad, resultados de resonancia magnética) y validar el modelo en \textit{datasets} externos de diferentes instituciones. Esto permitiría evaluar su robustez frente a variaciones de protocolo, tinción y población, acercándolo a escenarios de despliegue real.
+    Extender el sistema mediante la fusión de imágenes histopatológicas con variables clínicas relevantes, como PSA, edad o resultados de resonancia magnética, así como validar el modelo en \textit{datasets} externos de distintas instituciones, fortaleciendo su robustez frente a variaciones de protocolo, tinción y población.
 
     \item \textbf{Aplicaciones Clínicas Interactivas:}  
-    Desarrollar integraciones con visores de WSI de código abierto, como QuPath, para que el modelo funcione como una herramienta de apoyo a la decisión en tiempo real. Este tipo de integración permitiría resaltar regiones sospechosas directamente sobre la lámina digital, optimizando el tiempo de análisis y facilitando la adopción clínica.
+    Desarrollar integraciones con visores de WSI de código abierto, como QuPath, que permitan utilizar el modelo como herramienta de apoyo a la decisión clínica en tiempo real, resaltando regiones sospechosas directamente sobre la lámina digital y facilitando su adopción en entornos clínicos reales.
 
 \end{itemize}
