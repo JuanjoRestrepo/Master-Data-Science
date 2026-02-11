@@ -1,5 +1,3 @@
-\chapter*{Abstract}
-
 This undergraduate thesis presents the design, implementation, and evaluation of a reproducible experimental pipeline based on Multiple Instance Learning (MIL) for weakly supervised classification of Whole Slide Images (WSI) in prostate cancer. The study addresses two central challenges in digital histopathology: interobserver variability in tumor grading and the limited availability of detailed patch-level annotations.\newline
 
 The proposed methodology integrates a preprocessing stage focused on relevant tissue region selection using HSV color space filtering, deep feature extraction through a frozen ResNet-50 backbone, and the training of MIL architectures employing both classical pooling and attention-based aggregation mechanisms. The experimental framework was developed using the public SICAPv2 dataset and evaluated through strict patient-level cross-validation (\textit{GroupKFold}), ensuring complete separation between training and testing WSIs.\newline
