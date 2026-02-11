@@ -6,6 +6,8 @@
 \def\authorB{}
 \def\authorBCOD{}
 \def\codirector{}
+% Ensure `numautores` counter exists to avoid undefined-counter errors
+\@ifundefined{c@numautores}{\newcounter{numautores}\setcounter{numautores}{1}}{}
 %% end Colarte, Tek
 \let\cleardoublepage=\clearpage
 \NeedsTeXFormat{LaTeX2e}[1995/12/01]
@@ -105,15 +107,15 @@ Director Maestría en Ciencia de Datos \\
 Director Trabajo de Grado
 }
 {
-\begin{tabular}{c{8cm}c{8cm}}
-\line(1,0){200}&\line(1,0){200} \\
-\director \\
-Director Trabajo de Grado \\
-\end{tabular}
+  \begin{tabular}{>{\centering\arraybackslash}p{8cm}>{\centering\arraybackslash}p{8cm}}
+  \line(1,0){200}&\line(1,0){200} \\
+  \director & \director \\
+  Director Trabajo de Grado & Director Trabajo de Grado \\
+  \end{tabular}
 }
 \vskip 2cm
 
-\begin{tabular}{c{8cm}c{8cm}}
+\begin{tabular}{>{\centering\arraybackslash}p{8cm}>{\centering\arraybackslash}p{8cm}}
 \line(1,0){200}&\line(1,0){200} \\
 \juryA & \juryB\\
 Jurado & Jurado\\
@@ -122,16 +124,15 @@ Jurado & Jurado\\
 }
 
 %%%%%%%%%% 3th Letter - presentacion %%%%%%%%%%%%%
-
+\clearpage
 \thispagestyle{empty}
 %\ \newpage
 %\thispagestyle{empty}
 \noindent Santiago de Cali, \fecha
 \vskip 2cm
 \noindent Se\~nores\\
-\noindent {Pontificia Universidad Javeriana -- Cali}\\
+\noindent {\bf Pontificia Universidad Javeriana -- Cali}\\
 \noindent \deanFIC \\
-\noindent Decano \\
 \noindent Facultad de Ingenier\'ia y Ciencias \\
 \noindent Cali
 \vskip 1.5cm
@@ -159,7 +160,8 @@ Al firmar aquí,%
 \end{tabular}
 
 
-\cleardoublepage
+% Use \clearpage here so the next letter can appear on same page if space allows
+\clearpage
 
 %%%%%%%%%% 4thrd Letter - certificacion %%%%%%%%%%%%%
 
@@ -169,7 +171,6 @@ Al firmar aquí,%
 \noindent Se\~nores\\
 \noindent {\bf Pontificia Universidad Javeriana -- Cali}\\
 \noindent \deanFIC \\
-\noindent Decano \\
 \noindent Facultad de Ingenier\'ia y Ciencias \\
 \noindent Cali
 \vskip 2cm
