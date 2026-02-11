@@ -1,9 +1,9 @@
 % ================= CÁNCER DE PRÓSTATA Y ESCALA DE GLEASON =================
 
-El cáncer de próstata es una de las neoplasias más frecuentes y una de las principales causas de morbilidad y mortalidad en la población masculina a nivel mundial \cite{SungH_2021_Global, MinSalud_2025}. La detección temprana y precisa de esta enfermedad es fundamental para orientar decisiones terapéuticas y estrategias de manejo individualizado, debido a la amplia variabilidad biológica de la enfermedad y su impacto en la supervivencia a largo plazo.\newline
+El cáncer de próstata es una de las neoplasias más frecuentes y una de las principales causas de morbilidad y mortalidad en la población masculina a nivel mundial \cite{MinSalud_2025} \cite{SungH_2021_Global}. La detección temprana y precisa de esta enfermedad es fundamental para orientar decisiones terapéuticas y estrategias de manejo individualizado, debido a la amplia variabilidad biológica de la enfermedad y su impacto en la supervivencia a largo plazo.\newline
 
 El diagnóstico clínico convencional se basa en el análisis histopatológico de biopsias teñidas con hematoxilina y eosina (H\&E), donde el patólogo examina patrones arquitecturales del tejido prostático bajo el microscopio.  
-Este examen produce la asignación de un \textbf{puntaje de Gleason}, un sistema de gradación que clasifica la agresividad tumoral con base en la arquitectura glandular observada en las muestras \cite{Brett_2016, Ozkan2016}. \newline
+Este examen produce la asignación de un \textbf{puntaje de Gleason}, un sistema de gradación que clasifica la agresividad tumoral con base en la arquitectura glandular observada en las muestras \cite{Brett_2016} \cite{Ozkan2016}. \newline
 
 La escala de Gleason combina dos patrones arquitecturales, primario y secundario, para obtener un puntaje sumado que refleja la agresividad biológica del tumor.  
 \begin{itemize}
@@ -11,7 +11,7 @@ La escala de Gleason combina dos patrones arquitecturales, primario y secundario
     \item Puntajes altos (Gleason 8--10) indican tumores más indiferenciados y de mayor agresividad clínica.  
 \end{itemize}
 
-Esta información se resume y agrupa en categorías clínicamente relevantes definidas por la \textbf{International Society of Urological Pathology (ISUP)} \cite{epstein2016gleason, SILVARODRIGUEZ2020105637}.\newline
+Esta información se resume y agrupa en categorías clínicamente relevantes definidas por la \textbf{International Society of Urological Pathology (ISUP)} \cite{SILVARODRIGUEZ2020105637} \cite{epstein2016gleason}.\newline
 
 Ahora bien, un patrón histológico particularmente desafiante es el \textbf{cribriforme}, caracterizado por estructuras glandulares complejas que se asocian con peor pronóstico y mayor riesgo de recurrencia. Numerosos estudios han documentado que la presencia de patrones cribiformes se correlaciona con desenlaces clínicos adversos, lo que subraya la importancia de su identificación precisa \cite{SILVARODRIGUEZ2020105637}. La Figura \ref{fig:cribriform_patterns} muestra ejemplos de este patrón histológico, evidenciando la complejidad de su arquitectura glandular y la dificultad diagnóstica que representa.
 
@@ -23,7 +23,7 @@ Ahora bien, un patrón histológico particularmente desafiante es el \textbf{cri
 \end{figure}
 
 % ### **Justificación clínica de la binarización ISUP**
-A pesar de la importancia clínica de la gradación de Gleason, su asignación presenta variabilidad \textbf{interobservador} significativa, incluso entre patólogos experimentados \cite{Ozkan2016, Brett_2016, GleasonInterobserverPubMed2023}. Dicha variabilidad es especialmente notoria en la distinción entre \textbf{Gleason 3 y Gleason 4} y en la identificación de patrones con riesgo clínico intermedio o alto, lo que genera retos en la reproducibilidad y consistencia diagnóstica.\newline
+A pesar de la importancia clínica de la gradación de Gleason, su asignación presenta variabilidad \textbf{interobservador} significativa, incluso entre patólogos experimentados \cite{Brett_2016} \cite{Ozkan2016} \cite{GleasonInterobserverPubMed2023}. Dicha variabilidad es especialmente notoria en la distinción entre \textbf{Gleason 3 y Gleason 4} y en la identificación de patrones con riesgo clínico intermedio o alto, lo que genera retos en la reproducibilidad y consistencia diagnóstica.\newline
 
 Para integrar esta complejidad diagnóstica con métodos computacionales basados en aprendizaje automático, es frecuente reformular el problema en términos clínicos significativos. Una aproximación clínicamente respaldada consiste en \textbf{binarizar las categorías ISUP} en dos grupos de interés:
 
@@ -32,7 +32,7 @@ Para integrar esta complejidad diagnóstica con métodos computacionales basados
     \item \textbf{Alto grado}: tumores con mayor probabilidad de progresión clínica adversa (ISUP grados $\geq 3$).
 \end{itemize}
 
-Esta reformulación reduce la ambigüedad diagnóstica en casos limítrofes y se alinea con decisiones clínicas reales, tales como la elección entre tratamientos activos frente a intervenciones más agresivas. Diversos trabajos en patología computacional han adoptado esquemas similares cuando el objetivo es la \textbf{clasificación binaria de riesgo clínico} en cáncer de próstata \cite{campanella2019clinical, MoralesAlvarez2024}. \newline
+Esta reformulación reduce la ambigüedad diagnóstica en casos limítrofes y se alinea con decisiones clínicas reales, tales como la elección entre tratamientos activos frente a intervenciones más agresivas. Diversos trabajos en patología computacional han adoptado esquemas similares cuando el objetivo es la \textbf{clasificación binaria de riesgo clínico} en cáncer de próstata \cite{campanella2019clinical} \cite{MoralesAlvarez2024}. \newline
 
 
 % ### **Necesidad de enfoques computacionales**
@@ -44,7 +44,7 @@ La digitalización de imágenes histopatológicas (WSIs) genera grandes volúmen
     \item La elevada cantidad de parches contenidos en una sola WSI.
 \end{itemize}
 
-Estas limitaciones han motivado la adopción de técnicas computacionales avanzadas, particularmente en aprendizaje profundo, para apoyar la evaluación histopatológica y mejorar la reproducibilidad diagnóstica. Las arquitecturas de \textbf{Multiple Instance Learning} (MIL), junto con mecanismos de atención, se presentan como soluciones naturales para integrar supervisión débil con representación de patrones discriminativos en WSIs (ver Sección \ref{sec:aprendizaje_MIL}).\newline
+Estas limitaciones han motivado la adopción de técnicas computacionales avanzadas, particularmente en aprendizaje profundo, para apoyar la evaluación histopatológica y mejorar la reproducibilidad diagnóstica. Las arquitecturas de \textbf{Multiple Instance Learning} (MIL), junto con mecanismos de atención, se presentan como soluciones naturales para integrar supervisión débil con representación de patrones discriminativos en WSIs.\newline
 
 En consecuencia, el desarrollo de modelos computacionales capaces de imitar y fortalecer el juicio clínico en la gradación de Gleason constituye un área de investigación activa y de alto impacto clínico. La variabilidad interobservador, la complejidad morfológica de ciertos patrones histológicos y la necesidad de evaluaciones reproducibles han impulsado el uso de enfoques basados en aprendizaje profundo para apoyar el diagnóstico histopatológico.
 

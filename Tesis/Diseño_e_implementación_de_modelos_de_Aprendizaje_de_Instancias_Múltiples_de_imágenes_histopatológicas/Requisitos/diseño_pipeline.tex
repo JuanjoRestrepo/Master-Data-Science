@@ -5,9 +5,7 @@
 \section{Diseño del Pipeline Experimental}
 \label{sec:diseno_pipeline}
 
-Este capítulo presenta el diseño conceptual y técnico del pipeline experimental propuesto para el análisis de imágenes histopatológicas de próstata mediante el paradigma de Aprendizaje de Instancias Múltiples (MIL).\newline
-
-Su propósito es describir de forma estructurada cómo se concibió la solución, qué componentes la conforman y cómo se organiza el flujo de datos desde la adquisición de las Whole Slide Images (WSI) hasta la generación de predicciones a nivel de lámina, sin anticipar resultados cuantitativos ni interpretaciones empíricas.\newline
+Este capítulo presenta el diseño conceptual y técnico del pipeline experimental propuesto para el análisis de imágenes histopatológicas de próstata mediante el paradigma de Aprendizaje de Instancias Múltiples (MIL). Su propósito es describir de forma estructurada cómo se concibió la solución, qué componentes la conforman y cómo se organiza el flujo de datos desde la adquisición de las Whole Slide Images (WSI) hasta la generación de predicciones a nivel de lámina, sin anticipar resultados cuantitativos ni interpretaciones empíricas.\newline
 
 El diseño del pipeline fue desarrollado siguiendo un enfoque incremental basado en sprints, lo que permitió descomponer el problema en etapas claramente delimitadas, garantizar trazabilidad entre decisiones técnicas y facilitar la alineación entre el diseño metodológico y la implementación computacional realizada posteriormente en los notebooks experimentales.\newline
 
@@ -16,28 +14,28 @@ Cada sprint representa una unidad lógica de diseño, estableciendo responsabili
 \subsection{Visión General del Pipeline Metodológico}
 \label{subsec:vision_general_pipeline}
 
-El pipeline completo fue representado gráficamente con el fin de proporcionar una visión global del flujo de procesamiento y de las interacciones entre sus distintos componentes.\newline
-
-Debido a su complejidad y nivel de detalle, el diagrama fue dividido en dos partes complementarias que, en conjunto, describen el proceso completo desde los datos crudos hasta la salida del modelo.\newline
+El pipeline completo fue representado gráficamente con el fin de proporcionar una visión global del flujo de procesamiento y de las interacciones entre sus distintos componentes. Debido a su complejidad y nivel de detalle, el diagrama fue dividido en dos partes complementarias que, en conjunto, describen el proceso completo desde los datos crudos hasta la salida del modelo.\newline
 
 La Figura~\ref{fig:pipeline_part1} ilustra la primera parte del pipeline, abarcando la adquisición de las WSI, su partición en parches, el preprocesamiento inicial y la extracción de características a nivel de instancia.\newline
 
-\begin{figure}[H]
+\newpage
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=\textwidth]{images/PipelineDiag1.png}
+    \includegraphics[width=0.72\textwidth]{images/PipelineDiag1.png}
     \caption{Primera parte del pipeline propuesto: adquisición de WSI, partición en patches, preprocesamiento y extracción de características a nivel de instancia.}
     \label{fig:pipeline_part1}
 \end{figure}
 
-La Figura~\ref{fig:pipeline_part2} presenta la segunda parte del pipeline, correspondiente a la organización de instancias en bolsas MIL, el mecanismo de atención, la agregación de información y la generación de predicciones a nivel de lámina.\newline
+Por otro lado, la Figura~\ref{fig:pipeline_part2} presenta la segunda parte del pipeline, correspondiente a la organización de instancias en bolsas MIL, el mecanismo de atención, la agregación de información y la generación de predicciones a nivel de lámina.\newline
 
-\begin{figure}[H]
+\begin{figure}[h!]
     \centering
-    \includegraphics[width=\textwidth]{images/PipelineDiag2.png}
+    \includegraphics[width=0.73\textwidth]{images/PipelineDiag2.png}
     \caption{Segunda parte del pipeline: modelo MIL con mecanismo de atención, agregación de instancias, predicción y evaluación conceptual.}
     \label{fig:pipeline_part2}
 \end{figure}
 
+\newpage
 Ambos diagramas deben interpretarse como un único flujo continuo de procesamiento, en el cual cada etapa transforma progresivamente la información histopatológica desde su representación cruda hasta una decisión clínica modelada.\newline
 
 \subsection{Sprint 0: Infraestructura, Entorno y Reproducibilidad}
