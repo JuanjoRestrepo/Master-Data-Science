@@ -153,12 +153,8 @@ Se validó que cada bolsa contuviera instancias de una única WSI, sin mezclas e
 Bajo esta configuración, el conjunto final presenta un número variable de instancias por bolsa, reflejando la heterogeneidad espacial inherente a las imágenes histopatológicas y fundamentando el uso de modelos MIL con mecanismos de agregación flexibles.
 
 \subsection{Resumen de la Metodología Experimental}
-La metodología experimental descrita establece un procedimiento riguroso, reproducible y clínicamente coherente para la evaluación de modelos de Aprendizaje de Instancias Múltiples aplicados a imágenes histopatológicas prostáticas.\newline
+La metodología descrita establece un marco experimental riguroso, reproducible y con coherencia clínica para la evaluación de modelos MIL en el contexto de la histopatología prostática. Esta estructuración, fundamentada en la separación estricta de las fases de preparación, control de integridad y entrenamiento, garantiza la ortogonalidad de los procesos; es decir, asegura que el desempeño observado sea atribuible al comportamiento intrínseco de los modelos y no a sesgos o artefactos derivados del procesamiento. \newline
 
-La separación explícita entre las etapas de preparación de datos, control de integridad, construcción formal de estructuras MIL y entrenamiento de modelos garantiza que los resultados obtenidos puedan ser atribuidos exclusivamente al comportamiento de los modelos evaluados, y no a artefactos derivados de la manipulación de los datos.\newline
+Un pilar fundamental de este diseño es el uso de un \textit{dataset manifest} como fuente única de verdad. Junto con la adopción de supervisión débil y particiones herméticas a nivel de lámina (\textit{WSI-level partitioning}), se garantiza un entorno experimental homogéneo, auditable y libre de fuga de información (\textit{data leakage}).\newline
 
-Asimismo, el uso de un \textit{dataset manifest} como fuente única de verdad, junto con la adopción estricta de supervisión débil y particiones a nivel de lámina, asegura condiciones experimentales homogéneas, comparables y auditables a lo largo de todos los experimentos realizados.\newline
-
-Sobre este marco metodológico se ejecutan los experimentos presentados en el capítulo de Resultados, donde se evalúa cuantitativamente el desempeño de las arquitecturas propuestas bajo distintos escenarios experimentales.\newline
-
-Posteriormente, en el capítulo de Discusión, dichos resultados son analizados de manera crítica a la luz del diseño metodológico adoptado, permitiendo interpretar sus implicaciones clínicas, limitaciones y oportunidades de mejora.
+Este andamiaje metodológico constituye la base operativa para los experimentos presentados en el capítulo de Resultados, donde se evalúa el desempeño de las arquitecturas bajo distintos escenarios. Finalmente, dichas evidencias son sometidas a un análisis crítico en el capítulo de Discusión, permitiendo interpretar las implicaciones clínicas, limitaciones y proyecciones del sistema propuesto a la luz del diseño aquí adoptado.

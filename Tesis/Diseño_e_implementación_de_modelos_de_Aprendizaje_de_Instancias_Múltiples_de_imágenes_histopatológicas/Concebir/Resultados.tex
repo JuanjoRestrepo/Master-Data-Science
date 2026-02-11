@@ -1,7 +1,7 @@
 % ====================== RESULTADOS ======================
 
 \section{Construcción y validación del dataset experimental}
-A partir del conjunto original de imágenes histopatológicas SICAPv2, se construyó un archivo \textit{dataset_manifest.csv} que actúa como única fuente de verdad para todos los experimentos posteriores. En este manifest, cada fila corresponde a un parche histopatológico y queda asociado de forma explícita a su Whole Slide Image (WSI), fold de validación cruzada, subconjunto (entrenamiento o prueba), rutas a imagen y máscara, así como a los labels clínicos globales derivados a nivel WSI.\newline
+A partir del conjunto original de imágenes histopatológicas SICAPv2, se construyó un archivo \textit{dataset\_manifest.csv} que actúa como única fuente de verdad para todos los experimentos posteriores. En este manifest, cada fila corresponde a un parche histopatológico y queda asociado de forma explícita a su Whole Slide Image (WSI), fold de validación cruzada, subconjunto (entrenamiento o prueba), rutas a imagen y máscara, así como a los labels clínicos globales derivados a nivel WSI.\newline
 
 El manifest final contiene un total de \textbf{39,836} parches, organizados en \textbf{496} WSIs, distribuidos en cuatro folds de validación cruzada (Val1--Val4). Cada WSI posee un único conjunto de labels clínicos (Gleason primario, Gleason secundario e ISUP), los cuales se derivan una sola vez a nivel WSI y posteriormente se propagan a todos los parches asociados, garantizando coherencia clínica y evitando inconsistencias a nivel de instancia.\newline
 
@@ -16,7 +16,7 @@ Durante la construcción del manifest se realizaron validaciones automáticas cr
 Todas las validaciones fueron superadas satisfactoriamente, por lo que el archivo \textit{dataset\_manifest.csv} se considera estable, coherente y clínicamente consistente, y se utiliza como base única para la construcción de bags MIL, el análisis estructural y el entrenamiento de los modelos.
 
 \subsection{Preparación de Bags MIL y análisis estructural}
-A partir del \textit{dataset_manifest.csv}, se construyó una representación basada en Aprendizaje de Instancias Múltiples (Multiple Instance Learning, MIL), donde \textbf{cada bag corresponde a una WSI} y \textbf{cada instancia corresponde a un parche histopatológico}. El label del bag se definió como el grado ISUP asociado a la WSI, mientras que las instancias conservan información local relacionada con la presencia de patrones histológicos (NC, G3, G4, G5 y G4C), utilizada únicamente con fines de trazabilidad.\newline
+A partir del \textit{dataset\_manifest.csv}, se construyó una representación basada en Aprendizaje de Instancias Múltiples (Multiple Instance Learning, MIL), donde \textbf{cada bag corresponde a una WSI} y \textbf{cada instancia corresponde a un parche histopatológico}. El label del bag se definió como el grado ISUP asociado a la WSI, mientras que las instancias conservan información local relacionada con la presencia de patrones histológicos (NC, G3, G4, G5 y G4C), utilizada únicamente con fines de trazabilidad.\newline
 
 El conjunto final contiene un total de \textbf{496 bags MIL}, distribuidos de forma consistente entre folds y subconjuntos de entrenamiento y prueba. Se verificó que:
 
@@ -281,18 +281,15 @@ En particular, la relación entre falsos negativos y verdaderos positivos adquie
     \centering
     \caption{Resumen de matrices de confusión (media $\pm$ desviación estándar) por modelo}
     \label{tab:confusion_summary}
-    \begin{tabular}{lcccc}
-        \toprule
-        Modelo & TN & FP & FN & TP \\
-        \midrule
-        MeanMIL  & $4.75 \pm 2.06$ & $5.50 \pm 5.32$ & $3.75 \pm 3.77$ & $17.00 \pm 5.89$ \\
-        MaxMIL   & $10.25 \pm 5.12$ & $0.00 \pm 0.00$ & $18.25 \pm 4.92$ & $2.50 \pm 3.11$ \\
-        ABMIL    & $5.75 \pm 3.30$ & $4.50 \pm 2.38$ & $3.00 \pm 1.41$ & $17.75 \pm 4.99$ \\
-        SmABMIL  & $5.00 \pm 2.16$ & $5.25 \pm 4.43$ & $1.75 \pm 0.96$ & $19.00 \pm 5.72$ \\
-        \bottomrule
+    \begin{tabular}{|l|c|c|c|c|}
+        \hline
+        \textbf{Modelo} & \textbf{TN} & \textbf{FP} & \textbf{FN} & \textbf{TP} \\
+        \hline
+        MeanMIL  & $4.75 \pm 2.06$ & $5.50 \pm 5.32$ & $3.75 \pm 3.77$ & $17.00 \pm 5.89$ \\ \hline
+        MaxMIL   & $10.25 \pm 5.12$ & $0.00 \pm 0.00$ & $18.25 \pm 4.92$ & $2.50 \pm 3.11$ \\ \hline
+        ABMIL    & $5.75 \pm 3.30$ & $4.50 \pm 2.38$ & $3.00 \pm 1.41$ & $17.75 \pm 4.99$ \\ \hline
+        SmABMIL  & $5.00 \pm 2.16$ & $5.25 \pm 4.43$ & $1.75 \pm 0.96$ & $19.00 \pm 5.72$ \\ \hline
     \end{tabular}
 \end{table}
 
-Los resultados presentados en este capítulo evidencian diferencias claras entre las arquitecturas MIL evaluadas, tanto en términos de estabilidad de entrenamiento como de desempeño clínico a nivel WSI.\newline
-
-En el capítulo de Discusión, estos hallazgos se analizan en profundidad, relacionándolos con las decisiones metodológicas adoptadas, las características estructurales del dataset y las implicaciones clínicas del uso de mecanismos de atención en histopatología digital.\newline
+Los resultados presentados en este capítulo evidencian diferencias claras entre las arquitecturas MIL evaluadas, tanto en términos de estabilidad de entrenamiento como de desempeño clínico a nivel WSI. En el capítulo de Discusión, estos hallazgos se analizan en profundidad, relacionándolos con las decisiones metodológicas adoptadas, las características estructurales del dataset y las implicaciones clínicas del uso de mecanismos de atención en histopatología digital.

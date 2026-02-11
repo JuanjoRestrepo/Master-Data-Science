@@ -36,68 +36,52 @@ Por otro lado, la Figura~\ref{fig:pipeline_part2} presenta la segunda parte del 
 \end{figure}
 
 \newpage
-Ambos diagramas deben interpretarse como un único flujo continuo de procesamiento, en el cual cada etapa transforma progresivamente la información histopatológica desde su representación cruda hasta una decisión clínica modelada.\newline
+Ambos diagramas deben interpretarse como un único flujo continuo de procesamiento, en el cual cada etapa transforma progresivamente la información histopatológica desde su representación cruda hasta una decisión clínica modelada.
 
 \subsection{Sprint 0: Infraestructura, Entorno y Reproducibilidad}
-
 El Sprint 0 tuvo como objetivo establecer una infraestructura computacional reproducible y adecuada para el procesamiento de imágenes histopatológicas a gran escala.\newline
 
 Se definió un entorno de ejecución basado en GPU utilizando Google Colaboratory, seleccionando explícitamente bibliotecas y versiones compatibles con patología digital y aprendizaje profundo, tales como PyTorch, NumPy, Pandas y OpenSlide.\newline
 
-Asimismo, se diseñó una estructura de directorios estandarizada que separa datos crudos, datos procesados, artefactos intermedios y salidas experimentales, garantizando trazabilidad completa del flujo de datos y facilitando la replicación de los experimentos.\newline
-
-En este sprint no se ejecutan experimentos ni se generan métricas, sino que se fijan las bases técnicas sobre las cuales se construye todo el pipeline experimental.\newline
+Asimismo, se diseñó una estructura de directorios estandarizada que separa datos crudos, datos procesados, artefactos intermedios y salidas experimentales, garantizando trazabilidad completa del flujo de datos y facilitando la replicación de los experimentos. Cabe resaltar que en este sprint no se ejecutan experimentos ni se generan métricas, sino que se fijan las bases técnicas sobre las cuales se construye todo el pipeline experimental.
 
 \subsection{Sprint 1: Comprensión del Dataset y Diseño de Particiones}
-
 El Sprint 1 estuvo orientado al análisis estructural del dataset SICAPv2 y al diseño de una estrategia de partición experimental clínicamente válida.\newline
 
 Se realizó una revisión exhaustiva de la estructura del conjunto de datos, verificando la correspondencia entre parches, anotaciones clínicas y metadatos asociados, así como la relación jerárquica entre pacientes, láminas y parches.\newline
 
-Un aspecto central de este sprint fue el diseño de una estrategia de validación que evitara explícitamente la fuga de datos (\textit{data leakage}), definiendo particiones basadas en identificadores de paciente como unidad indivisible.\newline
-
-Este diseño garantiza que ninguna información de un mismo paciente esté presente simultáneamente en conjuntos de entrenamiento y validación, alineando la evaluación con escenarios clínicos realistas.\newline
+Un aspecto central de este sprint fue el diseño de una estrategia de validación que evitara explícitamente la fuga de datos (\textit{data leakage}), definiendo particiones basadas en identificadores de paciente como unidad indivisible.Este diseño garantiza que ninguna información de un mismo paciente esté presente simultáneamente en conjuntos de entrenamiento y validación, alineando la evaluación con escenarios clínicos realistas.
 
 \subsection{Sprint 2: Construcción del \textit{Dataset Manifest}}
-
 El Sprint 2 definió el mecanismo central de control del flujo de datos mediante la construcción del archivo \texttt{dataset\_manifest.csv}, concebido como la fuente única de verdad del pipeline experimental.\newline
 
 El manifiesto fue diseñado para consolidar toda la información relevante de cada parche, incluyendo identificadores de paciente y lámina, asignación a fold, conjunto experimental, etiqueta clínica global y rutas a los archivos correspondientes.\newline
 
-Desde el punto de vista metodológico, este archivo actúa como un contrato formal entre las distintas etapas del pipeline, asegurando consistencia, trazabilidad y control total de las particiones experimentales.\newline
-
-Las validaciones estructurales asociadas a este manifiesto fueron definidas conceptualmente en este sprint, dejando su ejecución concreta para la metodología experimental.\newline
+Desde el punto de vista metodológico, este archivo actúa como un contrato formal entre las distintas etapas del pipeline, asegurando consistencia, trazabilidad y control total de las particiones experimentales. Las validaciones estructurales asociadas a este manifiesto fueron definidas conceptualmente en este sprint, dejando su ejecución concreta para la metodología experimental.
 
 \subsection{Sprint 3: Ingeniería de Características y Construcción de Bolsas MIL}
-
 El Sprint 3 se enfocó en el diseño del proceso de ingeniería de características y en la definición formal de las bolsas de instancias requeridas por el paradigma MIL.\newline
 
 Se estableció el uso de un extractor de características basado en una red neuronal convolucional profunda preentrenada, con el objetivo de transformar cada parche histopatológico en una representación vectorial compacta y semánticamente rica.\newline
 
-Previamente, se definieron criterios de filtrado visual para descartar regiones no informativas, reduciendo ruido y optimizando el uso de recursos computacionales.\newline
-
-A nivel conceptual, se definió que cada bolsa MIL corresponde a una WSI completa, agrupando un número variable de instancias, lo cual refleja la heterogeneidad inherente al tejido prostático.\newline
+Previamente, se definieron criterios de filtrado visual para descartar regiones no informativas, reduciendo ruido y optimizando el uso de recursos computacionales.A nivel conceptual, se definió que cada bolsa MIL corresponde a una WSI completa, agrupando un número variable de instancias, lo cual refleja la heterogeneidad inherente al tejido prostático.
 
 \subsection{Sprint 4: Diseño de Modelos MIL}
-
 El Sprint 4 abordó el diseño de las arquitecturas de Aprendizaje de Instancias Múltiples empleadas en el sistema.\newline
 
 Se definieron múltiples estrategias de agregación a nivel de bolsa, incluyendo enfoques basados en promedios, máximos y mecanismos de atención, todas concebidas para operar sobre las mismas representaciones y particiones.\newline
 
-Desde el punto de vista de diseño, se estableció que el entrenamiento y la evaluación de los modelos se realicen de forma independiente por fold, respetando estrictamente las particiones definidas en el manifiesto.\newline
-
-Este sprint describe el espacio de modelos considerado, sin introducir comparaciones empíricas ni resultados cuantitativos.\newline
+Desde el punto de vista de diseño, se estableció que el entrenamiento y la evaluación de los modelos se realicen de forma independiente por fold, respetando estrictamente las particiones definidas en el manifiesto. Este sprint describe el espacio de modelos considerado, sin introducir comparaciones empíricas ni resultados cuantitativos.
 
 \subsection{Sprint 5: Interpretabilidad y Análisis Conceptual}
-
 El Sprint 5 definió el componente de interpretabilidad del pipeline, concebido como un requisito fundamental para aplicaciones clínicas.\newline
 
 En particular, se diseñó el uso de mecanismos de atención como herramienta para asignar pesos de importancia a las instancias dentro de cada bolsa, permitiendo identificar regiones histopatológicas relevantes desde un punto de vista conceptual.\newline
 
-Asimismo, se estableció que el análisis del comportamiento del sistema incluya herramientas visuales y métricas agregadas que permitan evaluar estabilidad y coherencia, dejando su cálculo y análisis detallado para capítulos posteriores.\newline
+Asimismo, se estableció que el análisis del comportamiento del sistema incluya herramientas visuales y métricas agregadas que permitan evaluar estabilidad y coherencia, dejando su cálculo y análisis detallado para capítulos posteriores.
 
 \subsection{Resumen del Diseño del Pipeline}
 
 En conjunto, el pipeline diseñado establece un flujo de trabajo modular, reproducible y clínicamente alineado para el análisis de imágenes histopatológicas mediante MIL.\newline
 
-La separación explícita por sprints permite distinguir con claridad entre decisiones de diseño y ejecución experimental, minimizando ambigüedades metodológicas y preparando una transición natural hacia el capítulo de Metodología Experimental y Resultados.\newline
+La separación explícita por sprints permite distinguir con claridad entre decisiones de diseño y ejecución experimental, minimizando ambigüedades metodológicas y preparando una transición natural hacia el capítulo de Metodología Experimental y Resultados.
