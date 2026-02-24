@@ -14,73 +14,74 @@ Todas las decisiones metodológicas descritas en este capítulo se encuentran di
 \label{subsec:entorno_ejecucion}
 Los experimentos fueron desarrollados en un entorno de computación acelerada por GPU, utilizando la plataforma Google Colaboratory como infraestructura principal de ejecución.\newline
 
-El entrenamiento y la inferencia de los modelos se realizaron mediante la librería PyTorch, aprovechando capacidades de cómputo CUDA cuando estuvieron disponibles, lo cual permitió manejar de forma eficiente grandes volúmenes de datos y modelos con un número elevado de parámetros.\newline
-
-Con el fin de garantizar la reproducibilidad de los experimentos, se fijaron semillas aleatorias para los generadores de números pseudoaleatorios de Python, NumPy y PyTorch, incluyendo tanto ejecuciones en CPU como en GPU.\newline
+El entrenamiento y la inferencia de los modelos se realizaron mediante la librería PyTorch, aprovechando capacidades de cómputo CUDA cuando estuvieron disponibles, lo cual permitió manejar de forma eficiente grandes volúmenes de datos y modelos con un número elevado de parámetros. Por otro lado, para garantizar la reproducibilidad de los experimentos, se fijaron semillas aleatorias para los generadores de números pseudoaleatorios de Python, NumPy y PyTorch, incluyendo tanto ejecuciones en CPU como en GPU.\newline
 
 Adicionalmente, la gestión explícita de dependencias, rutas de archivos y organización del espacio de trabajo fue implementada directamente en el código, asegurando que cada experimento pudiera ser replicado de manera determinística bajo las mismas condiciones computacionales.
 
 \subsection{Conjunto de Datos y Definición Operativa del Problema}
 \label{subsec:dataset_problema}
-El conjunto de datos utilizado está compuesto por Whole Slide Images (WSI) de histopatología prostática teñidas con Hematoxilina y Eosina (H\&E), acompañadas de etiquetas clínicas a nivel de lámina y paciente, correspondientes al grado ISUP derivado de la escala de Gleason \cite{Silva-Rodríguez_2020Data}.\newline
+El conjunto de datos utilizado en este estudio corresponde a la base pública SICAPv2, la cual contiene imágenes histopatológicas prostáticas digitalizadas en formato \textit{Whole Slide Image} (WSI), teñidas con Hematoxilina y Eosina (H\&E), junto con anotaciones clínicas y máscaras derivadas de la gradación de Gleason \cite{Silva-Rodríguez_2020Data}.\newline
 
-Debido a la naturaleza del problema clínico, no se dispone de anotaciones exhaustivas a nivel de parche que indiquen de forma explícita la presencia o ausencia de tejido tumoral en cada región local, lo cual imposibilita el uso de esquemas de aprendizaje supervisado clásico a nivel de instancia.\newline
+El dataset está compuesto por múltiples láminas provenientes de distintos pacientes, cada una asociada a un puntaje de Gleason primario y secundario, a partir del cual se deriva el grado ISUP correspondiente. En su formulación original, SICAPv2 fue diseñado para tareas de segmentación y clasificación multiclase de patrones histopatológicos, incluyendo regiones no cancerosas (NC) y patrones Gleason 3, 4 y 5.\newline
 
-En consecuencia, el problema se formula bajo el paradigma de Aprendizaje de Instancias Múltiples, donde cada WSI es tratada como una bolsa (\textit{bag}) compuesta por múltiples instancias (\textit{patches}), y la etiqueta global del bag corresponde al diagnóstico clínico asociado a la lámina completa.\newline
+Desde el punto de vista clínico, el cáncer de próstata presenta una marcada heterogeneidad espacial, donde múltiples patrones histológicos pueden coexistir dentro de una misma lámina. Esta característica se refleja en la anotación multiclase original del dataset. No obstante, aunque se dispone de información local a nivel de parche sobre patrones histológicos específicos (NC, G3, G4, G5 y variantes cribiformes), dichas etiquetas no fueron utilizadas como señal supervisada durante el entrenamiento de los modelos. En el presente trabajo, la tarea fue formulada como un problema de clasificación binaria a nivel de WSI, distinguiendo entre láminas con presencia de malignidad clínicamente significativa y láminas sin evidencia predominante de tumor agresivo. Esta reformulación responde a dos criterios principales:
 
-Desde el punto de vista experimental, todas las predicciones, métricas y evaluaciones se realizan estrictamente a nivel de bolsa, en coherencia con esta formulación y con el contexto clínico real del problema.
+\begin{itemize}
+    \item \textbf{Criterio clínico:} En escenarios de apoyo diagnóstico inicial, la decisión primaria se centra en determinar la presencia o ausencia de enfermedad relevante, antes de abordar una gradación histológica detallada.
+    \item \textbf{Criterio metodológico:} La formulación binaria permite evaluar de manera más controlada la capacidad discriminativa de los modelos bajo supervisión débil, evitando el efecto amplificador del desbalance de clases propio de la clasificación multiclase.
+\end{itemize}
+
+Dado que no se empleó supervisión exhaustiva a nivel de parche para la tarea de clasificación final, el problema se enmarca dentro del paradigma de Aprendizaje de Instancias Múltiples (MIL). Bajo esta formulación, cada WSI se define como una bolsa (\textit{bag}) compuesta por múltiples instancias (\textit{patches}), y la etiqueta global del bag corresponde al diagnóstico clínico asociado a la lámina completa.\newline
+
+Todas las predicciones, métricas y evaluaciones se realizan estrictamente a nivel de bolsa (WSI-level), garantizando coherencia con la formulación de supervisión débil y con el flujo de trabajo clínico real, donde la decisión diagnóstica se emite sobre la lámina completa. Esta definición operativa fundamenta directamente la interpretación de las métricas reportadas en el Capítulo de Resultados, donde el desempeño de las arquitecturas MIL es evaluado exclusivamente a nivel de WSI. En la Figura~\ref{fig:sicap_examples} se presentan ejemplos representativos de láminas pertenecientes al dataset SICAPv2, ilustrando la variabilidad morfológica y cromática característica de este tipo de imágenes histopatológicas.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/sicap_examples.jpg}
+    \caption{Ejemplos representativos de Whole Slide Images del dataset SICAPv2. Se observa la variabilidad morfológica y estructural del tejido prostático teñido con H\&E.}
+    \label{fig:sicap_examples}
+\end{figure}
+
 
 \subsection{Preparación Inicial del Dataset y Control de Integridad}
 \label{subsec:preparacion_dataset}
 \begin{enumerate}
-    \item \textbf{Descarga y organización:} Se realizó la descarga, descompresión y organización estructurada del dataset SICAPv2, preservando la trazabilidad completa desde el origen de los datos hasta su disposición final en el entorno de trabajo.\newline
+    \item \textbf{Descarga y organización:} Se realizó la descarga, descompresión y organización estructurada del dataset SICAPv2, preservando la trazabilidad completa desde el origen de los datos hasta su disposición final en el entorno de trabajo.
     
-    \item \textbf{Verificación de estructura:} Se verificó la estructura real del conjunto de datos en disco, confirmando la existencia y correspondencia entre imágenes, máscaras y archivos de partición oficiales proporcionados por el dataset.\newline
+    \item \textbf{Verificación de estructura:} Se verificó la estructura real del conjunto de datos en disco, confirmando la existencia y correspondencia entre imágenes, máscaras y archivos de partición oficiales proporcionados por el dataset.
     
-    \item \textbf{Validación de consistencia:} Durante esta etapa se validó la integridad del par imagen--máscara, la ausencia de archivos corruptos y la coherencia de los identificadores de lámina utilizados a lo largo de las distintas particiones experimentales.\newline
+    \item \textbf{Validación de consistencia:} Durante esta etapa se validó la integridad del par imagen--máscara, la ausencia de archivos corruptos y la coherencia de los identificadores de lámina utilizados a lo largo de las distintas particiones experimentales.
     
-    \item \textbf{Consolidación de la base de datos:} Este proceso permitió establecer una base de datos limpia, íntegra y estructuralmente consistente antes de iniciar cualquier fase de transformación o entrenamiento posterior.\newline
+    \item \textbf{Consolidación de la base de datos:} Este proceso permitió establecer una base de datos limpia, íntegra y estructuralmente consistente antes de iniciar cualquier fase de transformación o entrenamiento posterior.
 \end{enumerate}
 
 \subsection{Estrategia de Partición y Prevención de Fuga de Datos}
 \label{subsec:particiones_validacion}
-El dataset SICAPv2 proporciona particiones oficiales para validación cruzada, las cuales fueron empleadas directamente en este trabajo con el fin de garantizar comparabilidad y rigor metodológico.\newline
+El dataset SICAPv2 proporciona particiones oficiales para validación cruzada, las cuales fueron empleadas directamente en este trabajo con el fin de garantizar comparabilidad y rigor metodológico. Cada partición fue analizada para confirmar que no existiera solapamiento de información entre los conjuntos de entrenamiento y validación a nivel de paciente o lámina, evitando explícitamente escenarios de fuga de datos (\textit{data leakage}).\newline
 
-Cada partición fue analizada para confirmar que no existiera solapamiento de información entre los conjuntos de entrenamiento y validación a nivel de paciente o lámina, evitando explícitamente escenarios de fuga de datos (\textit{data leakage}).\newline
-
-La unidad mínima de partición se definió a nivel de WSI, asegurando que todos los parches derivados de una misma lámina permanezcan agrupados dentro del mismo subconjunto experimental.\newline
-
-Este esquema de validación emula de manera más fiel el flujo de trabajo clínico real y permite evaluar la capacidad de generalización del modelo frente a la variabilidad biológica de pacientes no observados previamente.
+Por otro lado, la unidad mínima de partición se definió a nivel de WSI, asegurando que todos los parches derivados de una misma lámina permanezcan agrupados dentro del mismo subconjunto experimental. Este esquema de validación emula de manera más fiel el flujo de trabajo clínico real y permite evaluar la capacidad de generalización del modelo bajo un escenario estrictamente paciente-independiente, donde ningún individuo contribuye simultáneamente a los conjuntos de entrenamiento y validación.
 
 \subsection{Construcción del \textit{Dataset Manifest}}
 \label{subsec:dataset_manifest}
-Con el objetivo de centralizar y controlar el flujo de datos del experimento, se construyó un archivo denominado \texttt{dataset\_manifest.csv}, concebido como la fuente única de verdad del sistema.\newline
+Con el objetivo de centralizar y controlar el flujo de datos del experimento, se construyó un archivo denominado \texttt{dataset\_manifest.csv}, concebido como la fuente única de verdad del sistema. En este manifiesto, cada fila corresponde a un parche histopatológico y consolida información clave como su ruta de acceso, la WSI de origen, el fold de validación, el subconjunto experimental, las etiquetas clínicas globales y metadatos asociados.\newline
 
-En este manifiesto, cada fila corresponde a un parche histopatológico y consolida información clave como su ruta de acceso, la WSI de origen, el fold de validación, el subconjunto experimental, las etiquetas clínicas globales y metadatos asociados.\newline
+Para asegurar la coherencia diagnóstica, el grado ISUP se determinó algorítmicamente a nivel de lámina (WSI) basándose en los puntajes de Gleason primario y secundario. Posteriormente, este valor se propagó de forma consistente a todas las instancias (parches) derivadas de dicha lámina.\newline
 
-El grado ISUP fue calculado una única vez a nivel de WSI a partir de los puntajes de Gleason primario y secundario, y posteriormente propagado a todos los parches asociados a dicha lámina para garantizar coherencia clínica.\newline
-
-Para verificar la integridad de este procedimiento, se implementaron validaciones explícitas que aseguraron la ausencia de valores nulos, la consistencia de las etiquetas clínicas, la validez de las rutas de acceso y la correcta separación por fold y subconjunto experimental.
+La integridad del manifiesto se verificó mediante un protocolo de validación diseñado para detectar valores nulos, confirmar la existencia física de los archivos en disco y asegurar una separación estricta entre subconjuntos experimentales, evitando así cualquier sesgo de selección o solapamiento de datos.
 
 \subsubsection{Definición Formal y Rol Metodológico del Dataset Manifest}
 \label{subsec:manifest_formal}
-El archivo \texttt{dataset\_manifest.csv} constituye un componente metodológico central del pipeline experimental, actuando como la fuente única de verdad (\textit{single source of truth}) para la gestión, trazabilidad y control de los datos utilizados en todos los experimentos.\newline
+El archivo \texttt{dataset\_manifest.csv} constituye el componente metodológico central del \textit{pipeline} experimental, actuando como el \textbf{registro maestro de datos} para la gestión, trazabilidad y control de la información utilizada en todas las fases del estudio. Su función trasciende la mera organización de archivos, estableciéndose como el mecanismo de gobernanza que garantiza la integridad y la reproducibilidad de los experimentos.\newline
 
-Desde una perspectiva formal, el manifiesto define una correspondencia unívoca entre cada instancia (parche histopatológico) y su contexto experimental, encapsulando en una única estructura toda la información necesaria para garantizar coherencia entre datos, particiones, etiquetas clínicas y rutas de acceso a los archivos.\newline
+Desde una perspectiva formal, el manifiesto define una correspondencia unívoca entre cada instancia (parche histopatológico) y su contexto experimental. Esta estructura encapsula de manera atómica la información crítica: rutas de acceso indexadas, pertenencia a la \textit{Whole Slide Image} (WSI) de origen, identidad del paciente y asignación a particiones específicas. Este diseño permite un desacoplamiento estricto entre la curaduría del \textit{dataset} y la implementación de los modelos de aprendizaje, eliminando dependencias implícitas y asegurando que la lógica de datos sea independiente de los \textit{scripts} de entrenamiento.\newline
 
-Cada fila del manifiesto representa exactamente un parche extraído de una Whole Slide Image, estableciendo explícitamente su pertenencia a una lámina específica, a un paciente determinado y a una partición experimental concreta.\newline
-
-Este diseño permite desacoplar de manera estricta las decisiones metodológicas relacionadas con la construcción del dataset de la implementación de los modelos de aprendizaje automático, evitando dependencias implícitas entre notebooks, scripts o configuraciones particulares.\newline
-
-Desde el punto de vista experimental, el manifiesto actúa como un contrato formal entre todas las etapas del pipeline, asegurando que cualquier experimento posterior utilice exactamente las mismas particiones, definiciones de bolsas MIL y etiquetas clínicas.\newline
-
-Asimismo, esta estrategia facilita la auditoría tanto técnica como clínica del proceso experimental, permitiendo verificar de forma explícita la procedencia de cada instancia, su asignación a folds de validación y su contribución a las predicciones a nivel de lámina.
+Bajo esta configuración, cada fila del manifiesto representa exactamente un parche extraído de una lámina, estableciendo explícitamente su jerarquía dentro del conjunto de datos. En el ámbito experimental, el manifiesto funciona como un contrato formal entre las etapas del flujo de trabajo, asegurando que cualquier proceso posterior ---ya sea el entrenamiento de modelos MIL o la validación cruzada--- utilice definiciones de bolsas y etiquetas clínicas idénticas. Asimismo, facilita la auditoría técnica y clínica, permitiendo verificar de forma explícita la procedencia de cada instancia y su contribución a las predicciones globales a nivel de lámina.
 
 \subsubsection{Estructura del Archivo \texttt{dataset\_manifest.csv}}
 \label{subsec:manifest_structure}
 La estructura del archivo \texttt{dataset\_manifest.csv} fue diseñada para capturar de manera explícita la información jerárquica inherente a los datos histopatológicos, abarcando niveles de paciente, lámina e instancia.\newline
 
-En la Tabla~\ref{tab:dataset_manifest} se presenta la descripción formal de las columnas que componen el manifiesto, junto con su rol dentro del pipeline experimental.
+En el cuadro~\ref{tab:dataset_manifest} se presenta la descripción formal de las columnas que componen el manifiesto, junto con su rol dentro del pipeline experimental.
 
 \begin{table}[H]
     \centering
@@ -112,49 +113,37 @@ Las etiquetas clínicas empleadas por el sistema corresponden exclusivamente a n
 
 \subsubsection{Justificación Metodológica del Uso de Supervisión Débil}
 \label{subsec:weak_supervision}
-El diseño del pipeline experimental adopta de forma deliberada un esquema de supervisión débil, en el cual las etiquetas clínicas están disponibles únicamente a nivel de lámina completa y no a nivel de parche individual.\newline
+El diseño del pipeline experimental adopta de forma deliberada un esquema de supervisión débil, en el cual las etiquetas clínicas están disponibles únicamente a nivel de lámina completa y no a nivel de parche individual. Esta decisión metodológica responde tanto a consideraciones prácticas como clínicas, ya que en escenarios reales de patología digital las anotaciones exhaustivas a nivel de píxel o parche suelen ser costosas, subjetivas y difícilmente escalables.\newline
 
-Esta decisión metodológica responde tanto a consideraciones prácticas como clínicas, ya que en escenarios reales de patología digital las anotaciones exhaustivas a nivel de píxel o parche suelen ser costosas, subjetivas y difícilmente escalables.\newline
-
-El uso de información local únicamente con fines de trazabilidad, y no como señal supervisada directa, evita introducir sesgos artificiales en el aprendizaje y garantiza que el modelo aprenda patrones discriminativos relevantes a partir de la agregación de instancias heterogéneas.\newline
-
-De esta manera, el pipeline se alinea con escenarios clínicos realistas, donde la decisión diagnóstica se emite a nivel de lámina, y el sistema debe inferir dicha decisión a partir de múltiples regiones con distintos grados de relevancia histopatológica.\newline
+El uso de información local únicamente con fines de trazabilidad, y no como señal supervisada directa, evita introducir sesgos artificiales en el aprendizaje y garantiza que el modelo aprenda patrones discriminativos relevantes a partir de la agregación de instancias heterogéneas. De esta manera, el pipeline se alinea con escenarios clínicos realistas, donde la decisión diagnóstica se emite a nivel de lámina, y el sistema debe inferir dicha decisión a partir de múltiples regiones con distintos grados de relevancia histopatológica.\newline
 
 Este enfoque refuerza la validez externa del sistema propuesto y justifica el uso de mecanismos de atención y agregación definidos en etapas posteriores del pipeline.
 
 \subsection{Preprocesamiento y Control de Calidad de Parches}
 \label{subsec:preprocesamiento_patches}
-Previo a la extracción de características, se aplicó un proceso de control de calidad orientado a descartar parches no informativos.\newline
+Antes de la extracción de características, se implementó un protocolo de control de calidad para descartar parches no informativos. Este filtrado consistió en el análisis del contenido tisular mediante la transformación al espacio de color HSV, utilizando específicamente el canal de saturación para discriminar regiones con presencia significativa de tejido.\newline
 
-Este filtrado se basó en el análisis del contenido tisular utilizando el espacio de color HSV, empleando el canal de saturación como criterio para identificar regiones con presencia significativa de tejido.\newline
-
-Los parches que no alcanzaron un umbral mínimo de proporción de tejido fueron excluidos del proceso de aprendizaje para reducir ruido y optimizar recursos computacionales.\newline
-
-Este filtrado se ejecutó de manera completamente ciega a las etiquetas clínicas, preservando la validez experimental y evitando cualquier forma de fuga de información.
+Aquellos parches que no alcanzaron un umbral predefinido de proporción tisular fueron excluidos para mitigar el ruido experimental y optimizar la carga computacional. Este procedimiento se realizó de forma agnóstica a las etiquetas clínicas, garantizando la integridad del experimento y evitando el sesgo por fuga de información (data leakage).
 
 \subsection{Extracción de Características Profundas}
 \label{subsec:feature_extraction}
-Con el fin de desacoplar la extracción de características del entrenamiento de los modelos MIL, se implementó una etapa explícita de ingeniería de características.\newline
+Con el objetivo de desacoplar la representación visual del entrenamiento de los modelos de Aprendizaje por Instancias Múltiples (MIL), se implementó una fase de extracción de características profundas.\newline
 
-Cada parche válido fue procesado mediante una red neuronal convolucional profunda ResNet-50 preentrenada sobre ImageNet, eliminando su capa de clasificación final.\newline
+Cada parche válido fue procesado mediante una arquitectura ResNet-50 preentrenada en ImageNet, empleada como extractor de características (feature extractor) tras la remoción de su capa de clasificación final (top layer). De este modo, cada parche se transformó en un vector de características (embedding) de dimensión fija, diseñado para codificar patrones morfológicos complejos de la arquitectura tisular y celular. \newline
 
-Como resultado, cada parche fue representado por un vector de características de dimensión fija, capaz de capturar patrones morfológicos complejos asociados a la arquitectura tisular y celular.\newline
-
-Una vez obtenidos, estos embeddings se almacenaron de manera persistente, permitiendo su reutilización en múltiples experimentos sin necesidad de reprocesar las imágenes originales.
+Estos descriptores se almacenaron de forma persistente, optimizando el flujo de trabajo al permitir su reutilización en diversas configuraciones experimentales sin incurrir en el costo computacional de reprocesar las imágenes originales.
 
 \subsection{Construcción Formal de Bolsas MIL}
 \label{subsec:bags_mil}
-A partir del \texttt{dataset\_manifest.csv}, se construyó una representación basada en Aprendizaje de Instancias Múltiples, donde cada bolsa corresponde a una WSI y cada instancia a un parche histopatológico.\newline
+Utilizando el registro centralizado en \texttt{dataset_manifest.csv}, se estructuraron los datos bajo el paradigma de Aprendizaje por Instancias Múltiples (MIL). En este esquema, cada bolsa (\textit{bag}) se define como una imagen de lámina completa (WSI), mientras que cada parche histopatológico constituye una instancia dentro de dicha bolsa.\newline
 
-El label clínico del bag se definió exclusivamente a partir del grado ISUP asociado a la lámina, mientras que las instancias conservaron información local únicamente con fines descriptivos y de trazabilidad.\newline
+La etiqueta de supervisión de la bolsa se asignó exclusivamente a partir del grado ISUP clínico de la WSI original. Por su parte, las instancias mantuvieron sus atributos locales (coordenadas y descriptores) con fines estrictamente descriptivos y de trazabilidad, sin participar en la supervisión directa durante el entrenamiento.\newline
 
-Se validó que cada bolsa contuviera instancias de una única WSI, sin mezclas entre conjuntos y con etiquetas clínicas consistentes.\newline
-
-Bajo esta configuración, el conjunto final presenta un número variable de instancias por bolsa, reflejando la heterogeneidad espacial inherente a las imágenes histopatológicas y fundamentando el uso de modelos MIL con mecanismos de agregación flexibles.
+Se implementó un protocolo de validación para garantizar la integridad estructural de las bolsas, asegurando que cada una contuviera exclusivamente instancias provenientes de su WSI correspondiente y que no existiera contaminación cruzada entre particiones experimentales. Esta configuración preserva la cardinalidad variable de las bolsas, característica estructural inherente al problema MIL en histopatología digital, donde la cantidad de regiones informativas puede variar sustancialmente entre láminas. Mantener esta variabilidad resulta esencial para evaluar de manera realista la capacidad de los mecanismos de agregación para adaptarse a distribuciones espaciales heterogéneas de patrones tisulares.
 
 \subsection{Resumen de la Metodología Experimental}
-La metodología descrita establece un marco experimental riguroso, reproducible y con coherencia clínica para la evaluación de modelos MIL en el contexto de la histopatología prostática. Esta estructuración, fundamentada en la separación estricta de las fases de preparación, control de integridad y entrenamiento, garantiza la ortogonalidad de los procesos; es decir, asegura que el desempeño observado sea atribuible al comportamiento intrínseco de los modelos y no a sesgos o artefactos derivados del procesamiento. \newline
+La metodología descrita establece un marco experimental riguroso, reproducible y clínicamente coherente para la evaluación de modelos MIL en histopatología prostática. La separación explícita entre preparación de datos, control de integridad, extracción de representaciones y entrenamiento garantiza la ortogonalidad de los procesos, asegurando que el desempeño observado sea atribuible al comportamiento intrínseco de las arquitecturas evaluadas y no a artefactos derivados del preprocesamiento.\newline
 
-Un pilar fundamental de este diseño es el uso de un \textit{dataset manifest} como fuente única de verdad. Junto con la adopción de supervisión débil y particiones herméticas a nivel de lámina (\textit{WSI-level partitioning}), se garantiza un entorno experimental homogéneo, auditable y libre de fuga de información (\textit{data leakage}).\newline
+El uso del \textit{dataset manifest} como fuente única de verdad, junto con la adopción de supervisión débil y particiones estrictamente paciente-independientes a nivel de lámina (\textit{WSI-level partitioning}), define un entorno experimental homogéneo, auditable y libre de fuga de información (\textit{data leakage}). Bajo estas condiciones controladas, el rendimiento medido refleja de forma más fiel la capacidad de generalización de los modelos frente a variabilidad morfológica no observada durante el entrenamiento.\newline
 
-Este andamiaje metodológico constituye la base operativa para los experimentos presentados en el capítulo de Resultados, donde se evalúa el desempeño de las arquitecturas bajo distintos escenarios. Finalmente, dichas evidencias son sometidas a un análisis crítico en el capítulo de Discusión, permitiendo interpretar las implicaciones clínicas, limitaciones y proyecciones del sistema propuesto a la luz del diseño aquí adoptado.
+Este andamiaje metodológico no solo sustenta los experimentos presentados en el capítulo de Resultados, sino que también delimita el marco interpretativo bajo el cual dichos resultados deben analizarse en la Discusión, particularmente en lo referente a robustez, generalización y validez clínica del enfoque propuesto.
