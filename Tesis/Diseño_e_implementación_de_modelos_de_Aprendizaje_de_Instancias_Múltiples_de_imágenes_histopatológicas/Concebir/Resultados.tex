@@ -122,7 +122,6 @@ La evaluación del desempeño de los modelos de \textit{Multiple Instance Learni
 Para cada fold de validación cruzada (\texttt{Val1--Val4}), se entrenaron y evaluaron de forma independiente los cuatro modelos considerados: \textbf{MeanMIL}, \textbf{MaxMIL}, \textbf{ABMIL} y \textbf{SmABMIL}. Las métricas reportadas incluyen \textit{accuracy}, sensibilidad, especificidad, precisión, F1-score y AUC-ROC, todas calculadas sobre el conjunto de prueba de cada fold.
 
 % ---------------------- VAL1 ----------------------
-\newpage
 \subsubsection*{Fold Val1}
 
 \begin{table}[h!]
@@ -177,6 +176,7 @@ SmABMIL & 0.633 & 0.786 & 0.500 & 0.688 & 0.733 & 0.746 \\
 \end{table}
 
 % ---------------------- VAL4 ----------------------
+\newpage
 \subsubsection*{Fold Val4}
 
 \begin{table}[h!]
@@ -199,7 +199,7 @@ SmABMIL & 0.711 & 0.960 & 0.231 & 0.706 & 0.813 & 0.818 \\
 
 Los resultados clínicos cuantitativos obtenidos para cada fold de validación cruzada permiten evaluar no solo el desempeño promedio de los modelos, sino también su estabilidad frente a variaciones en la partición de los datos. Dado el número limitado de WSIs y la heterogeneidad intrínseca del tejido prostático, esta evaluación por fold resulta particularmente relevante en un contexto clínico.\newline
 
-En las Tablas siguientes se reportan métricas ampliamente utilizadas en clasificación médica, donde la sensibilidad refleja la capacidad del modelo para identificar correctamente casos clínicamente relevantes, mientras que la especificidad cuantifica la correcta identificación de casos no relevantes. Métricas como F1-score y AUC-ROC permiten evaluar el equilibrio global entre detección y precisión, proporcionando una visión integral del comportamiento diagnóstico de cada arquitectura.\newline
+En la siguiente tabla se reportan métricas ampliamente utilizadas en clasificación médica, donde la sensibilidad refleja la capacidad del modelo para identificar correctamente casos clínicamente relevantes, mientras que la especificidad cuantifica la correcta identificación de casos no relevantes. Métricas como F1-score y AUC-ROC permiten evaluar el equilibrio global entre detección y precisión, proporcionando una visión integral del comportamiento diagnóstico de cada arquitectura.\newline
 
 
 \begin{table}[h!]

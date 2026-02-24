@@ -1,93 +1,63 @@
 % -------------------------------------------------------------
-% Capítulo: Análisis de Resultados y Atención 
+% Resultados de la Etapa de Procesamiento, Análisis Estructural 
+% del Dataset y Transición al Modelado MIL
 % -------------------------------------------------------------
-Este capítulo presenta, analiza y discute los hallazgos derivados de la implementación del modelo de Aprendizaje de Instancias Múltiples (MIL) con mecanismo de atención. La exposición integra el control de calidad de los datos, la descripción técnica del flujo experimental, la evaluación cuantitativa mediante procedimientos estadísticos robustos y la validación cualitativa basada en la inspección de mapas de atención. \newline
 
-El objetivo central es validar no solo el rendimiento numérico del modelo en la discriminación entre tejido benigno y maligno (Gleason $\geq 3$), sino también su capacidad de explicabilidad mediante la identificación correcta de morfología patológica, un requisito indispensable para la traducción clínica.
+Este capítulo integra de manera unificada los resultados derivados de la etapa de procesamiento de datos, el análisis estructural del conjunto histopatológico y la evaluación cuantitativa y cualitativa de las arquitecturas basadas en \textit{Multiple Instance Learning} (MIL). La exposición sigue una progresión lógica que parte de la consolidación del dataset, continúa con la caracterización estadística de su estructura y culmina con la interpretación metodológica y clínica del comportamiento de los modelos propuestos.
 
-\section{Análisis de Resultados Cuantitativos}
+\section{Resultados de la Etapa de Procesamiento y Consolidación del Dataset}
+La construcción del archivo maestro \texttt{dataset\_manifest.csv} permitió estructurar de forma consistente la totalidad del conjunto SICAPv2 bajo un esquema reproducible y clínicamente coherente. El dataset consolidado contiene un total de 39\,836 parches histopatológicos asociados a 124 \textit{Whole Slide Images} (WSIs) únicas. Cada instancia quedó vinculada a su identificador de WSI, partición oficial (Val1–Val4), subconjunto (train/test), metadatos clínicos y grado ISUP derivado a nivel global.\newline
 
-Esta sección analiza en profundidad los resultados cuantitativos obtenidos por los distintos modelos de Aprendizaje de Instancias Múltiples (MIL) evaluados, integrando las métricas clínicas reportadas en el capítulo de Resultados con una interpretación orientada a su aplicabilidad diagnóstica. El análisis se realiza exclusivamente a nivel de \textit{Whole Slide Image} (WSI), en coherencia con el planteamiento clínico del problema y el esquema de supervisión débil adoptado.\newline
+Las validaciones programáticas confirmaron la integridad estructural del conjunto: no se detectaron valores nulos, inconsistencias imagen–máscara ni variabilidad intra-WSI del grado ISUP. Asimismo, se verificó ausencia total de solapamiento entre entrenamiento y prueba en cada partición oficial, garantizando estrictamente la no existencia de \textit{data leakage} a nivel de paciente.\newline
 
-Se consideran explícitamente las cuatro arquitecturas evaluadas: \textbf{MeanMIL}, \textbf{MaxMIL}, \textbf{ABMIL} y \textbf{SmABMIL}, analizando su comportamiento promedio, estabilidad entre folds y los compromisos clínicos implícitos entre sensibilidad, especificidad y capacidad discriminativa global.
+Desde el punto de vista clínico, la distribución del grado ISUP evidenció una mayor proporción de casos clínicamente significativos. Tras la binarización definida como ISUP $\geq 2$ (malignidad clínicamente relevante) frente a ISUP = 1 (benigno), la composición final a nivel WSI fue de 332 casos malignos y 164 benignos. Esta distribución, equivalente a aproximadamente 66.9\% de casos positivos, introduce un desbalance moderado que resulta representativo de cohortes clínicas orientadas a diagnóstico oncológico.
 
-\subsection{Comparación clínica entre arquitecturas MIL}
+\section{Construcción y Análisis Estructural de las Bolsas MIL}
+A partir del manifest consolidado se construyó la representación MIL formal, donde cada WSI constituye un \textit{bag} y cada parche una instancia. Dado que el protocolo experimental emplea cuatro particiones oficiales de validación cruzada, las 124 WSIs originales generan un total de 496 bolsas MIL (124 WSIs $\times$ 4 folds), manteniendo separación estricta entre entrenamiento y prueba en cada partición.\newline
 
-Los resultados cuantitativos evidencian diferencias claras y consistentes entre los modelos evaluados, tanto en términos de desempeño promedio como de estabilidad entre particiones de validación cruzada.\newline
-
-El modelo \textbf{MaxMIL} presenta un patrón caracterizado por una especificidad extremadamente elevada (igual a 1.0 en todos los folds), acompañada de una sensibilidad marcadamente baja. Este comportamiento indica que el modelo tiende a clasificar únicamente como positivos aquellos casos en los que existe al menos una instancia con señal extremadamente dominante. Desde una perspectiva clínica, este enfoque minimiza los falsos positivos, pero incurre en una tasa inaceptable de falsos negativos, lo que lo hace inapropiado para escenarios de cribado o diagnóstico asistido, donde la omisión de casos malignos representa un riesgo clínico significativo.\newline
-
-Por el contrario, \textbf{MeanMIL} muestra un comportamiento más equilibrado, con valores moderados de sensibilidad y especificidad, aunque con una variabilidad considerable entre folds. Este modelo se beneficia de una agregación uniforme de todas las instancias, pero dicha estrategia resulta limitada en WSIs altamente heterogéneas, donde la dilución de señales focales relevantes puede afectar negativamente la discriminación global.\newline
-
-Los modelos basados en mecanismos de atención, \textbf{ABMIL} y \textbf{SmABMIL}, presentan el desempeño más robusto y clínicamente relevante. Ambos alcanzan valores elevados de sensibilidad y F1-score, reflejando una adecuada capacidad para identificar correctamente WSIs malignas, incluso en presencia de heterogeneidad tisular significativa. Este comportamiento es consistente con la capacidad del mecanismo de atención para asignar mayor peso a regiones histológicamente informativas dentro de cada bag.\newline
-
-Entre estos, \textbf{SmABMIL} destaca por combinar una alta sensibilidad promedio ($0.903 \pm 0.080$) con una mejor estabilidad entre folds y una AUC-ROC global superior, lo que sugiere una mayor robustez frente a variaciones en la composición de los datos y una mejor generalización clínica.
-
-\subsection{Trade-offs clínicos: sensibilidad versus especificidad}
-
-Desde un punto de vista clínico, el análisis de los compromisos entre sensibilidad y especificidad resulta central para evaluar la utilidad real de un sistema de apoyo diagnóstico.\newline
-
-En el contexto del cáncer de próstata, y particularmente en escenarios de cribado histopatológico asistido, la prioridad clínica suele centrarse en maximizar la sensibilidad, con el objetivo de minimizar la probabilidad de pasar por alto casos malignos. Bajo esta premisa, los modelos \textbf{ABMIL} y \textbf{SmABMIL} ofrecen un balance favorable, al mantener sensibilidades elevadas sin una degradación excesiva de la especificidad.\newline
-
-El comportamiento de \textbf{MaxMIL}, aunque atractivo desde una perspectiva puramente estadística por su ausencia de falsos positivos, resulta clínicamente subóptimo debido a su elevada tasa de falsos negativos. En contraste, los modelos con atención muestran una redistribución más equilibrada de errores, desplazando el compromiso hacia una mayor detección de enfermedad a costa de un número controlado de falsos positivos, los cuales pueden ser posteriormente revisados por el patólogo.\newline
-
-Este patrón sugiere que los modelos con atención se alinean mejor con los flujos clínicos reales, donde la automatización se concibe como una herramienta de apoyo y priorización de casos, más que como un sustituto del diagnóstico experto.
-
-\subsection{Estabilidad entre folds y robustez del modelo}
-
-Un aspecto clave observado en los resultados es la estabilidad de las métricas obtenidas por los modelos con atención a lo largo de los distintos folds de validación cruzada.\newline
-
-Mientras que \textbf{MeanMIL} y, especialmente, \textbf{MaxMIL} presentan una dispersión significativa en métricas como sensibilidad y F1-score, los modelos \textbf{ABMIL} y \textbf{SmABMIL} muestran una variabilidad más contenida, tanto en términos de pérdida durante el entrenamiento como en desempeño final.\newline
-
-Esta estabilidad resulta particularmente relevante en un escenario clínico, donde las diferencias interpaciente, inter-WSI y de adquisición son inevitables. Un modelo cuya performance fluctúa de manera abrupta según la partición de datos difícilmente puede ser considerado confiable para su despliegue en entornos reales. En este sentido, los resultados obtenidos refuerzan la elección de \textbf{SmABMIL} como la arquitectura más robusta dentro del conjunto evaluado.
-
-
-
-
-\section{Validación Cualitativa y Explicabilidad}
-Si bien las métricas cuantitativas proporcionan una evaluación objetiva del rendimiento predictivo de los modelos MIL evaluados, su eventual adopción en un contexto clínico exige un análisis cualitativo riguroso que permita comprender \emph{cómo} y \emph{por qué} el modelo toma determinadas decisiones. En aplicaciones de histopatología digital, la interpretabilidad no constituye un atributo accesorio, sino un requisito fundamental para generar confianza clínica y facilitar la integración del sistema como herramienta de apoyo diagnóstico.\newline
-
-En el marco del Aprendizaje de Instancias Múltiples bajo supervisión débil, donde las etiquetas están disponibles únicamente a nivel de WSI, el mecanismo de atención desempeña un papel central al permitir identificar de manera explícita las regiones que más contribuyen a la predicción global. El presente análisis cualitativo se estructura en dos ejes complementarios: (i) el estudio de las distribuciones de probabilidad predicha como indicador de confianza y calibración del modelo, y (ii) la inspección visual de los parches con mayor peso de atención (\textit{top-k}), evaluando su coherencia con patrones histopatológicos conocidos del cáncer de próstata.
-
-\subsection{Distribución de probabilidades y confianza predictiva}
-La distribución de probabilidades predichas por un modelo constituye un indicador indirecto de su comportamiento decisional y de su grado de confianza. En la Figura~\ref{fig:dist_prob_A}, correspondiente al modelo \textbf{SmABMIL}, se observa una marcada polarización de las predicciones hacia valores cercanos a 0 y 1, con una densidad reducida en la región intermedia.\newline
-
-Este patrón sugiere que el modelo tiende a emitir decisiones con alto nivel de certeza, evitando zonas amplias de ambigüedad diagnóstica. Desde una perspectiva clínica, esta característica resulta altamente deseable por varias razones. En primer lugar, facilita la definición de umbrales operativos claros y reproducibles, reduciendo la dependencia de ajustes finos específicos para cada cohorte. En segundo lugar, minimiza la proporción de WSIs clasificadas con incertidumbre moderada, las cuales suelen requerir revisiones adicionales y aumentan la carga de trabajo del patólogo.\newline
-
-Adicionalmente, la ausencia de una saturación artificial en los extremos indica que el modelo no adopta un comportamiento trivial ni excesivamente confiado, sino que discrimina activamente en función de la evidencia histológica disponible. Este equilibrio entre polarización y plausibilidad refuerza la percepción de que el modelo aprende patrones morfológicos genuinos y no artefactos del conjunto de entrenamiento.
+El análisis estadístico del tamaño de las bolsas reveló una heterogeneidad estructural considerable. El número mínimo de instancias por bolsa fue 7, mientras que el máximo alcanzó 347 parches por WSI. La media fue de 80.31 instancias, con una desviación estándar de 57.08. Esta dispersión elevada respecto a la media confirma una variabilidad sustancial en la extensión espacial del tejido representado por cada biopsia digitalizada.
 
 \begin{figure}[ht!]
     \centering
-    \includegraphics[width=0.4\textwidth]{images/prob_dist_A.png}
-    \caption{Distribución de probabilidades predichas por el modelo SmABMIL. Se observa una clara polarización hacia valores extremos, indicativa de alta confianza predictiva.}
+    \includegraphics[width=0.6\textwidth]{images/Histograma_Instancias_Por_Bag.png}
+    \caption{Distribución del número de instancias por bolsa MIL. Se evidencia alta heterogeneidad estructural entre WSIs.}
+    \label{fig:bag_size_hist}
+\end{figure}
+
+Desde una perspectiva metodológica, esta heterogeneidad justifica el uso de enfoques MIL con mecanismos de agregación adaptativa. La amplia variabilidad en el tamaño de los bags implica que estrategias de pooling uniforme pueden diluir señales tumorales focales o amplificar instancias no representativas. Por tanto, la estructura estadística del dataset no solo describe su composición, sino que fundamenta la elección arquitectónica adoptada.
+
+\section{Evaluación Cuantitativa y Comparación de Arquitecturas MIL}
+La comparación entre las arquitecturas evaluadas (MeanMIL, MaxMIL, ABMIL y SmABMIL) evidenció diferencias consistentes asociadas a sus mecanismos de agregación. Los métodos no adaptativos mostraron limitaciones estructurales frente a la heterogeneidad espacial del tejido prostático. En particular, MeanMIL tendió a promediar uniformemente regiones informativas con tejido benigno dominante, reduciendo la sensibilidad frente a lesiones focales. MaxMIL, por su parte, dependió exclusivamente de la instancia con activación máxima, generando un comportamiento inestable y clínicamente riesgoso al incrementar la probabilidad de falsos negativos en presencia de ruido o artefactos locales.\newline
+
+En contraste, las arquitecturas basadas en atención (ABMIL y especialmente SmABMIL) demostraron mayor robustez y estabilidad inter-fold. El mecanismo de atención permitió asignar pesos diferenciados a subconjuntos informativos dentro del bag, adaptando la representación global a la distribución real de patrones histológicos. La variante SmABMIL, mediante su mecanismo de atención compuerta, actuó además como regularizador implícito, evitando concentraciones excesivas en una sola instancia y favoreciendo representaciones más balanceadas.\newline
+
+Este comportamiento se tradujo en un compromiso clínicamente más adecuado entre sensibilidad y especificidad, priorizando la detección de casos malignos sin degradar sustancialmente el control de falsos positivos. Dado el predominio de casos clínicamente significativos en la cohorte, la optimización de la sensibilidad adquiere especial relevancia en escenarios de cribado asistido.
+
+\section{Interpretabilidad y Correlato Histopatológico}
+Más allá de las métricas globales, el análisis de interpretabilidad constituye un componente central para la integración clínica del sistema. La distribución de probabilidades predichas por SmABMIL mostró una marcada polarización hacia valores cercanos a 0 y 1, con baja densidad en el rango intermedio de ambigüedad, lo que sugiere alta confianza predictiva y estabilidad decisional.
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.6\textwidth]{images/prob_dist_A.png}
+    \caption{Distribución de probabilidades predichas por SmABMIL. Se observa polarización hacia valores extremos, indicativa de alta confianza predictiva.}
     \label{fig:dist_prob_A}
 \end{figure}
 
-En contraste, la distribución correspondiente a modelos sin atención o con agregación más simple presenta una mayor concentración de predicciones en rangos intermedios, lo que refleja un mayor grado de indecisión ante WSIs complejas o heterogéneas. Este comportamiento, aunque no incorrecto desde un punto de vista estadístico, puede resultar menos adecuado en escenarios clínicos donde la priorización y estratificación de casos es crítica.
+Adicionalmente, la inspección de los parches con mayor peso de atención (\textit{Top-k}) evidenció coherencia morfológica con criterios diagnósticos reconocidos del cáncer de próstata. Las regiones resaltadas correspondieron predominantemente a áreas con arquitectura glandular alterada, fusión de glándulas y pérdida de organización estructural, mientras que el tejido estromal conservado recibió pesos marginales.
 
-\subsection{Análisis de parches de alta atención (\textit{Top-k})}
-Uno de los principales aportes del enfoque MIL con atención radica en la posibilidad de inspeccionar explícitamente las instancias que más contribuyen a la decisión final del modelo. En este contexto, el análisis de los parches con mayor coeficiente de atención (\textit{top-k}) permite evaluar la coherencia entre las regiones consideradas relevantes por el sistema y los patrones histopatológicos asociados al cáncer de próstata.\newline
-
-La Figura~\ref{fig:top_parches} presenta ejemplos representativos de WSIs junto con los parches ordenados según su peso de atención y la probabilidad global predicha para cada caso. En WSIs clasificadas como malignas con alta probabilidad, los parches con mayor atención corresponden de manera consistente a regiones que exhiben características morfológicas compatibles con enfermedad prostática, tales como arquitectura glandular desorganizada o fusionada, incremento de la densidad celular, núcleos agrandados y pérdida de la diferenciación glandular típica del tejido benigno.\newline
-
-Por el contrario, los parches con pesos de atención bajos suelen asociarse a estroma relativamente conservado, regiones con escasa densidad glandular o áreas con menor relevancia diagnóstica. Esta diferenciación sugiere que el modelo ha aprendido a discriminar de manera efectiva entre información histológica relevante e irrelevante dentro de una misma WSI, incluso en ausencia de anotaciones locales explícitas.\newline
-
-Resulta particularmente notable que este comportamiento emerja bajo un esquema de supervisión débil, donde el modelo no recibe indicaciones directas sobre qué regiones son patológicas. La focalización automática de la atención en zonas morfológicamente plausibles constituye una evidencia cualitativa sólida de que el mecanismo de atención no solo mejora el rendimiento cuantitativo, sino que también aporta interpretabilidad clínica y transparencia al proceso de decisión.
-
+\newpage
 \begin{figure}[ht!]
     \centering
     \includegraphics[width=0.6\textwidth]{images/top_k_patches.png}
-    \caption{Ejemplos de parches con mayor peso de atención (\textit{top-k}). El modelo SmABMIL focaliza regiones con alteraciones morfológicas compatibles con cáncer de próstata.}
+    \caption{Parches con mayor peso de atención (\textit{Top-k}). El modelo focaliza regiones morfológicamente compatibles con malignidad bajo supervisión débil.}
     \label{fig:top_parches}
 \end{figure}
 
-\subsection{Implicaciones clínicas de la explicabilidad}
-Desde una perspectiva aplicada, la capacidad del modelo para identificar regiones histológicamente relevantes tiene implicaciones directas en su potencial integración en flujos clínicos reales. En primer lugar, los mapas de atención pueden utilizarse como herramienta de apoyo visual para el patólogo, facilitando la revisión focalizada de regiones sospechosas dentro de WSIs extensas y complejas.\newline
+Este correlato histopatológico emergió bajo un esquema de supervisión débil, utilizando exclusivamente etiquetas a nivel WSI. La capacidad del modelo para identificar regiones clínicamente relevantes sin anotaciones locales manuales refuerza su potencial como herramienta de apoyo diagnóstico y reduce el carácter opaco asociado tradicionalmente a los sistemas de aprendizaje profundo.
 
-En segundo lugar, la coherencia observada entre las regiones de alta atención y los patrones morfológicos clásicos del sistema de Gleason refuerza la confianza en que el modelo aprende representaciones alineadas con el conocimiento patológico establecido, y no correlaciones espurias. Esta propiedad resulta esencial para mitigar la reticencia clínica hacia sistemas de caja negra y favorece la aceptación del modelo como asistente diagnóstico.\newline
+\section{Consideraciones Metodológicas y Proyección}
+A pesar de la solidez estructural y del desempeño observado, el estudio presenta limitaciones inherentes al manejo de imágenes gigapíxel y al tamaño variable de las bolsas, lo cual impone restricciones computacionales y de memoria en GPU. Asimismo, la formulación binaria del problema simplifica la complejidad clínica real del sistema ISUP multiclase.\newline
 
-Finalmente, la interpretabilidad inherente al mecanismo de atención abre la puerta a extensiones futuras orientadas a la estratificación de riesgo, localización aproximada de focos tumorales y priorización automática de WSIs para revisión experta, consolidando el valor clínico del enfoque propuesto más allá de la mera clasificación binaria.
+No obstante, los resultados obtenidos demuestran de forma consistente que la combinación de una estructuración rigurosa del dataset, una representación MIL adecuada a la heterogeneidad espacial y un mecanismo de atención compuerta constituye una base metodológica sólida para el desarrollo de sistemas de apoyo diagnóstico en patología prostática digital.\newline
 
-
-
-
+En síntesis, la etapa de procesamiento no solo garantizó integridad y coherencia estructural del conjunto de datos, sino que estableció las condiciones estadísticas y clínicas que justifican la superioridad de los modelos MIL basados en atención, consolidando una transición metodológicamente fundamentada hacia su aplicación en escenarios diagnósticos reales.
