@@ -45,19 +45,6 @@ La Figura \ref{fig:distribucion_instancias} ilustra la distribución del número
     \label{fig:distribucion_instancias}
 \end{figure}
 
-\subsection{Estrategia experimental para el modelado MIL binario}
-Sobre los bags MIL construidos, se planteó un problema de clasificación binaria a nivel WSI, donde el objetivo consiste en discriminar entre casos clínicamente relevantes y no relevantes a partir del grado ISUP. Para ello, se entrenaron y compararon cuatro arquitecturas MIL ampliamente utilizadas:
-
-\begin{itemize}
-    \item Mean Pooling MIL
-    \item Max Pooling MIL
-    \item Attention-based MIL (ABMIL)
-    \item Gated Attention MIL (SmABMIL)
-\end{itemize}
-
-Las características de los parches se extrajeron previamente mediante una ResNet50 preentrenada en ImageNet, utilizada exclusivamente como extractor de características, manteniendo todos sus pesos congelados. Esta decisión reduce el riesgo de sobreajuste dado el número limitado de WSIs y sigue prácticas estándar en histopatología digital basada en MIL. \newline
-
-El entrenamiento se realizó durante 10 épocas para cada modelo y cada fold, utilizando validación cruzada estricta, sin solapamiento entre WSIs de entrenamiento y prueba.
 
 \subsection{Dinámica de entrenamiento y convergencia}
 La evolución de la función de pérdida durante el entrenamiento se analizó tanto de forma agregada (promedio sobre folds) como individualmente por fold y modelo.

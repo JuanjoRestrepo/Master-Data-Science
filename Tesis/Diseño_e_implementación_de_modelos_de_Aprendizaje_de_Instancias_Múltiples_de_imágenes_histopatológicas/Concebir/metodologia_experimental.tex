@@ -141,9 +141,27 @@ La etiqueta de supervisión de la bolsa se asignó exclusivamente a partir del g
 
 Se implementó un protocolo de validación para garantizar la integridad estructural de las bolsas, asegurando que cada una contuviera exclusivamente instancias provenientes de su WSI correspondiente y que no existiera contaminación cruzada entre particiones experimentales. Esta configuración preserva la cardinalidad variable de las bolsas, característica estructural inherente al problema MIL en histopatología digital, donde la cantidad de regiones informativas puede variar sustancialmente entre láminas. Mantener esta variabilidad resulta esencial para evaluar de manera realista la capacidad de los mecanismos de agregación para adaptarse a distribuciones espaciales heterogéneas de patrones tisulares.
 
+\subsection{Estrategia experimental para el modelado MIL binario}
+\label{subsec:estrategia_mil_binario}
+Sobre los bags MIL construidos, se definió un problema de clasificación binaria a nivel de WSI, cuyo objetivo consiste en discriminar entre casos clínicamente relevantes y no relevantes a partir del grado ISUP asociado a cada lámina.
+
+Se implementaron cuatro arquitecturas MIL ampliamente utilizadas en la literatura:
+
+\begin{itemize}
+    \item Mean Pooling MIL
+    \item Max Pooling MIL
+    \item Attention-based MIL (ABMIL)
+    \item Gated Attention MIL (SmABMIL)
+\end{itemize}
+
+Las representaciones de cada parche fueron obtenidas previamente mediante una arquitectura ResNet-50 preentrenada en ImageNet, utilizada exclusivamente como extractor de características. La capa de clasificación final fue removida y todos los pesos se mantuvieron congelados durante el entrenamiento de los modelos MIL, con el fin de reducir el riesgo de sobreajuste dado el número limitado de WSIs disponibles.
+
+El entrenamiento se realizó durante 10 épocas por modelo y por fold, empleando validación cruzada estricta a nivel de WSI, sin solapamiento entre conjuntos de entrenamiento y prueba. Las métricas clínicas se calcularon exclusivamente a nivel de bolsa (WSI-level), en coherencia con la formulación del problema bajo el paradigma MIL.
+
+
 \subsection{Resumen de la Metodología Experimental}
-La metodología descrita establece un marco experimental riguroso, reproducible y clínicamente coherente para la evaluación de modelos MIL en histopatología prostática. La separación explícita entre preparación de datos, control de integridad, extracción de representaciones y entrenamiento garantiza la ortogonalidad de los procesos, asegurando que el desempeño observado sea atribuible al comportamiento intrínseco de las arquitecturas evaluadas y no a artefactos derivados del preprocesamiento.\newline
+La metodología expuesta consolida un marco experimental caracterizado por su rigor, reproducibilidad y fundamentación clínica para la evaluación de modelos MIL en histopatología prostática. La separación explícita entre la preparación de datos, el control de integridad, la extracción de descriptores y la fase de entrenamiento garantiza la ortogonalidad de los procesos. Este diseño asegura que el desempeño observado sea atribuible exclusivamente al comportamiento intrínseco de las arquitecturas evaluadas, eliminando posibles sesgos o artefactos derivados del preprocesamiento.
 
-El uso del \textit{dataset manifest} como fuente única de verdad, junto con la adopción de supervisión débil y particiones estrictamente paciente-independientes a nivel de lámina (\textit{WSI-level partitioning}), define un entorno experimental homogéneo, auditable y libre de fuga de información (\textit{data leakage}). Bajo estas condiciones controladas, el rendimiento medido refleja de forma más fiel la capacidad de generalización de los modelos frente a variabilidad morfológica no observada durante el entrenamiento.\newline
+La adopción del \texttt{dataset/_manifest.csv} como \textbf{registro maestro de datos}, en conjunto con el paradigma de supervisión débil y un particionamiento estrictamente independiente a nivel de paciente (\textit{patient-level partitioning}), define un entorno experimental homogéneo, auditable y libre de fuga de información (\textit{data leakage}). Bajo estas condiciones controladas, las métricas obtenidas reflejan de manera fiel la capacidad de generalización de los modelos ante la variabilidad morfológica no observada durante el entrenamiento, un factor crítico en el despliegue de herramientas de apoyo al diagnóstico.
 
-Este andamiaje metodológico no solo sustenta los experimentos presentados en el capítulo de Resultados, sino que también delimita el marco interpretativo bajo el cual dichos resultados deben analizarse en la Discusión, particularmente en lo referente a robustez, generalización y validez clínica del enfoque propuesto.
+Este andamiaje metodológico no solo sustenta la validez de los experimentos presentados en el capítulo de Resultados, sino que también delimita el marco interpretativo para la Discusión. En particular, proporciona la base necesaria para evaluar la robustez y la viabilidad clínica del enfoque propuesto, garantizando que las conclusiones extraídas posean la solidez técnica requerida en el ámbito de la patología digital.
