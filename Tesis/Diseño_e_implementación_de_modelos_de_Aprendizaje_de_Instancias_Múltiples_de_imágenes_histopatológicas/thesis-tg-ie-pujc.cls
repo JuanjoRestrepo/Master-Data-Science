@@ -26,8 +26,8 @@
 %Nombre del director de carrera
 \newcommand{\directorcarrera}[2]{\def \directorIE{#1 #2}}
 %Autor(es)
-\newcommand{\autorA}[2]{\def \authorA{#2}\def \authorACOD{#1}}
-\newcommand{\autorB}[2]{\def \authorB{#2}\def \authorBCOD{#1}}
+\newcommand{\autorA}[2]{\def \authorA{#2}\def \authorACOD{#1}\setcounter{numautores}{1}}
+\newcommand{\autorB}[2]{\def \authorB{#2}\def \authorBCOD{#1}\setcounter{numautores}{2}}
 %\newcommand{\autorC}[2]{\def \authorC{#2}\def \authorCCOD{#1}}
 
 %Decano
@@ -175,20 +175,19 @@ Al firmar aquí,%
 \noindent Cali
 \vskip 2cm
 \noindent Cordial Saludo.\\\\\\
-Por medio de la presente me permito informarle que 
-\ifthenelse{\value{numautores}=1}{el estudiante}{los estudiantes }%
- de la Maestría en Ciencia de Datos 
+Por medio de la presente me permito informarle que
+\ifthenelse{\value{numautores}=1}{el estudiante }{los estudiantes }~
+de la Maestría en Ciencia de Datos
 %
 \ifthenelse{\value{numautores}=1}{%
-  \authorA~(cod: \authorACOD) trabajó%
+  \authorA~(cod: \authorACOD) trabajó 
 }{%
   \ifthenelse{\value{numautores}=2}{%
-    \authorA~(cod: \authorACOD) y \authorB~(cod: \authorBCOD) trabajaron%
+    \authorA~(cod: \authorACOD) y \authorB~(cod: \authorBCOD) trabajaron 
   }{%
-    \authorA~(cod: \authorACOD) y \authorB~(cod: \authorBCOD) trabajaron %
+    \authorA~(cod: \authorACOD) y \authorB~(cod: \authorBCOD) trabajaron 
   }%
-}% 
- bajo mi dirección en el Proyecto Aplicado titulado `\titulovar'.\\\\\\
+}~bajo mi dirección en el Proyecto Aplicado titulado `\titulovar'.\\\\\\
 
 
 
@@ -740,7 +739,7 @@ Director Trabajo de Grado
 \newenvironment{figure*}
                {\@dblfloat{figure}}
                {\end@dblfloat}
-\newcounter{table}[chapter]
+\@ifundefined{c@table}{\newcounter{table}[chapter]}{}
 \renewcommand \thetable
      {\ifnum \c@chapter>\z@ \thechapter.\fi \@arabic\c@table}
 \def\fps@table{tbp}
@@ -895,7 +894,7 @@ Director Trabajo de Grado
 \newcommand\@idxitem{\par\hangindent 40\p@}
 \newcommand\subitem{\@idxitem \hspace*{20\p@}}
 \newcommand\subsubitem{\@idxitem \hspace*{30\p@}}
-\newcommand\indexspace{\par \vskip 10\p@ \@plus5\p@ \@minus3\p@\relax}
+\@ifundefined{indexspace}{\newcommand\indexspace{\par \vskip 10\p@ \@plus5\p@ \@minus3\p@\relax}}{}
 \renewcommand\footnoterule{%
   \kern-3\p@
   \hrule\@width.4\columnwidth
@@ -911,7 +910,7 @@ Director Trabajo de Grado
 \newcommand\bibname{Bibliography}
 \newcommand\indexname{Index}
 \newcommand\figurename{Figure}
-\newcommand\tablename{Table}
+\@ifundefined{tablename}{\newcommand\tablename{Table}}{}
 \newcommand\partname{Part}
 \newcommand\chaptername{Chapter}
 \newcommand\appendixname{Appendix}
