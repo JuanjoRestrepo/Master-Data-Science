@@ -70,7 +70,6 @@ Para asegurar la coherencia diagnóstica, el grado ISUP se determinó algorítmi
 La integridad del manifiesto se verificó mediante un protocolo de validación diseñado para detectar valores nulos, confirmar la existencia física de los archivos en disco y asegurar una separación estricta entre subconjuntos experimentales, evitando así cualquier sesgo de selección o solapamiento de datos.
 
 \subsubsection{Definición Formal y Rol Metodológico del Dataset Manifest}
-\label{subsec:manifest_formal}
 El archivo \texttt{dataset\_manifest.csv} constituye el componente metodológico central del \textit{pipeline} experimental, actuando como el \textbf{registro maestro de datos} para la gestión, trazabilidad y control de la información utilizada en todas las fases del estudio. Su función trasciende la mera organización de archivos, estableciéndose como el mecanismo de gobernanza que garantiza la integridad y la reproducibilidad de los experimentos.\newline
 
 Desde una perspectiva formal, el manifiesto define una correspondencia unívoca entre cada instancia (parche histopatológico) y su contexto experimental. Esta estructura encapsula de manera atómica la información crítica: rutas de acceso indexadas, pertenencia a la \textit{Whole Slide Image} (WSI) de origen, identidad del paciente y asignación a particiones específicas. Este diseño permite un desacoplamiento estricto entre la curaduría del \textit{dataset} y la implementación de los modelos de aprendizaje, eliminando dependencias implícitas y asegurando que la lógica de datos sea independiente de los \textit{scripts} de entrenamiento.\newline
@@ -78,11 +77,9 @@ Desde una perspectiva formal, el manifiesto define una correspondencia unívoca 
 Bajo esta configuración, cada fila del manifiesto representa exactamente un parche extraído de una lámina, estableciendo explícitamente su jerarquía dentro del conjunto de datos. En el ámbito experimental, el manifiesto funciona como un contrato formal entre las etapas del flujo de trabajo, asegurando que cualquier proceso posterior ---ya sea el entrenamiento de modelos MIL o la validación cruzada--- utilice definiciones de bolsas y etiquetas clínicas idénticas. Asimismo, facilita la auditoría técnica y clínica, permitiendo verificar de forma explícita la procedencia de cada instancia y su contribución a las predicciones globales a nivel de lámina.
 
 \subsubsection{Estructura del Archivo \texttt{dataset\_manifest.csv}}
-\label{subsec:manifest_structure}
-La estructura del archivo \texttt{dataset\_manifest.csv} fue diseñada para capturar de manera explícita la información jerárquica inherente a los datos histopatológicos, abarcando niveles de paciente, lámina e instancia.\newline
+La estructura del archivo \texttt{dataset\_manifest.csv} fue diseñada para capturar de manera explícita la información jerárquica inherente a los datos histopatológicos, abarcando niveles de paciente, lámina e instancia. En el cuadro~\ref{tab:dataset_manifest} se presenta la descripción formal de las columnas que componen el manifiesto, junto con su rol dentro del pipeline experimental.
 
-En el cuadro~\ref{tab:dataset_manifest} se presenta la descripción formal de las columnas que componen el manifiesto, junto con su rol dentro del pipeline experimental.
-
+\newpage
 \begin{table}[H]
     \centering
     \caption{Estructura del archivo \texttt{dataset\_manifest.csv} utilizado como fuente única de verdad del pipeline experimental.}
@@ -107,9 +104,7 @@ En el cuadro~\ref{tab:dataset_manifest} se presenta la descripción formal de la
     \end{tabular}
 \end{table}
 
-Es importante destacar que, aunque el manifiesto incluye información a nivel de parche sobre patrones histológicos locales, dichas variables no son utilizadas como etiquetas supervisadas durante el entrenamiento de los modelos.\newline
-
-Las etiquetas clínicas empleadas por el sistema corresponden exclusivamente a nivel de Whole Slide Image, manteniendo de forma estricta el paradigma de supervisión débil propio del Aprendizaje de Instancias Múltiples.
+Es pertinente precisar que, si bien el \textit{manifest} integra descriptores histológicos a nivel de parche, estos atributos se omiten deliberadamente como etiquetas de entrenamiento. El sistema se restringe exclusivamente al uso de etiquetas clínicas globales a nivel de \textit{Whole Slide Image} (WSI), garantizando así el cumplimiento estricto del paradigma de supervisión débil que define al Aprendizaje de Instancias Múltiples y que sustenta la evaluación de los modelos propuestos
 
 \subsubsection{Justificación Metodológica del Uso de Supervisión Débil}
 \label{subsec:weak_supervision}

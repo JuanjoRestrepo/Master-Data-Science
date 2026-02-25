@@ -81,7 +81,6 @@ Este análisis resulta particularmente relevante en el contexto de histopatolog�
 
 En el caso de \textbf{MeanMIL} (Figura~\ref{fig:training_loss_meanmil}), se observa una convergencia relativamente estable en los cuatro folds, aunque con diferencias moderadas en la pendiente inicial y en el valor final de la pérdida. Este comportamiento refleja la naturaleza del promedio como operador de agregación, el cual incorpora información de todas las instancias del bag de forma uniforme, pero puede verse afectado por la presencia de instancias no informativas o ruidosas, particularmente en WSIs con alta heterogeneidad histológica.\newline
 
-\newpage
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.6\textwidth]{images/Training_Loss_MaxMIL.png}
@@ -100,7 +99,6 @@ Para el modelo \textbf{MaxMIL} (Figura~\ref{fig:training_loss_maxmil}), las curv
 
 El modelo \textbf{ABMIL} (Figura~\ref{fig:training_loss_abmil}) presenta un patrón de convergencia más uniforme entre folds, con reducciones pronunciadas de la pérdida desde las primeras épocas y valores finales similares. Este comportamiento sugiere que el mecanismo de atención aprende de manera efectiva a ponderar las instancias más relevantes dentro de cada bag, mitigando el efecto del ruido y favoreciendo una optimización más estable independientemente de la partición de los datos.\newline
 
-\newpage
 \begin{figure}[h!]
     \centering
     \includegraphics[width=0.5\textwidth]{images/Training_Loss_SmABMIL.png}
@@ -122,6 +120,7 @@ La evaluación del desempeño de los modelos de \textit{Multiple Instance Learni
 Para cada fold de validación cruzada (\texttt{Val1--Val4}), se entrenaron y evaluaron de forma independiente los cuatro modelos considerados: \textbf{MeanMIL}, \textbf{MaxMIL}, \textbf{ABMIL} y \textbf{SmABMIL}. Las métricas reportadas incluyen \textit{accuracy}, sensibilidad, especificidad, precisión, F1-score y AUC-ROC, todas calculadas sobre el conjunto de prueba de cada fold.
 
 % ---------------------- VAL1 ----------------------
+\newpage
 \subsubsection*{Fold Val1}
 
 \begin{table}[h!]
@@ -176,7 +175,6 @@ SmABMIL & 0.633 & 0.786 & 0.500 & 0.688 & 0.733 & 0.746 \\
 \end{table}
 
 % ---------------------- VAL4 ----------------------
-\newpage
 \subsubsection*{Fold Val4}
 
 \begin{table}[h!]
